@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ru" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>NOVA — студия цифровых впечатлений</title>
+  <meta name="description" content="NOVA — дизайн, анимация и разработка сайтов, которые запоминаются.">
+  <meta name="theme-color" content="#07060f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='1' stop-color='%23ff4d8d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M16 1l3.6 11.4L31 16l-11.4 3.6L16 31l-3.6-11.4L1 16l11.4-3.6z'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@400;500;700;800&display=swap">
+  <link rel="stylesheet" href="style.css">
+
+  <script>document.documentElement.classList.replace('no-js', 'js');</script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+
+  <!-- Прелоадер -->
+  <div class="preloader" aria-hidden="true">
+    <div class="preloader__inner">
+      <div class="preloader__logo">
+        <span>N</span><span>O</span><span>V</span><span>A</span>
+      </div>
+      <div class="preloader__bar"><span></span></div>
+    </div>
+    <div class="preloader__count"><span>0</span>%</div>
+  </div>
+
+  <!-- Кастомный курсор -->
+  <div class="cursor" aria-hidden="true">
+    <span class="cursor__ring"><span class="cursor__text"></span></span>
+    <span class="cursor__dot"></span>
+  </div>
+
+  <!-- Шапка -->
+  <header class="header ui">
+    <a class="logo" href="#home" aria-label="NOVA — на главную">
+      <svg class="logo__star" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 1l3.6 11.4L31 16l-11.4 3.6L16 31l-3.6-11.4L1 16l11.4-3.6z"/></svg>
+      NOVA
+    </a>
+    <nav class="nav" aria-label="Основная навигация">
+      <a href="#about">О нас</a>
+      <a href="#services">Услуги</a>
+      <a href="#stats">Цифры</a>
+      <a href="#work">Работы</a>
+      <a href="#contact">Контакты</a>
+    </nav>
+    <a class="header__cta" href="#contact">Связаться</a>
+  </header>
+
+  <!-- Точки навигации (заполняются из script.js) -->
+  <nav class="dots ui" aria-label="Слайды"></nav>
+
+  <!-- Счётчик и стрелки -->
+  <div class="hud ui">
+    <div class="hud__counter" aria-live="polite">
+      <span class="hud__current"><span class="hud__roll"></span></span>
+      <span class="hud__line"><span class="hud__fill"></span></span>
+      <span class="hud__total"></span>
+      <span class="hud__title"></span>
+    </div>
+    <div class="hud__arrows">
+      <button class="hud__btn" type="button" data-nav="prev" aria-label="Предыдущий слайд">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
+      <button class="hud__btn" type="button" data-nav="next" aria-label="Следующий слайд">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <main class="slides">
+
+    <!-- 1. Главная -->
+    <section class="slide slide--hero" id="home" data-title="Главная" data-transition="liquid">
+      <div class="slide__bg">
+        <div class="blob blob--violet"></div>
+        <div class="blob blob--pink"></div>
+        <div class="blob blob--cyan"></div>
+        <canvas class="particles" aria-hidden="true"></canvas>
+      </div>
+
+      <div class="slide__inner">
+        <div class="container hero">
+          <p class="eyebrow reveal" style="--d: 150ms"><span class="eyebrow__dash"></span>Студия цифрового дизайна</p>
+          <h1 class="hero__title" data-split="chars">
+            <span class="line">Создаём</span>
+            <span class="line">цифровые</span>
+            <span class="line line--accent" data-split-whole>миры</span>
+          </h1>
+          <p class="hero__text reveal" style="--d: 900ms">Дизайн, анимация и разработка сайтов, от&nbsp;которых невозможно оторваться.</p>
+          <div class="hero__actions reveal" style="--d: 1050ms">
+            <a class="btn btn--primary magnetic" href="#work">
+              <span>Смотреть работы</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+            <a class="btn btn--ghost magnetic" href="#contact"><span>Обсудить проект</span></a>
+          </div>
+        </div>
+
+        <div class="orbs" aria-hidden="true">
+          <div class="orbs__layer" data-depth="0.6"><span class="orb orb--lg"></span></div>
+          <div class="orbs__layer" data-depth="1.2"><span class="orb orb--md"></span></div>
+          <div class="orbs__layer" data-depth="1.8"><span class="orb orb--sm"></span></div>
+          <div class="orbs__layer" data-depth="0.9"><span class="orbit"></span></div>
+        </div>
+      </div>
+
+      <button class="scroll-hint" type="button" data-nav="next" aria-label="К следующему слайду">
+        <span class="scroll-hint__mouse"><span></span></span>
+        <span class="scroll-hint__text">Листайте</span>
+      </button>
+    </section>
+
+    <!-- 2. О нас -->
+    <section class="slide slide--about" id="about" data-title="О нас" data-transition="circle" data-theme="light">
+      <div class="slide__bg">
+        <div class="about__glow"></div>
+        <div class="bg-num" data-depth="0.5">02</div>
+      </div>
+
+      <div class="slide__inner">
+        <div class="container about">
+          <p class="eyebrow reveal"><span class="eyebrow__dash"></span>Манифест</p>
+          <p class="about__text" data-split="highlight">
+            Мы верим, что сайт — это не набор страниц, а история. Каждый переход, каждая анимация и&nbsp;каждая мелочь работают на одно: чтобы вас запомнили.
+          </p>
+          <ul class="values">
+            <li class="values__item reveal" style="--d: 1500ms"><b>01</b>Смелые идеи</li>
+            <li class="values__item reveal" style="--d: 1620ms"><b>02</b>Внимание к деталям</li>
+            <li class="values__item reveal" style="--d: 1740ms"><b>03</b>Честные сроки</li>
+          </ul>
+        </div>
+
+        <div class="marquee reveal" style="--d: 600ms" aria-hidden="true">
+          <div class="marquee__track">
+            <span>Дизайн</span><i>✦</i><span>Анимация</span><i>✦</i><span>Разработка</span><i>✦</i><span>Брендинг</span><i>✦</i><span>3D</span><i>✦</i>
+            <span>Дизайн</span><i>✦</i><span>Анимация</span><i>✦</i><span>Разработка</span><i>✦</i><span>Брендинг</span><i>✦</i><span>3D</span><i>✦</i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Услуги -->
+    <section class="slide slide--services" id="services" data-title="Услуги" data-transition="liquid">
+      <div class="slide__bg">
+        <div class="aurora"></div>
+        <div class="bg-num" data-depth="0.5">03</div>
+      </div>
+
+      <div class="slide__inner">
+        <div class="container">
+          <div class="section-head">
+            <p class="eyebrow reveal"><span class="eyebrow__dash"></span>Услуги</p>
+            <h2 class="title" data-split="words">Что мы умеем лучше всего</h2>
+          </div>
+
+          <div class="cards">
+            <div class="card-wrap reveal" style="--d: 500ms">
+              <article class="card">
+                <span class="card__glare" aria-hidden="true"></span>
+                <span class="card__num">01</span>
+                <svg class="card__icon" viewBox="0 0 48 48" aria-hidden="true">
+                  <rect x="5" y="9" width="38" height="30" rx="5"/><path d="M5 17h38"/><circle cx="10.5" cy="13" r="1"/><circle cx="14.5" cy="13" r="1"/><rect x="11" y="23" width="12" height="10" rx="2"/><path d="M28 24h9M28 29h6"/>
+                </svg>
+                <h3 class="card__title">Веб-дизайн</h3>
+                <p class="card__text">Интерфейсы, в которых хочется задержаться подольше.</p>
+              </article>
+            </div>
+            <div class="card-wrap reveal" style="--d: 620ms">
+              <article class="card">
+                <span class="card__glare" aria-hidden="true"></span>
+                <span class="card__num">02</span>
+                <svg class="card__icon" viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M4 34c8 0 10-20 20-20s12 20 20 20"/><circle cx="24" cy="14" r="4"/><path d="M8 42h32" stroke-dasharray="2 4"/>
+                </svg>
+                <h3 class="card__title">Анимация</h3>
+                <p class="card__text">Плавные переходы и микро-взаимодействия, которые оживляют продукт.</p>
+              </article>
+            </div>
+            <div class="card-wrap reveal" style="--d: 740ms">
+              <article class="card">
+                <span class="card__glare" aria-hidden="true"></span>
+                <span class="card__num">03</span>
+                <svg class="card__icon" viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M16 14L6 24l10 10M32 14l10 10-10 10M27 9l-6 30"/>
+                </svg>
+                <h3 class="card__title">Разработка</h3>
+                <p class="card__text">Быстрый, чистый и адаптивный код под любые устройства.</p>
+              </article>
+            </div>
+            <div class="card-wrap reveal" style="--d: 860ms">
+              <article class="card">
+                <span class="card__glare" aria-hidden="true"></span>
+                <span class="card__num">04</span>
+                <svg class="card__icon" viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M24 4l6 14 14 6-14 6-6 14-6-14-14-6 14-6z"/><circle cx="24" cy="24" r="3"/>
+                </svg>
+                <h3 class="card__title">Брендинг</h3>
+                <p class="card__text">Айдентика, которую узнают с&nbsp;первого взгляда.</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Цифры -->
+    <section class="slide slide--stats" id="stats" data-title="Цифры" data-transition="diagonal">
+      <div class="slide__bg">
+        <div class="sun"></div>
+        <div class="floor"><div class="floor__grid"></div></div>
+        <div class="stars"></div>
+      </div>
+
+      <div class="slide__inner">
+        <div class="container">
+          <div class="section-head section-head--center">
+            <p class="eyebrow reveal"><span class="eyebrow__dash"></span>В цифрах<span class="eyebrow__dash"></span></p>
+            <h2 class="title" data-split="words">Результаты, которыми гордимся</h2>
+          </div>
+
+          <div class="stats">
+            <div class="stat reveal" style="--d: 450ms; --p: 0.82">
+              <div class="stat__ring">
+                <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-bar" cx="60" cy="60" r="54"/></svg>
+                <span class="stat__value"><span data-count="120">120</span>+</span>
+              </div>
+              <p class="stat__label">проектов запущено</p>
+            </div>
+            <div class="stat reveal" style="--d: 570ms; --p: 0.98">
+              <div class="stat__ring">
+                <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-bar" cx="60" cy="60" r="54"/></svg>
+                <span class="stat__value"><span data-count="98">98</span>%</span>
+              </div>
+              <p class="stat__label">клиентов возвращаются</p>
+            </div>
+            <div class="stat reveal" style="--d: 690ms; --p: 0.6">
+              <div class="stat__ring">
+                <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-bar" cx="60" cy="60" r="54"/></svg>
+                <span class="stat__value"><span data-count="24">24</span></span>
+              </div>
+              <p class="stat__label">награды и премии</p>
+            </div>
+            <div class="stat reveal" style="--d: 810ms; --p: 0.45">
+              <div class="stat__ring">
+                <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-bar" cx="60" cy="60" r="54"/></svg>
+                <span class="stat__value"><span data-count="9">9</span></span>
+              </div>
+              <p class="stat__label">лет на рынке</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Работы -->
+    <section class="slide slide--work" id="work" data-title="Работы" data-transition="liquid">
+      <div class="slide__bg">
+        <div class="spotlight"></div>
+      </div>
+
+      <div class="slide__inner">
+        <div class="container work">
+          <div class="section-head section-head--center">
+            <p class="eyebrow reveal"><span class="eyebrow__dash"></span>Портфолио<span class="eyebrow__dash"></span></p>
+            <h2 class="title" data-split="words">Избранные проекты</h2>
+          </div>
+
+          <div class="ring-stage reveal" style="--d: 450ms" data-cursor-text="Тяни">
+            <div class="ring">
+              <figure class="work-card"><div class="art art--1"></div><figcaption><span>Брендинг · 2026</span><strong>Аврора</strong></figcaption></figure>
+              <figure class="work-card"><div class="art art--2"></div><figcaption><span>Веб-сайт · 2026</span><strong>Прилив</strong></figcaption></figure>
+              <figure class="work-card"><div class="art art--3"></div><figcaption><span>Моушн · 2025</span><strong>Неон</strong></figcaption></figure>
+              <figure class="work-card"><div class="art art--4"></div><figcaption><span>Приложение · 2025</span><strong>Орбита</strong></figcaption></figure>
+              <figure class="work-card"><div class="art art--5"></div><figcaption><span>Айдентика · 2025</span><strong>Мираж</strong></figcaption></figure>
+              <figure class="work-card"><div class="art art--6"></div><figcaption><span>Веб-сайт · 2024</span><strong>Сияние</strong></figcaption></figure>
+              <figure class="work-card"><div class="art art--7"></div><figcaption><span>3D · 2024</span><strong>Пульс</strong></figcaption></figure>
+              <figure class="work-card"><div class="art art--8"></div><figcaption><span>Лендинг · 2024</span><strong>Эфир</strong></figcaption></figure>
+            </div>
+          </div>
+
+          <div class="ring-controls reveal" style="--d: 650ms">
+            <button class="round-btn magnetic" type="button" data-ring="prev" aria-label="Предыдущий проект">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+            </button>
+            <span class="ring-controls__hint">Тяните, чтобы вращать</span>
+            <button class="round-btn magnetic" type="button" data-ring="next" aria-label="Следующий проект">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Контакты -->
+    <section class="slide slide--contact" id="contact" data-title="Контакты" data-transition="circle">
+      <div class="slide__bg">
+        <div class="mesh"></div>
+      </div>
+
+      <div class="slide__inner">
+        <div class="container contact">
+          <p class="eyebrow reveal"><span class="eyebrow__dash"></span>Контакты<span class="eyebrow__dash"></span></p>
+          <h2 class="contact__title" data-split="chars">
+            <span class="line">Давайте создадим</span>
+            <span class="line">что-то новое</span>
+          </h2>
+
+          <a class="cta-circle magnetic reveal" style="--d: 900ms" href="mailto:hello@example.com" data-strength="0.25">
+            <svg class="cta-circle__text" viewBox="0 0 200 200" aria-hidden="true">
+              <defs><path id="cta-path" d="M100 100m-80 0a80 80 0 1 1 160 0a80 80 0 1 1-160 0"/></defs>
+              <text><textPath href="#cta-path" textLength="498">НАПИСАТЬ НАМ ✦ НАПИСАТЬ НАМ ✦ </textPath></text>
+            </svg>
+            <span class="cta-circle__core">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg>
+            </span>
+            <span class="sr-only">Написать нам</span>
+          </a>
+
+          <a class="contact__mail reveal" style="--d: 1000ms" href="mailto:hello@example.com">hello@example.com</a>
+
+          <ul class="socials reveal" style="--d: 1100ms">
+            <li><a href="#" class="socials__link">Telegram</a></li>
+            <li><a href="#" class="socials__link">Behance</a></li>
+            <li><a href="#" class="socials__link">Dribbble</a></li>
+            <li><a href="#" class="socials__link">Instagram</a></li>
+          </ul>
+
+          <footer class="footer reveal" style="--d: 1200ms">
+            <span>© 2026 NOVA. Сделано с любовью к деталям.</span>
+            <a href="#home" class="footer__top">Наверх ↑</a>
+          </footer>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>
