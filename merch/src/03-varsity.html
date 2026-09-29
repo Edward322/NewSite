@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Варсити-бомбер</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<script src="shared.js"></script>
+<div class="scene">
+<svg viewBox="0 0 1600 1200">
+  <defs>
+    <radialGradient id="stage" cx=".5" cy=".38" r=".75">
+      <stop offset="0" stop-color="#4a24a8"/><stop offset=".6" stop-color="#26105e"/><stop offset="1" stop-color="#12062e"/>
+    </radialGradient>
+    <linearGradient id="leather" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#b9a6f0"/><stop offset=".35" stop-color="#f4efff"/><stop offset=".55" stop-color="#e2d8ff"/><stop offset="1" stop-color="#a893e6"/>
+    </linearGradient>
+    <radialGradient id="vhl" cx=".5" cy=".35" r=".55">
+      <stop offset="0" stop-color="#8f6bff" stop-opacity=".25"/><stop offset="1" stop-color="#8f6bff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="vside" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#07021a" stop-opacity=".5"/><stop offset=".25" stop-color="#07021a" stop-opacity="0"/>
+      <stop offset=".75" stop-color="#07021a" stop-opacity="0"/><stop offset="1" stop-color="#07021a" stop-opacity=".5"/>
+    </linearGradient>
+    <pattern id="vrib" width="6" height="10" patternUnits="userSpaceOnUse">
+      <rect width="6" height="10" fill="#2a116c"/><rect width="2.5" height="10" fill="#1d0b50"/>
+    </pattern>
+
+    <path id="vf-body" d="M304 124 L234 104 C200 116 160 130 128 146 C98 160 76 192 68 240 L46 556 C44 600 44 636 46 664 L120 668 C121 636 121 604 122 578 L126 556 L141 302 L143 612 C143 648 146 676 150 702 L304 704 Z"/>
+    <path id="vb-body" d="M304 96 L234 104 C200 116 160 130 128 146 C98 160 76 192 68 240 L46 556 C44 600 44 636 46 664 L120 668 C121 636 121 604 122 578 L126 556 L141 302 L143 612 C143 648 146 676 150 702 L304 704 Z"/>
+    <path id="v-sleeve" d="M128 146 C98 160 76 192 68 240 L47 560 L125 560 L141 302 C140 250 136 200 128 146 Z"/>
+    <path id="v-cuff" d="M47 560 C44 600 44 636 46 664 L120 668 C121 636 121 604 125 560 Z"/>
+    <path id="v-hem" d="M143 612 C143 648 146 676 150 702 L304 704 L304 612 Z"/>
+    <clipPath id="clipVF"><use href="#vf-body"/><use href="#vf-body" transform="translate(600 0) scale(-1 1)"/></clipPath>
+    <clipPath id="clipVB"><use href="#vb-body"/><use href="#vb-body" transform="translate(600 0) scale(-1 1)"/></clipPath>
+    <clipPath id="clipCuff"><use href="#v-cuff"/></clipPath>
+    <clipPath id="clipHem"><use href="#v-hem"/></clipPath>
+    <clipPath id="clipSleeve"><use href="#v-sleeve"/></clipPath>
+
+    <g id="v-half">
+      <use href="#v-sleeve" fill="url(#leather)"/>
+      <g clip-path="url(#clipSleeve)">
+        <path d="M60 400 C80 392 104 398 136 386" fill="none" stroke="#6f58b8" stroke-width="8" opacity=".35" filter="url(#b4)"/>
+        <path d="M56 440 C82 436 104 444 134 430" fill="none" stroke="#6f58b8" stroke-width="7" opacity=".3" filter="url(#b4)"/>
+        <path d="M86 200 C80 300 74 420 70 540" fill="none" stroke="#fff" stroke-width="10" opacity=".6" filter="url(#b8)"/>
+        <path d="M128 146 C98 160 76 192 68 240" fill="none" stroke="#5d47a8" stroke-width="18" opacity=".35" filter="url(#b8)"/>
+      </g>
+      <path d="M128 146 C136 200 140 250 141 302" fill="none" stroke="#1d0b4d" stroke-width="3" opacity=".7"/>
+      <path d="M126 556 L141 302" fill="none" stroke="#12053a" stroke-width="6" opacity=".45" filter="url(#b2)"/>
+      <use href="#v-cuff" fill="url(#vrib)"/>
+      <g clip-path="url(#clipCuff)"><rect x="30" y="592" width="110" height="7" fill="#d2ff3f"/><rect x="30" y="608" width="110" height="7" fill="#d2ff3f"/></g>
+      <use href="#v-hem" fill="url(#vrib)"/>
+      <g clip-path="url(#clipHem)"><rect x="140" y="640" width="170" height="7" fill="#d2ff3f"/><rect x="140" y="656" width="170" height="7" fill="#d2ff3f"/></g>
+      <path d="M47 560 L125 560" stroke="#12053a" stroke-width="3" opacity=".6"/>
+      <path d="M143 612 L304 612" stroke="#12053a" stroke-width="3" opacity=".6"/>
+      <g fill="none" stroke-linecap="round">
+        <path d="M170 330 C178 410 172 490 178 590" stroke="#07021a" stroke-width="16" opacity=".28" filter="url(#b8)"/>
+        <path d="M194 340 C200 420 196 490 200 590" stroke="#a88bff" stroke-width="12" opacity=".12" filter="url(#b8)"/>
+      </g>
+    </g>
+  </defs>
+
+  <rect width="1600" height="1200" fill="url(#stage)"/>
+  <ellipse cx="800" cy="1010" rx="760" ry="70" fill="#07021a" opacity=".35" filter="url(#b24)"/>
+
+  <!-- ===== ПЕРЕД ===== -->
+  <g transform="translate(92 120) scale(1.13)">
+    <g transform="translate(10 26)" opacity=".5" filter="url(#b24)" fill="#07021a">
+      <use href="#vf-body"/><use href="#vf-body" transform="translate(600 0) scale(-1 1)"/>
+    </g>
+    <use href="#vf-body" fill="#3a1a8a"/><use href="#vf-body" fill="#3a1a8a" transform="translate(600 0) scale(-1 1)"/>
+    <use href="#v-half"/><use href="#v-half" transform="translate(600 0) scale(-1 1)"/>
+
+    <!-- воротник -->
+    <path d="M232 100 C252 128 274 136 300 138 C326 136 348 128 368 100" fill="none" stroke="#2a116c" stroke-width="26"/>
+    <path d="M232 100 C252 128 274 136 300 138 C326 136 348 128 368 100" fill="none" stroke="#d2ff3f" stroke-width="3.5" transform="translate(0 -1)"/>
+    <path d="M232 100 C252 128 274 136 300 138 C326 136 348 128 368 100" fill="none" stroke="#d2ff3f" stroke-width="3.5" transform="translate(0 8)"/>
+    <path d="M234 88 C254 114 276 120 300 121 C324 120 346 114 366 88" fill="none" stroke="#1a0848" stroke-width="10" opacity=".7"/>
+
+    <!-- застёжка и кнопки -->
+    <path d="M300 150 L300 704" stroke="#12053a" stroke-width="3"/>
+    <path d="M296 150 L296 612" stroke="#7b5ce0" stroke-width="1.2" stroke-dasharray="5 4" opacity=".6"/>
+    <g>
+      <circle cx="300" cy="180" r="9" fill="url(#silver)" stroke="#5e5a70" stroke-width="1.5"/>
+      <circle cx="300" cy="262" r="9" fill="url(#silver)" stroke="#5e5a70" stroke-width="1.5"/>
+      <circle cx="300" cy="344" r="9" fill="url(#silver)" stroke="#5e5a70" stroke-width="1.5"/>
+      <circle cx="300" cy="426" r="9" fill="url(#silver)" stroke="#5e5a70" stroke-width="1.5"/>
+      <circle cx="300" cy="508" r="9" fill="url(#silver)" stroke="#5e5a70" stroke-width="1.5"/>
+      <circle cx="300" cy="590" r="9" fill="url(#silver)" stroke="#5e5a70" stroke-width="1.5"/>
+    </g>
+
+    <!-- карманы-листочки -->
+    <g>
+      <rect x="196" y="440" width="18" height="110" rx="4" fill="url(#leather)" transform="rotate(14 205 495)"/>
+      <rect x="386" y="440" width="18" height="110" rx="4" fill="url(#leather)" transform="rotate(-14 395 495)"/>
+    </g>
+
+    <!-- шениль «И» -->
+    <g filter="url(#chenille)">
+      <text x="412" y="340" text-anchor="middle" class="u" font-weight="900" font-size="132" fill="#ffffff" stroke="#ffffff" stroke-width="22" stroke-linejoin="round">И</text>
+      <text x="412" y="340" text-anchor="middle" class="u" font-weight="900" font-size="132" fill="#d2ff3f" stroke="#7b4dff" stroke-width="10" stroke-linejoin="round" paint-order="stroke">И</text>
+    </g>
+    <!-- вышитая надпись -->
+    <g filter="url(#emb)">
+      <text x="196" y="262" text-anchor="middle" class="h" font-size="50" fill="#ffffff" transform="rotate(-8 196 262)">Студент</text>
+      <path d="M140 284 C176 276 214 270 256 262" fill="none" stroke="#d2ff3f" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <!-- нашивка на рукаве -->
+    <g filter="url(#chenille)">
+      <circle cx="96" cy="300" r="33" fill="#d2ff3f" stroke="#3a1a8a" stroke-width="5"/>
+      <text x="96" y="306" text-anchor="middle" class="u" font-weight="900" font-size="15" fill="#1c0a3f">2030</text>
+    </g>
+
+    <g clip-path="url(#clipVF)">
+      <rect width="600" height="720" fill="url(#vhl)" style="mix-blend-mode:screen"/>
+      <rect x="40" width="520" height="720" fill="url(#vside)"/>
+      <rect width="600" height="720" filter="url(#knit)" opacity=".1" style="mix-blend-mode:overlay"/>
+    </g>
+  </g>
+
+  <!-- ===== СПИНА ===== -->
+  <g transform="translate(830 120) scale(1.13)">
+    <g transform="translate(10 26)" opacity=".5" filter="url(#b24)" fill="#07021a">
+      <use href="#vb-body"/><use href="#vb-body" transform="translate(600 0) scale(-1 1)"/>
+    </g>
+    <use href="#vb-body" fill="#3a1a8a"/><use href="#vb-body" fill="#3a1a8a" transform="translate(600 0) scale(-1 1)"/>
+    <use href="#v-half"/><use href="#v-half" transform="translate(600 0) scale(-1 1)"/>
+    <path d="M234 104 C256 116 278 120 300 120 C322 120 344 116 366 104" fill="none" stroke="#2a116c" stroke-width="22"/>
+    <path d="M234 104 C256 116 278 120 300 120 C322 120 344 116 366 104" fill="none" stroke="#d2ff3f" stroke-width="3.5" transform="translate(0 -2)"/>
+    <path d="M234 104 C256 116 278 120 300 120 C322 120 344 116 366 104" fill="none" stroke="#d2ff3f" stroke-width="3.5" transform="translate(0 6)"/>
+
+    <path id="v-arc" d="M150 262 Q300 150 450 262" fill="none"/>
+    <g filter="url(#chenille)">
+      <text class="u" font-weight="900" font-size="74" fill="#ffffff" stroke="#ffffff" stroke-width="20" stroke-linejoin="round"><textPath href="#v-arc" startOffset="50%" text-anchor="middle">ИУЭС</textPath></text>
+      <text class="u" font-weight="900" font-size="74" fill="#d2ff3f" stroke="#7b4dff" stroke-width="9" stroke-linejoin="round" paint-order="stroke"><textPath href="#v-arc" startOffset="50%" text-anchor="middle">ИУЭС</textPath></text>
+    </g>
+    <g filter="url(#chenille)">
+      <g filter="url(#felt)">
+        <use href="#owl" x="206" y="262" width="188" height="229" style="--owl-body:#7b4dff; --owl-face:#e4d9ff; --owl-belly:#b8a1ff; --owl-accent:#d2ff3f"/>
+      </g>
+    </g>
+    <g filter="url(#chenille)">
+      <text x="300" y="552" text-anchor="middle" class="u" font-weight="900" font-size="36" fill="#ffffff" stroke="#7b4dff" stroke-width="8" stroke-linejoin="round" paint-order="stroke">ТАГАНРОГ</text>
+    </g>
+    <g filter="url(#emb)">
+      <text x="300" y="590" text-anchor="middle" class="m" font-weight="800" font-size="16" letter-spacing="6" fill="#d2ff3f">ЮФУ • ВЫПУСК 2030</text>
+    </g>
+
+    <g clip-path="url(#clipVB)">
+      <rect width="600" height="720" fill="url(#vhl)" style="mix-blend-mode:screen"/>
+      <rect x="40" width="520" height="720" fill="url(#vside)"/>
+      <rect width="600" height="720" filter="url(#knit)" opacity=".1" style="mix-blend-mode:overlay"/>
+    </g>
+  </g>
+
+  <g class="m" font-weight="800" font-size="16" letter-spacing="4" fill="#9f88e8">
+    <text x="431" y="958" text-anchor="middle">ПЕРЕД</text>
+    <text x="1169" y="958" text-anchor="middle">СПИНА</text>
+  </g>
+  <text x="64" y="1070" class="u" font-weight="800" font-size="30" fill="#ffffff">Варсити-бомбер «Выпуск 2030»</text>
+  <text x="64" y="1108" class="m" font-weight="500" font-size="20" fill="#c9b9ff">Шерстяной корпус ночного цвета, рукава из сиреневой экокожи, трикотаж в полоску лайм</text>
+  <text x="64" y="1138" class="m" font-weight="500" font-size="20" fill="#c9b9ff">Махровые шениль-нашивки: буква «И», сова и арка «ИУЭС» · год выпуска — на рукаве</text>
+  <text x="1536" y="1138" text-anchor="end" class="u" font-weight="800" font-size="18" fill="#d2ff3f">МЕРЧ ИУЭС • 03</text>
+
+  <rect width="1600" height="1200" filter="url(#grain)" opacity=".08" style="mix-blend-mode:overlay"/>
+</svg>
+</div>
+</body>
+</html>

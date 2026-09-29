@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Блокнот, ланъярд, ручка</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<script src="shared.js"></script>
+<div class="scene">
+<svg viewBox="0 0 1600 1200">
+  <defs>
+    <radialGradient id="desk7" cx=".5" cy=".45" r=".8">
+      <stop offset="0" stop-color="#efe8ff"/><stop offset="1" stop-color="#c8b8f5"/>
+    </radialGradient>
+    <linearGradient id="cover7" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4b23a8"/><stop offset="1" stop-color="#2f1474"/>
+    </linearGradient>
+    <linearGradient id="penBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9b7bff"/><stop offset=".4" stop-color="#6a3cf0"/><stop offset="1" stop-color="#3d1a9a"/>
+    </linearGradient>
+    <linearGradient id="plastic" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".3" stop-color="#fff" stop-opacity=".08"/>
+      <stop offset=".7" stop-color="#fff" stop-opacity=".02"/><stop offset="1" stop-color="#fff" stop-opacity=".3"/>
+    </linearGradient>
+    <path id="strapL" d="M880 -30 C884 110 930 250 1052 352"/>
+    <path id="strapR" d="M1270 -30 C1260 110 1190 260 1076 352"/>
+  </defs>
+
+  <rect width="1600" height="1200" fill="url(#desk7)"/>
+  <rect width="1600" height="1200" filter="url(#paper)" opacity=".16" style="mix-blend-mode:multiply"/>
+
+  <!-- ===== Блокнот ===== -->
+  <g transform="translate(150 150) rotate(-5 220 300)">
+    <rect x="10" y="16" width="440" height="600" rx="16" fill="#2a1560" opacity=".4" filter="url(#b14)"/>
+    <rect x="8" y="6" width="440" height="600" rx="16" fill="#f7f4ff"/>
+    <path d="M440 20 V592" stroke="#d9d0f5" stroke-width="2"/>
+    <rect width="440" height="600" rx="16" fill="url(#cover7)"/>
+    <rect width="34" height="600" rx="12" fill="#23105c" opacity=".6"/>
+    <rect x="16" y="0" width="2" height="600" fill="#6a45d8" opacity=".5"/>
+    <g filter="url(#print)">
+      <use href="#wordmark" x="70" y="46" width="200" height="68" style="--wm:#d2ff3f; --wm-sub:#b8a1ff"/>
+      <text x="72" y="190" class="m" font-weight="800" font-size="17" letter-spacing="4" fill="#b8a1ff">ПЛАН НА СЕССИЮ:</text>
+      <g fill="none" stroke="#d2ff3f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="72" y="222" width="34" height="34" rx="6"/><path d="M79 239 l8 8 l16 -20"/>
+        <rect x="72" y="292" width="34" height="34" rx="6"/><path d="M79 309 l8 8 l16 -20"/>
+        <rect x="72" y="362" width="34" height="34" rx="6"/>
+      </g>
+      <g class="h" font-size="48" fill="#ffffff">
+        <text x="124" y="254">сдать</text>
+        <text x="124" y="324">не сдаться</text>
+        <text x="124" y="394">выспаться</text>
+      </g>
+      <path d="M120 372 C180 364 260 380 330 368" stroke="#ff77c8" stroke-width="4" fill="none" stroke-linecap="round" opacity="0"/>
+      <text x="150" y="438" class="h" font-size="30" fill="#ff77c8" transform="rotate(-4 150 438)">(когда-нибудь)</text>
+      <use href="#owl" x="72" y="470" width="72" height="88" style="--owl-body:#7b4dff"/>
+      <text x="158" y="530" class="m" font-weight="800" font-size="14" letter-spacing="4" fill="#b8a1ff">ЮФУ • ТАГАНРОГ</text>
+    </g>
+    <rect x="384" y="0" width="22" height="600" fill="#d2ff3f"/>
+    <rect x="384" y="0" width="22" height="600" fill="url(#plastic)" opacity=".6"/>
+    <rect width="440" height="600" rx="16" filter="url(#canvas)" opacity=".1" style="mix-blend-mode:overlay"/>
+  </g>
+
+  <!-- ===== Ланъярд ===== -->
+  <g>
+    <g opacity=".3" filter="url(#b8)" transform="translate(8 12)" fill="none" stroke="#2a1560" stroke-width="34">
+      <use href="#strapL"/><use href="#strapR"/>
+    </g>
+    <use href="#strapL" fill="none" stroke="#d2ff3f" stroke-width="34"/>
+    <use href="#strapR" fill="none" stroke="#d2ff3f" stroke-width="34"/>
+    <g class="u" font-weight="800" font-size="14" fill="#1c0a3f">
+      <text dy="5"><textPath href="#strapL">ИУЭС • ЮФУ • ИУЭС • ЮФУ • ИУЭС • ЮФУ • ИУЭС</textPath></text>
+      <text dy="5"><textPath href="#strapR">ИУЭС • ЮФУ • ИУЭС • ЮФУ • ИУЭС • ЮФУ • ИУЭС</textPath></text>
+    </g>
+    <!-- карабин -->
+    <rect x="1040" y="330" width="48" height="30" rx="6" fill="#d2ff3f"/>
+    <rect x="1054" y="352" width="20" height="40" rx="6" fill="url(#silver)" stroke="#6b6780" stroke-width="2"/>
+    <circle cx="1064" cy="400" r="14" fill="none" stroke="url(#silver)" stroke-width="6"/>
+    <!-- бейдж -->
+    <g transform="translate(934 408) rotate(3 130 190)">
+      <rect x="8" y="14" width="260" height="370" rx="18" fill="#2a1560" opacity=".35" filter="url(#b14)"/>
+      <rect width="260" height="370" rx="18" fill="#ffffff" opacity=".55"/>
+      <rect x="112" y="12" width="36" height="8" rx="4" fill="#c8bdf0"/>
+      <rect x="14" y="30" width="232" height="326" rx="12" fill="#ffffff"/>
+      <path d="M14 42 a12 12 0 0 1 12 -12 h208 a12 12 0 0 1 12 12 v78 h-232 Z" fill="#5b2bd0"/>
+      <text x="34" y="74" class="u" font-weight="900" font-size="26" fill="#d2ff3f">ИУЭС</text>
+      <text x="34" y="100" class="m" font-weight="800" font-size="12" letter-spacing="4" fill="#e4d9ff">ЮФУ • ТАГАНРОГ</text>
+      <use href="#i-star" x="206" y="46" width="24" height="24" color="#ffffff"/>
+      <rect x="34" y="138" width="92" height="112" rx="10" fill="#e4d9ff"/>
+      <use href="#owl" x="44" y="146" width="72" height="88" style="--owl-body:#7b4dff"/>
+      <text x="140" y="160" class="m" font-weight="800" font-size="11" letter-spacing="2" fill="#8a7bb8">СТАТУС</text>
+      <text x="140" y="184" class="u" font-weight="900" font-size="15" fill="#1c0a3f">СТУДЕНТ</text>
+      <text x="140" y="214" class="m" font-weight="800" font-size="11" letter-spacing="2" fill="#8a7bb8">КУРС</text>
+      <text x="140" y="240" class="u" font-weight="900" font-size="22" fill="#5b2bd0">1</text>
+      <text x="34" y="282" class="m" font-weight="800" font-size="11" letter-spacing="2" fill="#8a7bb8">СУПЕРСИЛА</text>
+      <text x="34" y="314" class="h" font-size="30" fill="#5b2bd0">тайм-менеджмент</text>
+      <rect x="14" y="336" width="232" height="20" fill="#d2ff3f"/>
+      <path d="M14 336 h232 v8 a12 12 0 0 1 -12 12 h-208 a12 12 0 0 1 -12 -12 Z" fill="#d2ff3f"/>
+      <rect width="260" height="370" rx="18" fill="url(#plastic)"/>
+      <rect x=".75" y=".75" width="258.5" height="368.5" rx="18" fill="none" stroke="#fff" stroke-width="1.5" opacity=".8"/>
+    </g>
+  </g>
+
+  <!-- ===== Ручка ===== -->
+  <g transform="translate(560 900) rotate(-18)">
+    <rect x="6" y="14" width="440" height="30" rx="15" fill="#2a1560" opacity=".35" filter="url(#b8)"/>
+    <path d="M0 15 L40 0 H420 a15 15 0 0 1 0 30 H40 Z" fill="url(#penBody)"/>
+    <path d="M0 15 L40 0 V30 Z" fill="#e4d9ff"/>
+    <path d="M0 15 L12 10.5 V19.5 Z" fill="#1c0a3f"/>
+    <rect x="330" y="-6" width="96" height="10" rx="5" fill="#d2ff3f"/>
+    <rect x="300" y="0" width="12" height="30" fill="#d2ff3f"/>
+    <text x="120" y="21" class="u" font-weight="900" font-size="14" fill="#ffffff">ИУЭС</text>
+    <text x="190" y="21" class="m" font-weight="800" font-size="10" letter-spacing="2" fill="#e4d9ff">СДАМ. НЕ СДАМСЯ.</text>
+    <rect x="44" y="3" width="370" height="6" rx="3" fill="#fff" opacity=".3"/>
+  </g>
+
+  <!-- ===== Стикеры-заметки ===== -->
+  <g transform="translate(1250 700) rotate(7 100 100)">
+    <rect x="6" y="10" width="210" height="210" fill="#2a1560" opacity=".3" filter="url(#b8)"/>
+    <rect width="210" height="210" fill="#d2ff3f"/>
+    <rect width="210" height="30" fill="#c2ef2c"/>
+    <text x="22" y="92" class="h" font-size="40" fill="#1c0a3f">дедлайн</text>
+    <text x="22" y="136" class="h" font-size="40" fill="#1c0a3f">в пятницу!!</text>
+    <path d="M24 158 C70 150 120 168 170 152" fill="none" stroke="#5b2bd0" stroke-width="4" stroke-linecap="round"/>
+    <use href="#i-star" x="160" y="44" width="28" height="28" color="#5b2bd0"/>
+  </g>
+
+  <use href="#st-five" x="600" y="170" width="120" height="120" transform="rotate(-12 660 230)" filter="url(#diecut)"/>
+  <use href="#st-tri" x="630" y="660" width="220" height="103" transform="rotate(-8 740 711)" filter="url(#diecut)"/>
+
+  <text x="64" y="1070" class="u" font-weight="800" font-size="30" fill="#1c0a3f">Блокнот «План на сессию», ланъярд с бейджем, ручка</text>
+  <text x="64" y="1108" class="m" font-weight="500" font-size="20" fill="#4a3d78">Блокнот А5 в тканевой обложке с резинкой · ланъярд с принтом «ИУЭС • ЮФУ» и бейджем первокурсника</text>
+  <text x="64" y="1138" class="m" font-weight="500" font-size="20" fill="#4a3d78">Ручка soft-touch с клипом цвета лайм и стикеры-заметки — для дедлайнов, которые мы победим</text>
+  <text x="1536" y="1138" text-anchor="end" class="u" font-weight="800" font-size="18" fill="#7b4dff">МЕРЧ ИУЭС • 07</text>
+
+  <rect width="1600" height="1200" filter="url(#grain)" opacity=".07" style="mix-blend-mode:overlay"/>
+</svg>
+</div>
+</body>
+</html>

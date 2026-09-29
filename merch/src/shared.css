@@ -1,0 +1,43 @@
+@import url('../fonts/fonts.css');
+
+:root {
+  --ink: #1c0a3f;
+  --deep: #3b1886;
+  --purple: #5b2bd0;
+  --violet: #7b4dff;
+  --lav: #b8a1ff;
+  --lilac: #e4d9ff;
+  --mist: #f3eeff;
+  --lime: #d2ff3f;
+  --pink: #ff77c8;
+
+  --owl-body: var(--violet);
+  --owl-face: var(--lilac);
+  --owl-belly: var(--lav);
+  --owl-ink: var(--ink);
+  --owl-accent: var(--lime);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: #000;
+}
+
+.scene {
+  position: relative;
+  width: 1600px;
+  height: 1200px;
+  overflow: hidden;
+}
+
+.scene > svg {
+  display: block;
+  width: 1600px;
+  height: 1200px;
+}
+
+.u { font-family: 'Unbounded', sans-serif; }
+.m { font-family: 'Manrope', sans-serif; }
+.h { font-family: 'Caveat', cursive; }

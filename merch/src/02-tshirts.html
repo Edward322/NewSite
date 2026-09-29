@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Футболки</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<script src="shared.js"></script>
+<div class="scene">
+<svg viewBox="0 0 1600 1200">
+  <defs>
+    <radialGradient id="table" cx=".5" cy=".45" r=".75">
+      <stop offset="0" stop-color="#f1ebff"/><stop offset="1" stop-color="#cbbdf2"/>
+    </radialGradient>
+    <radialGradient id="tl" cx=".45" cy=".35" r=".6">
+      <stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+
+    <path id="t-half" d="M304 80 C270 80 246 68 236 40 L128 62 C100 70 80 90 66 116 L14 262 L104 300 L116 236 L118 606 L304 610 Z"/>
+    <path id="t-backneck" d="M236 40 C258 50 280 54 304 54 L304 80 C270 80 246 68 236 40 Z"/>
+    <clipPath id="clipT">
+      <use href="#t-half"/><use href="#t-half" transform="translate(600 0) scale(-1 1)"/>
+    </clipPath>
+
+    <g id="t-details">
+      <path d="M236 40 C246 68 270 80 304 80" fill="none" stroke="var(--rib)" stroke-width="13"/>
+      <path d="M232 36 C243 70 268 88 304 88" fill="none" stroke="#000" stroke-width="2" opacity=".18"/>
+      <path d="M128 62 C112 120 114 180 116 236" fill="none" stroke="#000" stroke-width="2" opacity=".16"/>
+      <path d="M19 250 L108 288" stroke="#000" stroke-width="1.6" stroke-dasharray="5 4" opacity=".2"/>
+      <path d="M120 590 L304 594" stroke="#000" stroke-width="1.6" stroke-dasharray="5 4" opacity=".2"/>
+      <g fill="none" stroke-linecap="round">
+        <path d="M60 180 C80 200 96 230 104 262" stroke="#000" stroke-width="12" opacity=".12" filter="url(#b8)"/>
+        <path d="M76 170 C94 190 108 220 112 250" stroke="#fff" stroke-width="10" opacity=".12" filter="url(#b8)"/>
+        <path d="M160 300 C168 380 160 470 168 580" stroke="#000" stroke-width="18" opacity=".1" filter="url(#b8)"/>
+        <path d="M186 310 C192 390 188 470 192 580" stroke="#fff" stroke-width="12" opacity=".06" filter="url(#b8)"/>
+        <path d="M150 560 L146 600 M200 566 L198 604" stroke="#000" stroke-width="6" opacity=".12" filter="url(#b4)"/>
+      </g>
+    </g>
+  </defs>
+
+  <!-- стол -->
+  <rect width="1600" height="1200" fill="url(#table)"/>
+  <rect width="1600" height="1200" filter="url(#paper)" opacity=".16" style="mix-blend-mode:multiply"/>
+
+  <!-- ===== Лавандовая футболка «Сдам. Не сдамся.» ===== -->
+  <g transform="translate(96 150) rotate(-4 330 330) scale(1.1)" style="--rib:#9c83ec">
+    <g transform="translate(6 12)" opacity=".35" filter="url(#b14)" fill="#2a1560">
+      <use href="#t-half"/><use href="#t-half" transform="translate(600 0) scale(-1 1)"/>
+    </g>
+    <use href="#t-half" fill="#ab93f7"/><use href="#t-half" fill="#ab93f7" transform="translate(600 0) scale(-1 1)"/>
+    <use href="#t-backneck" fill="#8a71dc"/><use href="#t-backneck" fill="#8a71dc" transform="translate(600 0) scale(-1 1)"/>
+    <use href="#t-details"/><use href="#t-details" transform="translate(600 0) scale(-1 1)"/>
+
+    <g filter="url(#print)">
+      <use href="#owl" x="230" y="112" width="140" height="171" style="--owl-body:#5b2bd0; --owl-face:#e4d9ff; --owl-belly:#e4d9ff; --owl-ink:#1c0a3f; --owl-accent:#d2ff3f"/>
+      <text x="300" y="368" text-anchor="middle" class="u" font-weight="900" font-size="76" fill="#1c0a3f">СДАМ.</text>
+      <rect x="152" y="386" width="296" height="54" rx="27" fill="#5b2bd0"/>
+      <text x="300" y="424" text-anchor="middle" class="u" font-weight="900" font-size="28" fill="#ffffff">НЕ СДАМСЯ.</text>
+      <text x="300" y="478" text-anchor="middle" class="m" font-weight="800" font-size="14" letter-spacing="5" fill="#1c0a3f">ИУЭС • ЮФУ • СЕССИЯ</text>
+      <g color="#1c0a3f"><use href="#i-star" x="402" y="150" width="24" height="24"/><use href="#i-star" x="178" y="206" width="16" height="16"/></g>
+    </g>
+
+    <g clip-path="url(#clipT)">
+      <rect width="600" height="620" fill="url(#tl)"/>
+      <g fill="none" stroke="#1c0a3f" stroke-width="36" opacity=".18" filter="url(#b14)">
+        <use href="#t-half"/><use href="#t-half" transform="translate(600 0) scale(-1 1)"/>
+      </g>
+      <rect width="600" height="620" filter="url(#knit)" opacity=".13" style="mix-blend-mode:overlay"/>
+    </g>
+  </g>
+
+  <!-- ===== Тёмная футболка «Управляю» ===== -->
+  <g transform="translate(846 170) rotate(3.5 330 330) scale(1.1)" style="--rib:#3f1d93">
+    <g transform="translate(6 12)" opacity=".4" filter="url(#b14)" fill="#2a1560">
+      <use href="#t-half"/><use href="#t-half" transform="translate(600 0) scale(-1 1)"/>
+    </g>
+    <use href="#t-half" fill="#2f1474"/><use href="#t-half" fill="#2f1474" transform="translate(600 0) scale(-1 1)"/>
+    <use href="#t-backneck" fill="#1e0a52"/><use href="#t-backneck" fill="#1e0a52" transform="translate(600 0) scale(-1 1)"/>
+    <use href="#t-details"/><use href="#t-details" transform="translate(600 0) scale(-1 1)"/>
+
+    <g filter="url(#print)">
+      <text x="150" y="160" class="m" font-weight="800" font-size="17" letter-spacing="6" fill="#d2ff3f">УПРАВЛЯЮ:</text>
+      <g transform="translate(150 186)">
+        <circle cx="22" cy="22" r="22" fill="#d2ff3f"/><use href="#i-econ" x="9" y="9" width="26" height="26" color="#1c0a3f"/>
+        <text x="58" y="36" class="u" font-weight="900" font-size="27" fill="#d2ff3f">ЭКОНОМИКОЙ</text>
+      </g>
+      <g transform="translate(150 250)">
+        <circle cx="22" cy="22" r="22" fill="#b8a1ff"/><use href="#i-eco" x="9" y="9" width="26" height="26" color="#1c0a3f"/>
+        <text x="58" y="36" class="u" font-weight="900" font-size="27" fill="#b8a1ff">ЭКОЛОГИЕЙ</text>
+      </g>
+      <g transform="translate(150 314)">
+        <circle cx="22" cy="22" r="22" fill="#ff77c8"/><use href="#i-soc" x="9" y="9" width="26" height="26" color="#1c0a3f"/>
+        <text x="58" y="36" class="u" font-weight="900" font-size="27" fill="#ff77c8">СОЦИУМОМ</text>
+      </g>
+      <text x="152" y="420" class="h" font-size="38" fill="#ffffff" transform="rotate(-3 152 420)">…и своим сном (почти)</text>
+      <path d="M150 452 H450" stroke="#7b4dff" stroke-width="2" stroke-dasharray="4 6"/>
+      <text x="150" y="484" class="m" font-weight="800" font-size="14" letter-spacing="4" fill="#b8a1ff">ИУЭС ЮФУ • ТАГАНРОГ</text>
+      <use href="#owl" x="408" y="456" width="40" height="49" style="--owl-body:#7b4dff"/>
+    </g>
+
+    <g clip-path="url(#clipT)">
+      <rect width="600" height="620" fill="url(#tl)" opacity=".7"/>
+      <g fill="none" stroke="#07021a" stroke-width="36" opacity=".35" filter="url(#b14)">
+        <use href="#t-half"/><use href="#t-half" transform="translate(600 0) scale(-1 1)"/>
+      </g>
+      <rect width="600" height="620" filter="url(#knit)" opacity=".13" style="mix-blend-mode:overlay"/>
+    </g>
+  </g>
+
+  <!-- реквизит: стикеры на столе -->
+  <use href="#st-zachet" x="720" y="820" width="190" height="110" transform="rotate(-10 815 875)" filter="url(#diecut)"/>
+  <use href="#st-bolt" x="742" y="120" width="70" height="70" transform="rotate(12 777 155)" filter="url(#diecut)"/>
+  <use href="#st-heart" x="1380" y="60" width="150" height="137" transform="rotate(10 1455 128)" filter="url(#diecut)"/>
+
+  <text x="64" y="1070" class="u" font-weight="800" font-size="30" fill="#1c0a3f">Футболки «Сдам. Не сдамся.» и «Управляю»</text>
+  <text x="64" y="1108" class="m" font-weight="500" font-size="20" fill="#4a3d78">Хлопок 100%, оверсайз-крой, пенье 200 г/м² · шелкография в 3–4 цвета</text>
+  <text x="64" y="1138" class="m" font-weight="500" font-size="20" fill="#4a3d78">Цвета: лаванда и ночной фиолетовый — носятся парой или по отдельности</text>
+  <text x="1536" y="1138" text-anchor="end" class="u" font-weight="800" font-size="18" fill="#7b4dff">МЕРЧ ИУЭС • 02</text>
+
+  <rect width="1600" height="1200" filter="url(#grain)" opacity=".07" style="mix-blend-mode:overlay"/>
+</svg>
+</div>
+</body>
+</html>

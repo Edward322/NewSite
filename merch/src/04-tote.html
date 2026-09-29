@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Шопперы</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<script src="shared.js"></script>
+<div class="scene">
+<svg viewBox="0 0 1600 1200">
+  <defs>
+    <linearGradient id="wall4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9e1ff"/><stop offset="1" stop-color="#d4c6fa"/>
+    </linearGradient>
+    <radialGradient id="spot4" cx=".5" cy=".35" r=".6">
+      <stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bagShade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset=".18" stop-color="#000" stop-opacity="0"/>
+      <stop offset=".7" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#000" stop-opacity=".3"/>
+    </linearGradient>
+    <linearGradient id="bagTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity=".25"/><stop offset=".12" stop-color="#000" stop-opacity="0"/>
+      <stop offset=".85" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".2"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c9b8f2"/><stop offset=".5" stop-color="#b49ee8"/><stop offset="1" stop-color="#9a82d6"/>
+    </linearGradient>
+
+    <path id="bag" d="M40 210 L400 210 L410 640 Q220 654 30 640 Z"/>
+    <clipPath id="clipBag"><use href="#bag"/></clipPath>
+
+    <!-- Шоппер: цвет задаётся через --bag и --strap -->
+    <g id="tote-base">
+      <g transform="translate(14 24)" opacity=".35" filter="url(#b14)" fill="#2a1560"><use href="#bag"/></g>
+      <!-- ручки (задняя) -->
+      <path d="M150 214 L218 44 L290 214" fill="none" stroke="var(--strap-back)" stroke-width="26" stroke-linejoin="round"/>
+      <use href="#bag" fill="var(--bag)"/>
+      <!-- ручки (передняя) -->
+      <path d="M126 262 L126 214 L220 36 L314 214 L314 262" fill="none" stroke="#12053a" stroke-width="28" stroke-linejoin="round" opacity=".25" filter="url(#b4)" transform="translate(4 6)"/>
+      <path d="M126 262 L126 214 L220 36 L314 214 L314 262" fill="none" stroke="var(--strap)" stroke-width="28" stroke-linejoin="round"/>
+      <path d="M116 262 L116 214 L214 30" fill="none" stroke="#fff" stroke-width="1.4" stroke-dasharray="5 4" opacity=".35"/>
+      <path d="M136 262 L136 216 L220 56 L304 216 L304 262" fill="none" stroke="#fff" stroke-width="1.4" stroke-dasharray="5 4" opacity=".35"/>
+      <path d="M113 232 h26 v26 h-26 Z M113 232 l26 26 M139 232 l-26 26" fill="none" stroke="#fff" stroke-width="1.4" opacity=".35"/>
+      <path d="M301 232 h26 v26 h-26 Z M301 232 l26 26 M327 232 l-26 26" fill="none" stroke="#fff" stroke-width="1.4" opacity=".35"/>
+      <!-- подгиб верха -->
+      <path d="M40 236 L400 236" stroke="#000" stroke-width="2" opacity=".18"/>
+      <path d="M41 244 L401 244" stroke="#fff" stroke-width="1.4" stroke-dasharray="5 4" opacity=".35"/>
+    </g>
+  </defs>
+
+  <rect width="1600" height="1200" fill="url(#wall4)"/>
+  <ellipse cx="800" cy="420" rx="880" ry="560" fill="url(#spot4)"/>
+  <rect width="1600" height="1200" filter="url(#paper)" opacity=".14" style="mix-blend-mode:multiply"/>
+
+  <!-- рейка с крючками -->
+  <rect x="120" y="150" width="1360" height="30" rx="6" fill="url(#wood)"/>
+  <rect x="120" y="178" width="1360" height="12" fill="#2a1560" opacity=".18" filter="url(#b4)"/>
+  <g fill="#7a62c4"><circle cx="514" cy="190" r="15"/><circle cx="1084" cy="190" r="15"/></g>
+
+  <!-- ===== Шоппер 1: стикербомбинг ===== -->
+  <g transform="translate(250 147) scale(1.2) rotate(-1.5 220 300)" style="--bag:#34167e; --strap:#2c1270; --strap-back:#220d58">
+    <use href="#tote-base"/>
+    <g clip-path="url(#clipBag)">
+      <g filter="url(#print)">
+        <g filter="url(#felt)">
+          <use href="#st-lighthouse" x="232" y="262" width="150" height="150" transform="rotate(8 307 337)"/>
+          <use href="#st-deadline" x="64" y="270" width="170" height="124" transform="rotate(-8 149 332)"/>
+          <use href="#st-owl" x="150" y="360" width="140" height="169" transform="rotate(-3 220 444)"/>
+          <use href="#st-coffee" x="58" y="410" width="104" height="118" transform="rotate(-12 110 469)"/>
+          <use href="#st-five" x="286" y="420" width="106" height="106" transform="rotate(12 339 473)"/>
+          <use href="#st-wm" x="96" y="534" width="200" height="81" transform="rotate(-4 196 574)"/>
+          <use href="#st-bolt" x="300" y="540" width="60" height="60" transform="rotate(14 330 570)"/>
+          <use href="#st-star" x="70" y="540" width="34" height="34"/>
+          <use href="#st-star" x="360" y="410" width="26" height="26"/>
+        </g>
+      </g>
+      <use href="#bag" fill="url(#bagShade)"/>
+      <use href="#bag" fill="url(#bagTop)"/>
+      <path d="M150 260 C156 360 148 480 158 630" stroke="#000" stroke-width="16" opacity=".12" fill="none" filter="url(#b8)"/>
+      <path d="M300 250 C292 380 300 500 294 632" stroke="#fff" stroke-width="14" opacity=".08" fill="none" filter="url(#b8)"/>
+      <rect width="460" height="680" filter="url(#canvas)" opacity=".16" style="mix-blend-mode:overlay"/>
+    </g>
+  </g>
+
+  <!-- ===== Шоппер 2: «Таганрог. Море. ИУЭС.» ===== -->
+  <g transform="translate(820 147) scale(1.2) rotate(1.2 220 300)" style="--bag:#ab93f7; --strap:#9a80ee; --strap-back:#8468dc">
+    <use href="#tote-base"/>
+    <g clip-path="url(#clipBag)">
+      <g filter="url(#print)">
+        <use href="#i-lighthouse" x="176" y="270" width="88" height="88" color="#1c0a3f"/>
+        <text x="220" y="412" text-anchor="middle" class="u" font-weight="900" font-size="36" fill="#1c0a3f">ТАГАНРОГ.</text>
+        <text x="220" y="460" text-anchor="middle" class="u" font-weight="900" font-size="36" fill="#ffffff">МОРЕ.</text>
+        <text x="220" y="508" text-anchor="middle" class="u" font-weight="900" font-size="36" fill="#5b2bd0">ИУЭС.</text>
+        <g color="#1c0a3f" opacity=".9">
+          <use href="#i-wave" x="96" y="524" width="62" height="62"/><use href="#i-wave" x="158" y="524" width="62" height="62"/>
+          <use href="#i-wave" x="220" y="524" width="62" height="62"/><use href="#i-wave" x="282" y="524" width="62" height="62"/>
+        </g>
+        <text x="220" y="610" text-anchor="middle" class="m" font-weight="800" font-size="12" letter-spacing="4" fill="#1c0a3f">ЮФУ • АЗОВСКОЕ МОРЕ • 47°N</text>
+      </g>
+      <use href="#bag" fill="url(#bagShade)"/>
+      <use href="#bag" fill="url(#bagTop)"/>
+      <path d="M140 260 C146 360 138 480 148 630" stroke="#000" stroke-width="16" opacity=".1" fill="none" filter="url(#b8)"/>
+      <path d="M306 250 C298 380 306 500 300 632" stroke="#fff" stroke-width="14" opacity=".12" fill="none" filter="url(#b8)"/>
+      <rect width="460" height="680" filter="url(#canvas)" opacity=".18" style="mix-blend-mode:overlay"/>
+    </g>
+  </g>
+
+  <text x="64" y="1070" class="u" font-weight="800" font-size="30" fill="#1c0a3f">Шопперы «Стикербомбинг» и «Таганрог. Море. ИУЭС.»</text>
+  <text x="64" y="1108" class="m" font-weight="500" font-size="20" fill="#4a3d78">Плотный хлопковый канвас 280 г/м², длинные ручки на плечо · полноцветная печать DTF и шелкография</text>
+  <text x="64" y="1138" class="m" font-weight="500" font-size="20" fill="#4a3d78">Слева — все стикеры института в одном принте, справа — привет морю и маяку Таганрога</text>
+  <text x="1536" y="1138" text-anchor="end" class="u" font-weight="800" font-size="18" fill="#7b4dff">МЕРЧ ИУЭС • 04</text>
+
+  <rect width="1600" height="1200" filter="url(#grain)" opacity=".07" style="mix-blend-mode:overlay"/>
+</svg>
+</div>
+</body>
+</html>
