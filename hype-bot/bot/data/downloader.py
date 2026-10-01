@@ -30,6 +30,7 @@ MINUTE_MS = 60_000
 DAY_MS = 86_400_000
 KLINE_LIMIT = 1000
 FUNDING_LIMIT = 200
+CHUNK_REQUESTS = 100  # запросов на одну порцию сохранения (~69 дней минутных свечей)
 
 
 class DownloadError(RuntimeError):
@@ -233,15 +234,26 @@ def download_symbol(
         start_ms = max(launch_ms, now_ms - history_days * DAY_MS)
 
     summary: dict = {"symbol": symbol, "launch_ms": launch_ms, "start_ms": start_ms, "now_ms": now_ms}
+    chunk_ms = CHUNK_REQUESTS * KLINE_LIMIT * MINUTE_MS
     for kind in kinds:
         path = store.kline_path(data_dir, symbol, kind)
         columns = store.KLINE_COLUMNS if kind == store.KIND_LAST else store.MARK_COLUMNS
         resume = _resume_from(path, columns, start_ms, MINUTE_MS)
         log.info("%s %s: загрузка с %s", symbol, kind, fmt_ts(resume))
-        new = download_klines(session, call, symbol, kind, resume, now_ms)
-        df = store.merge_and_write(path, new, columns)
+        added = 0
+        df = store.read_parquet(path, columns)
+        # Сохраняем частями: после обрыва связи повторный запуск продолжит с места остановки.
+        chunk_start = (resume // MINUTE_MS) * MINUTE_MS
+        while chunk_start + MINUTE_MS <= now_ms:
+            chunk_end = min(chunk_start + chunk_ms, now_ms)
+            new = download_klines(session, call, symbol, kind, chunk_start, chunk_end)
+            df = store.merge_and_write(path, new, columns)
+            added += len(new)
+            log.info("%s %s: сохранено до %s, всего %d свечей", symbol, kind,
+                     fmt_ts(min(chunk_end, now_ms)), len(df))
+            chunk_start = chunk_end
         summary[f"kline_{kind}_rows"] = len(df)
-        summary[f"kline_{kind}_new"] = len(new)
+        summary[f"kline_{kind}_new"] = added
     if funding:
         path = store.funding_path(data_dir, symbol)
         resume = _resume_from(path, store.FUNDING_COLUMNS, start_ms, 1)

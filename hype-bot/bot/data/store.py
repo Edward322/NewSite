@@ -60,7 +60,7 @@ def merge_and_write(path: Path, new: pd.DataFrame, columns: list[str]) -> pd.Dat
     df = df.drop_duplicates(subset="ts", keep="last").sort_values("ts").reset_index(drop=True)
     df["ts"] = df["ts"].astype("int64")
     tmp = Path(str(path) + ".tmp")
-    df.to_parquet(tmp, index=False)
+    df.to_parquet(tmp, index=False, compression="zstd")
     tmp.replace(path)
     return df
 

@@ -30,8 +30,8 @@ class ExchangeCfg(_Strict):
 class DataCfg(_Strict):
     dir: str = "data/raw"
     extra_symbols: list[str] = Field(default_factory=list)
-    extra_history_days: int = Field(1100, ge=30)
-    request_pause_s: float = Field(0.12, ge=0.02)
+    extra_history_days: int = Field(730, ge=30)
+    request_pause_s: float = Field(0.08, ge=0.02)
 
 
 class ResearchCfg(_Strict):

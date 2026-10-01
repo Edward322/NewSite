@@ -3,6 +3,8 @@
     python -m bot.cli data download          # загрузить/дозагрузить историю
     python -m bot.cli data check             # отчёт о качестве → reports/data_quality.md
     python -m bot.cli data fees              # реальные комиссии (нужен ключ в .env)
+    python -m bot.cli data pack              # упаковать данные в upload/hype-data.zip
+    python -m bot.cli data unpack ФАЙЛ.zip   # распаковать архив с проверкой sha256
 """
 from __future__ import annotations
 
@@ -11,7 +13,7 @@ import logging
 import sys
 
 from bot.config import PROJECT_ROOT, load_config
-from bot.data import downloader, store
+from bot.data import downloader, store, transfer
 from bot.data.report import build_report
 
 log = logging.getLogger("bot")
@@ -70,8 +72,28 @@ def cmd_fees(cfg, args) -> int:
     return 0
 
 
+def cmd_pack(cfg, args) -> int:
+    out = PROJECT_ROOT / "upload" / "hype-data.zip"
+    manifest = transfer.pack(cfg.data_dir(), [cfg.symbol] + cfg.data.extra_symbols, out)
+    size_mb = out.stat().st_size / 1e6
+    print(f"Архив готов: {out} ({size_mb:.1f} МБ, файлов: {len(manifest['files'])})")
+    return 0
+
+
+def cmd_unpack(cfg, args) -> int:
+    manifest = transfer.unpack(args.zip, cfg.data_dir(), PROJECT_ROOT / "data" / "manifest.json")
+    print(f"Распаковано и проверено файлов: {len(manifest['files'])}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    log_dir = PROJECT_ROOT / "logs"
+    log_dir.mkdir(exist_ok=True)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        handlers=[logging.StreamHandler(), logging.FileHandler(log_dir / "bot.log", encoding="utf-8")],
+    )
     p = argparse.ArgumentParser(prog="bot")
     p.add_argument("--config", help="путь к YAML-конфигу")
     sub = p.add_subparsers(dest="group", required=True)
@@ -83,12 +105,19 @@ def main(argv: list[str] | None = None) -> int:
         sp.add_argument("--no-extra", action="store_true", help="только основной инструмент")
         sp.add_argument("--no-mark", action="store_true", help="без свечей mark-цены")
     dsub.add_parser("fees")
+    dsub.add_parser("pack")
+    up = dsub.add_parser("unpack")
+    up.add_argument("zip")
     args = p.parse_args(argv)
+    if sys.version_info < (3, 11):
+        log.error("Нужен Python 3.11 или новее, у вас %s", sys.version.split()[0])
+        return 2
     cfg = load_config(args.config)
-    handlers = {"download": cmd_download, "check": cmd_check, "fees": cmd_fees}
+    handlers = {"download": cmd_download, "check": cmd_check, "fees": cmd_fees,
+                "pack": cmd_pack, "unpack": cmd_unpack}
     try:
         return handlers[args.cmd](cfg, args)
-    except downloader.DownloadError as e:
+    except (downloader.DownloadError, transfer.TransferError) as e:
         log.error("%s", e)
         return 2
 

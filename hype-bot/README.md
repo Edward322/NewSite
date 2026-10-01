@@ -8,7 +8,7 @@
 | Этап | Статус |
 |---|---|
 | 0. План | готов |
-| 1. Данные | код загрузчика готов, ждёт доступа к API Bybit |
+| 1. Данные | код готов; данные скачиваются на компьютере пользователя ([инструкция](docs/DATA_DOWNLOAD_WINDOWS.md)) |
 | 2. Бэктестер | — |
 | 3. Исследование стратегий | — |
 | 4. Торговый движок | — |
@@ -28,5 +28,11 @@
 pip install -r requirements-dev.txt
 python -m bot.cli data download   # история HYPEUSDT + контракты для проверки устойчивости
 python -m bot.cli data check      # отчёт о качестве → reports/data_quality.md
+python -m bot.cli data pack       # архив upload/hype-data.zip для передачи
+python -m bot.cli data unpack upload/hype-data.zip   # распаковка с проверкой sha256
 python -m pytest                  # тесты
 ```
+
+API Bybit закрыт для ряда стран, включая страну облачной среды разработки,
+поэтому история скачивается на компьютере пользователя: на Windows достаточно
+запустить `windows\download_data.bat` — см. [инструкцию](docs/DATA_DOWNLOAD_WINDOWS.md).

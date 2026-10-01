@@ -27,3 +27,6 @@ venv/
 *.egg-info/
 build/
 dist/
+
+# Архив для передачи данных
+upload/
