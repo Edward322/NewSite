@@ -1,0 +1,9 @@
+[project]
+name = "hype-bot"
+version = "0.1.0"
+description = "Торговый бот HYPEUSDT для Bybit (V5 API, pybit)"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

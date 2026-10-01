@@ -1,0 +1,45 @@
+# Конфигурация бота. Скопируйте в config/config.yaml и правьте копию.
+# Ключи API здесь НЕ хранятся — только в файле .env.
+
+symbol: HYPEUSDT
+category: linear
+
+exchange:
+  # Аккаунт зарегистрирован на bybit.com → домен API bybit.com.
+  # Если api.bybit.com недоступен, можно указать официальный запасной: domain: bytick
+  domain: bybit
+  tld: com
+  recv_window_ms: 5000
+  http_timeout_s: 10
+
+data:
+  dir: data/raw
+  # Дополнительные контракты для проверки устойчивости правил (не для подбора).
+  extra_symbols: [SOLUSDT, SUIUSDT, DOGEUSDT, AVAXUSDT]
+  # Сколько истории грузить для дополнительных контрактов (дней).
+  extra_history_days: 1100
+  # Пауза между запросами к API (секунды): ~8 запросов/с, далеко от лимита 600/5 с.
+  request_pause_s: 0.12
+
+research:
+  # Последние N месяцев не участвуют в подборе параметров.
+  holdout_months: 6
+
+risk:
+  starting_equity_usdt: 10
+  max_leverage: 50
+  risk_per_trade: 0.05          # доля капитала, теряемая при срабатывании стопа
+  daily_loss_limit: 0.25        # доля капитала на начало дня (UTC)
+  max_drawdown: 0.80            # от пика капитала → полная остановка
+  loss_streak_pause_trades: 4   # убыточных сделок подряд
+  loss_streak_pause_hours: 24
+  day_boundary: UTC
+  margin_mode: ISOLATED_MARGIN
+  position_mode: one_way
+  sl_trigger_by: LastPrice
+  # Ликвидация должна быть дальше стопа минимум в столько раз (по расстоянию от входа).
+  liq_distance_vs_stop_min: 2.0
+
+live:
+  enabled: false                # реальная торговля включается только явно
+  min_size_only: true           # первая фаза live — минимальный объём

@@ -1,0 +1,29 @@
+# Секреты: ключи API хранятся только в .env и никогда не попадают в git
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Локальный конфиг пользователя (шаблон — config/config.example.yaml)
+config/config.yaml
+
+# Данные и состояние бота
+data/raw/
+data/cache/
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+logs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
