@@ -321,6 +321,21 @@ class BybitClient:
             raise errors[-1]
         return None
 
+    def order_history(self, symbol: str, since_ms: int, max_pages: int = 3) -> list[OrderInfo]:
+        """Последние ордера по монете (новые первыми), обновлённые не раньше since_ms."""
+        out, cursor = [], None
+        for _ in range(max_pages):
+            q: dict[str, Any] = dict(category=self.category, symbol=symbol, limit=50)
+            if cursor:
+                q["cursor"] = cursor
+            res = self._get("get_order_history", **q)
+            page = [self._order(o) for o in res.get("list") or []]
+            out += [o for o in page if o.updated_ms >= since_ms]
+            cursor = res.get("nextPageCursor")
+            if not cursor or (page and min(o.updated_ms for o in page) < since_ms):
+                break
+        return out
+
     def set_leverage(self, symbol: str, leverage: float) -> None:
         v = f"{leverage:.2f}".rstrip("0").rstrip(".")
         try:

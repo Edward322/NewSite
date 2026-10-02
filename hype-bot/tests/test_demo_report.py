@@ -1,6 +1,7 @@
 """Скрипт сравнения с бэктестом и отчёт по демо (docs/DEMO_PROTOCOL.md) на имитаторе биржи."""
 import json
 
+import pandas as pd
 import pytest
 
 from bot.data.panel import DAY_MS
@@ -97,3 +98,28 @@ def test_divergence_after_downtime_is_explained(tmp_path):
 def test_bootstrap_interval_is_sensible():
     lo, med, hi = bootstrap_interval([-1.0, 2.0], 10)
     assert -10 <= lo < med < hi <= 20
+
+
+def test_mismatch_from_selfcheck_test_order_is_listed_not_counted(run, tmp_path):
+    from bot.report.demo import selfcheck_windows
+    sc = tmp_path / "selfcheck"
+    sc.mkdir()
+    t = run.clock.now_ms() - 3_600_000
+    start = pd.Timestamp(t, unit="ms", tz="UTC")
+    end = start + pd.Timedelta(minutes=3)
+    (sc / f"selfcheck_demo_{end:%Y%m%d_%H%M}.txt").write_text(
+        f"САМОПРОВЕРКА бота (demo, полная), {start:%Y-%m-%d %H:%M} UTC\n"
+        "   1. Вход XRPUSDT 3.8 по рынку со стопом 1.3849 одним запросом\n", encoding="utf-8")
+    assert selfcheck_windows(sc)
+    run.db.event(t + 60_000, "error", "mismatch", "Расхождение с биржей: XRPUSDT: позиция на бирже (лонг 3.8), "
+                                                   "которой нет у бота")
+    try:
+        text, v = build(run.cfg, run.db, run.data.dir, "sim", run.clock.now_ms(),
+                        baseline(tmp_path, [1.0, -1.0]), selfcheck_dir=sc)
+        assert v.criteria["1. Движок"] is True
+        assert "вызвано пробным ордером самопроверки" in text
+        _, v2 = build(run.cfg, run.db, run.data.dir, "sim", run.clock.now_ms(), baseline(tmp_path, [1.0, -1.0]),
+                      selfcheck_dir=tmp_path / "нет")
+        assert v2.criteria["1. Движок"] is False
+    finally:
+        run.db.c.execute("DELETE FROM events WHERE message LIKE 'Расхождение с биржей: XRPUSDT%'")

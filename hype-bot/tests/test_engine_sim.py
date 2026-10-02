@@ -302,3 +302,22 @@ def test_unconfirmed_fill_is_adopted_when_order_lookup_is_unavailable(tmp_path, 
     assert not env.db.events(kinds=("mismatch",))
     assert any("принята по данным позиции" in e["message"] for e in env.db.events(kinds=("order",)))
     assert sum(1 for o in env.sim.orders if o["orderLinkId"].endswith("e")) == len(env.db.orders())
+
+
+def test_stop_outs_recorded_from_order_history_when_executions_are_empty(tmp_path, full_run, monkeypatch):
+    """На демо журнал исполнений оказался пустым (самопроверка 2026-10-02): закрытия берутся из истории ордеров."""
+    ref_env, _ = full_run
+    env = make_env(tmp_path, start_day=START_DAY)
+    monkeypatch.setattr(env.sim, "get_executions",
+                        lambda **p: env.sim._ok({"category": "linear", "list": [], "nextPageCursor": ""}))
+    assert env.engine.start()
+    env.run_until(T0 + END_DAY * DAY_MS)
+    tr = _trades(env)
+    assert "stop" in set(tr["exit_reason"])
+    a, b = _compare(tr, _trades(ref_env))
+    assert list(a.index) == list(b.index)
+    assert list(a["exit_reason"]) == list(b["exit_reason"])
+    np.testing.assert_allclose(a["exit_price"], b["exit_price"], rtol=1e-12)
+    np.testing.assert_allclose(a["net_pnl"], b["net_pnl"], rtol=1e-9, atol=1e-9)
+    assert list(a["exit_ts"]) == list(b["exit_ts"])
+    assert not env.db.events(kinds=("mismatch",))

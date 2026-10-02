@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -20,6 +21,7 @@ from bot.report.execution import per_trade, summary, summary_text
 
 DAY_MS = 86_400_000
 BASELINE = PROJECT_ROOT / "reports" / "stage1" / "baseline.json"
+SELFCHECK_DIR = PROJECT_ROOT / "reports" / "selfcheck"
 MIN_DAYS, MIN_MARKET = 7, 5
 N_BOOT = 10_000
 
@@ -40,7 +42,24 @@ def bootstrap_interval(base_r: list[float], n: int, seed: int = 7) -> tuple[floa
     return float(np.percentile(sums, 2.5)), float(np.median(sums)), float(np.percentile(sums, 97.5))
 
 
-def build(cfg: Config, db, data_dir: Path, mode: str, now_ms: int, baseline: Path = BASELINE) -> tuple[str, Verdict]:
+def selfcheck_windows(d: Path) -> list[tuple[int, int, str]]:
+    """Интервалы пробных ордеров самопроверки (из её отчётов): (начало, конец, монета)."""
+    out = []
+    for f in sorted(Path(d).glob("selfcheck_*_*.txt")) if Path(d).exists() else []:
+        text = f.read_text(encoding="utf-8", errors="ignore")
+        sym = re.search(r"1\. Вход (\S+)", text)
+        start = re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}) UTC", text.splitlines()[0] if text else "")
+        end = re.search(r"_(\d{8}_\d{4})\.txt$", f.name)
+        if not (sym and start and end):
+            continue
+        a = int(pd.Timestamp(start.group(1), tz="UTC").value // 1_000_000)
+        b = int(pd.to_datetime(end.group(1), format="%Y%m%d_%H%M", utc=True).value // 1_000_000)
+        out.append((a - 60_000, b + 180_000, sym.group(1)))
+    return out
+
+
+def build(cfg: Config, db, data_dir: Path, mode: str, now_ms: int, baseline: Path = BASELINE,
+          selfcheck_dir: Path = SELFCHECK_DIR) -> tuple[str, Verdict]:
     start = int(db.get("started_ms"))
     eq0 = float(db.get("equity_start") or cfg.risk.starting_equity_usdt)
     days = (now_ms - start) / DAY_MS
@@ -55,6 +74,9 @@ def build(cfg: Config, db, data_dir: Path, mode: str, now_ms: int, baseline: Pat
 
     # ---------------------------------------------------------------- 1. движок
     mism = [e for e in ev if e["kind"] == "mismatch"]
+    wins = selfcheck_windows(selfcheck_dir)
+    by_test = [e for e in mism if any(a <= e["ts"] <= b and sym in e["message"] for a, b, sym in wins)]
+    mism = [e for e in mism if e not in by_test]
     stop_ev = [e for e in ev if e["kind"] == "stop" and e["level"] in ("warn", "error")]
     bad_exit = [t for t in trades if t["exit_reason"] in ("no_stop", "liquidation")]
     loop_err = [e for e in ev if e["kind"] in ("loop", "hook") and e["level"] == "error"]
@@ -74,6 +96,9 @@ def build(cfg: Config, db, data_dir: Path, mode: str, now_ms: int, baseline: Pat
           f"{len(blk)} | |", ""]
     for e in (mism + stop_ev + loop_err)[:10]:
         L.append(f"- {utc(e['ts'])}: {e['message'][:200]}")
+    for e in by_test:
+        L.append(f"- Не засчитано (вызвано пробным ордером самопроверки, отклонение от протокола): "
+                 f"{utc(e['ts'])}: {e['message'][:160]}")
     L.append(f"Итог: **{ok_text(crit['1. Движок'])}**")
     L.append("")
 

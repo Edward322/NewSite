@@ -694,34 +694,59 @@ class Engine:
             elif o.purpose == "exit" and o.symbol in self.db.positions():
                 self._apply_exit_fill(self.db.order(o.link_id), ex)
 
+    def _reason(self, link_ids: list[str], stop: bool, liq: bool) -> str:
+        if liq:
+            return "liquidation"
+        if stop:
+            return "stop"
+        ours = [o for o in (self.db.order(x) for x in link_ids if x) if o is not None]
+        return json.loads(ours[0].extra or "{}").get("reason", "signal") if ours else "external"
+
+    def _closing_info(self, dp: DbPosition, now: int) -> tuple[float, float, int, str] | None:
+        """Цена, комиссия, время и причина закрытия позиции по данным биржи; None — данных пока нет.
+        Источники по очереди: исполнения → история ордеров → закрытый результат (на демо-сервере часть
+        журналов бывает пустой или недоступной)."""
+        try:
+            exs = [e for e in self.client.executions(dp.entry_ts - 60_000, now, dp.symbol)
+                   if e.side == -dp.side and e.ts >= dp.entry_ts and e.link_id != dp.link_id]
+        except ExchangeError:
+            exs = []
+        if exs:
+            q = sum(e.qty for e in exs)
+            return (sum(e.price * e.qty for e in exs) / q, sum(e.fee for e in exs), max(e.ts for e in exs),
+                    self._reason([e.link_id for e in exs], any(e.stop_order_type == "StopLoss" for e in exs),
+                                 any(e.exec_type in ("BustTrade", "AdlTrade") for e in exs)))
+        try:
+            ords = [o for o in self.client.order_history(dp.symbol, dp.entry_ts)
+                    if o.side == -dp.side and o.filled_qty > 0 and o.link_id != dp.link_id]
+        except ExchangeError:
+            ords = []
+        if ords:
+            q = sum(o.filled_qty for o in ords)
+            return (sum(o.avg_price * o.filled_qty for o in ords) / q, sum(o.fee for o in ords),
+                    max(o.updated_ms for o in ords),
+                    self._reason([o.link_id for o in ords], any(o.stop_order_type == "StopLoss" for o in ords), False))
+        try:
+            cl = [c for c in self.client.closed_pnl(dp.symbol, dp.entry_ts - 60_000, now)
+                  if int(c.get("updatedTime") or 0) >= dp.entry_ts]
+        except ExchangeError:
+            cl = []
+        if cl:
+            c = cl[0]
+            px = float(c["avgExitPrice"])
+            near_stop = (px <= dp.stop * 1.005) if dp.side > 0 else (px >= dp.stop * 0.995)
+            return (px, dp.qty * px * self.cfg.costs.taker_fee, int(c.get("updatedTime") or now),
+                    self._reason([], near_stop, c.get("execType") in ("BustTrade", "AdlTrade")))
+        return None
+
     def _external_close(self, dp: DbPosition) -> None:
         """Позиция есть у бота, но её нет на бирже: стоп, ликвидация или ручное закрытие."""
         now = self.now()
         try:
-            exs = [e for e in self.client.executions(dp.entry_ts - 60_000, now, dp.symbol)
-                   if e.side == -dp.side and e.ts >= dp.entry_ts and e.link_id != dp.link_id]
+            info = self._closing_info(dp, now)
         except NetworkError:
             return
-        except ExchangeError as e:                 # история исполнений недоступна — закрытый результат биржи
-            exs = []
-            self.db.event(now, "warn", "history", f"{dp.symbol}: исполнения недоступны ({e}), беру закрытый результат")
-            try:
-                cl = [c for c in self.client.closed_pnl(dp.symbol, dp.entry_ts - 60_000, now)
-                      if int(c.get("updatedTime") or 0) >= dp.entry_ts]
-            except (NetworkError, ExchangeError):
-                cl = []
-            if cl:
-                c = cl[0]
-                px = float(c["avgExitPrice"])
-                worse = (px <= dp.stop * 1.005) if dp.side > 0 else (px >= dp.stop * 0.995)
-                reason = "liquidation" if c.get("execType") in ("BustTrade", "AdlTrade") else \
-                    "stop" if worse else "external"
-                self.db.delete(f"close_wait_{dp.symbol}")
-                self._record_trade(dp, exit_price=px, exit_ts=int(c.get("updatedTime") or now),
-                                   exit_fee=dp.qty * px * self.cfg.costs.taker_fee, reason=reason,
-                                   exit_ref=dp.stop if reason == "stop" else None, exit_link="")
-                return
-        if not exs:
+        if info is None:
             tries = int(self.db.get(f"close_wait_{dp.symbol}", 0)) + 1
             self.db.set(f"close_wait_{dp.symbol}", tries)
             if tries < 5:
@@ -730,21 +755,12 @@ class Engine:
                 px = self.client.ticker(dp.symbol).last
             except (NetworkError, ExchangeError):
                 return
-            self.event("error", "mismatch", f"{dp.symbol}: позиция исчезла, исполнений не найдено — записана по цене "
-                                            f"{px:.6g}", notify=True)
-            exs_price, exs_fee, ts, reason = px, 0.0, now, "external"
-        else:
-            q = sum(e.qty for e in exs)
-            exs_price = sum(e.price * e.qty for e in exs) / q
-            exs_fee = sum(e.fee for e in exs)
-            ts = max(e.ts for e in exs)
-            ours = [self.db.order(e.link_id) for e in exs if e.link_id]
-            ours = [o for o in ours if o is not None]
-            reason = ("liquidation" if any(e.exec_type in ("BustTrade", "AdlTrade") for e in exs) else
-                      "stop" if any(e.stop_order_type == "StopLoss" for e in exs) else
-                      json.loads(ours[0].extra or "{}").get("reason", "signal") if ours else "external")
+            self.event("error", "mismatch", f"{dp.symbol}: позиция исчезла, данных о закрытии на бирже нет — "
+                                            f"записана по цене {px:.6g}", notify=True)
+            info = (px, 0.0, now, "external")
+        price, fee, ts, reason = info
         self.db.delete(f"close_wait_{dp.symbol}")
-        self._record_trade(dp, exit_price=exs_price, exit_ts=ts, exit_fee=exs_fee, reason=reason,
+        self._record_trade(dp, exit_price=price, exit_ts=ts, exit_fee=fee, reason=reason,
                            exit_ref=dp.stop if reason == "stop" else None, exit_link="")
 
     # ============================================================ остановки

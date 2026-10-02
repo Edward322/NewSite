@@ -234,7 +234,18 @@ def main(argv=None) -> int:
     R.check("WebSocket", ws)
 
     if not a.quick and mode == "demo":
-        R.check("Пробный ордер со стопом (демо)", order_test, R, client, cfg, ExchangeError)
+        from bot.engine.control import InstanceLock, paths
+        lock = InstanceLock(paths(cfg, mode)[0].with_suffix(".lock"))
+        if lock.acquire():                  # бот не запущен; пока идёт тест, он и не запустится
+            try:
+                R.check("Пробный ордер со стопом (демо)", order_test, R, client, cfg, ExchangeError)
+            finally:
+                lock.release()
+        else:
+            R.p("\n== Пробный ордер со стопом (демо)")
+            R.p("   Бот сейчас работает — пробный ордер НЕ выставляется: бот принял бы его позицию за чужую.")
+            R.p("   Этот тест уже пройден; повторять его нужно только после обновления программы и только")
+            R.p("   при остановленном боте.")
     if not a.quick:
         R.check("Сухой прогон движка на реальных данных (без ордеров)", dry_run, R, client, cfg, mode)
     return finish(R, mode)
@@ -299,10 +310,36 @@ def order_test(R: Report, client, cfg, ExchangeError):
         R.p("   8. reduce-only без позиции принят — неожиданно")
     except ExchangeError as e:
         R.p(f"   8. reduce-only без позиции отклонён: код {e.code} «{e.message[:100]}» (ожидается 110017)")
-    ex = client.executions(t0, int(time.time() * 1000) + 5000, s)
+    # какие журналы биржи заполняются (по ним движок записывает закрытия по стопу)
+    ex = []
+    for _ in range(10):
+        try:
+            ex = client.executions(t0, int(time.time() * 1000) + 5000, s)
+        except ExchangeError as e:
+            R.p(f"   Журнал исполнений: НЕДОСТУПЕН (код {e.code})")
+            break
+        if len(ex) >= 2:
+            break
+        time.sleep(1)
+    R.p(f"   Журнал исполнений: записей {len(ex)} (ожидается 2: вход и выход)")
     for e in ex:
-        R.p(f"   исполнение: {e.side:+d} {e.qty:g} по {e.price:g}, комиссия {e.fee:g} "
+        R.p(f"     исполнение: {e.side:+d} {e.qty:g} по {e.price:g}, комиссия {e.fee:g} "
             f"({e.fee / (e.qty * e.price) * 100:.4f}%), тип {e.exec_type}, orderLinkId {e.link_id or '—'}")
+    try:
+        oh = client.order_history(s, t0)
+        R.p(f"   История ордеров: записей {len(oh)}")
+        for o in oh:
+            R.p(f"     ордер {o.side:+d} {o.filled_qty:g} по {o.avg_price:g}, статус {o.status}, "
+                f"reduce-only {'да' if o.reduce_only else 'нет'}, стоп-тип {o.stop_order_type or '—'}, "
+                f"комиссия {o.fee:g}, orderLinkId {o.link_id or '—'}")
+    except ExchangeError as e:
+        R.p(f"   История ордеров: НЕДОСТУПНА (код {e.code})")
+    try:
+        cl = client.closed_pnl(s, t0, int(time.time() * 1000) + 5000)
+        R.p(f"   Закрытый результат: записей {len(cl)}" +
+            "".join(f"\n     выход по {c.get('avgExitPrice')}, результат {c.get('closedPnl')}" for c in cl))
+    except ExchangeError as e:
+        R.p(f"   Закрытый результат: НЕДОСТУПЕН (код {e.code})")
     f = client.funding_paid(s, t0, int(time.time() * 1000))
     R.p(f"   Журнал финансирования: {'доступен' if f is not None else 'НЕДОСТУПЕН (финансирование не будет учтено по сделкам)'}")
     if {p.symbol for p in client.positions()} & {s}:

@@ -395,6 +395,8 @@ class SimBybit:
         lst = list(reversed(self.orders))
         if p.get("orderLinkId"):
             lst = [o for o in lst if o.get("orderLinkId") == p["orderLinkId"]]
+        if p.get("symbol"):
+            lst = [o for o in lst if o.get("symbol") == p["symbol"]]
         return self._ok({"category": "linear", "list": lst[: int(p.get("limit", 50))], "nextPageCursor": ""})
 
     def get_executions(self, **p):
