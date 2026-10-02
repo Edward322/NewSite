@@ -72,6 +72,10 @@ class BybitStream:
             ref = self._last_public or self._started
         return None if ref is None else max(0.0, time.time() - ref)
 
+    def private_ok(self) -> bool:
+        """Приватный поток авторизован (pybit ставит auth=True после ответа биржи)."""
+        return bool(self.priv is not None and getattr(self.priv, "auth", False))
+
     def pop_dirty(self) -> bool:
         with self._lock:
             d, self._dirty = self._dirty, False

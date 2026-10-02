@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 from dataclasses import dataclass
 from typing import Any, Callable
@@ -27,10 +28,33 @@ REDUCE_ONLY_NOTHING = {110017}          # нечего сокращать: по�
 ORDER_NOT_FOUND = {110001, 110008, 170213}
 
 
+# Что означают частые коды отказа Bybit — простыми словами (для самопроверки и мастера ключей).
+HINTS = {
+    10002: "часы компьютера расходятся с биржей: Параметры → Время и язык → «Синхронизировать сейчас»",
+    10003: "биржа не знает этот ключ: ключ демо-счёта создаётся в режиме «Демо-торговля», ключ реального "
+           "счёта — в обычном режиме; или ключ удалён",
+    10004: "секрет не подходит к ключу (ошибка подписи): секрет скопирован не полностью или с лишними "
+           "символами. Bybit показывает секрет только при создании ключа — удалите ключ, создайте новый и "
+           "вставьте секрет правой кнопкой мыши",
+    10005: "у ключа нет нужных прав: «Контракты: Ордера, Позиции» и «Единый торговый аккаунт: Торговля»",
+    10010: "запрос пришёл с IP, которого нет в списке разрешённых у ключа",
+    33004: "срок действия ключа истёк — создайте новый",
+}
+
+
+def explain(code: int) -> str:
+    return HINTS.get(int(code), "")
+
+
+def _clean(message: str) -> str:
+    """Bybit вставляет в текст ошибки подписи строку с API-ключом — в журнал и отчёты она не попадает."""
+    return re.sub(r"origin_string\[[^\]]*\]", "origin_string[скрыто]", str(message))
+
+
 class ExchangeError(RuntimeError):
     def __init__(self, code: int, message: str):
-        self.code, self.message = int(code), str(message)
-        super().__init__(f"Bybit отказал: {message} (код {code})")
+        self.code, self.message = int(code), _clean(message)
+        super().__init__(f"Bybit отказал: {self.message} (код {code})")
 
 
 class NetworkError(RuntimeError):

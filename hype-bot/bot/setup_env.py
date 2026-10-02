@@ -42,7 +42,41 @@ def ensure_config() -> None:
         shutil.copyfile(PROJECT_ROOT / ".env.example", ENV)
 
 
-def ask_keys(mode: str = "demo") -> bool:
+def check_format(key: str, secret: str) -> list[str]:
+    """Явные ошибки вставки: пусто, слишком коротко, посторонние символы (например, Ctrl+V в скрытом поле)."""
+    out = []
+    for name, v, n_min in (("ключ", key, 10), ("секрет", secret, 20)):
+        if len(v) < n_min:
+            out.append(f"{name}: получено {len(v)} символов — слишком мало, похоже, вставка не сработала")
+        elif not (v.isascii() and v.isalnum()):
+            out.append(f"{name}: есть посторонние символы (пробелы, кавычки или служебные) — вставьте заново")
+    return out
+
+
+def verify(mode: str, key: str, secret: str) -> tuple[bool | None, str]:
+    """Проверка ключа на бирже: True — годится, False — нет (с причиной), None — нет связи, проверить нельзя."""
+    from bot.config import load_bot_config
+    from bot.engine.control import make_session
+    from bot.exchange.client import BybitClient, ExchangeError, NetworkError, explain
+    try:
+        client = BybitClient(make_session(load_bot_config(), mode, key, secret), get_attempts=2)
+        info = client._get("get_api_key_information")
+    except ExchangeError as e:
+        return False, f"Биржа не приняла ключ (код {e.code}): {explain(e.code) or e.message}"
+    except NetworkError as e:
+        return None, f"Не удалось проверить ключ — нет связи с биржей ({e}). Ключи сохранены, их проверит самопроверка."
+    perms = [x for v in (info.get("permissions") or {}).values() for x in (v or [])]
+    if "Withdraw" in perms:
+        return False, "У ключа есть право ВЫВОДА средств. Создайте ключ без него."
+    if info.get("readOnly"):
+        return False, "Ключ только для чтения. Нужны права «Контракты: Ордера, Позиции» (чтение и запись)."
+    ips = info.get("ips") or []
+    if mode == "live" and (not ips or ips == ["*"]):
+        return False, "Ключ реального счёта должен быть привязан к вашему IP."
+    return True, "Ключ проверен на бирже: подходит."
+
+
+def ask_keys(mode: str = "demo", check=verify, attempts: int = 3) -> bool:
     prefix = {"demo": "BYBIT_DEMO", "live": "BYBIT_LIVE"}[mode]
     from bot.envfile import load_env
     load_env(ENV)
@@ -56,15 +90,27 @@ def ask_keys(mode: str = "demo") -> bool:
         print("(чтение и запись), «Единый торговый аккаунт»: Торговля. Вывод средств НЕ включать.")
     else:
         print("\nКлючи РЕАЛЬНОГО счёта — см. README, раздел «Реальные деньги».")
-    key = input("API Key: ").strip()
-    secret = getpass.getpass("API Secret (при вставке символы не видны — это нормально): ").strip()
-    if not key or not secret:
-        print("Ключи не введены.")
-        return False
-    set_env_value(ENV, f"{prefix}_API_KEY", key)
-    set_env_value(ENV, f"{prefix}_API_SECRET", secret)
-    print("Ключи записаны в .env.")
-    return True
+    print("Вставляйте ПРАВОЙ кнопкой мыши (Ctrl+V в этом окне может вставить не то).")
+    for attempt in range(1, attempts + 1):
+        key = input("API Key: ").strip()
+        secret = getpass.getpass("API Secret (символы не видны — это нормально): ").strip()
+        print(f"Получено: ключ — {len(key)} символов, секрет — {len(secret)} символов "
+              "(обычно у Bybit 18 и 36).")
+        problems = check_format(key, secret)
+        if not problems:
+            ok, msg = check(mode, key, secret)
+            print(msg)
+            if ok is not False:
+                set_env_value(ENV, f"{prefix}_API_KEY", key)
+                set_env_value(ENV, f"{prefix}_API_SECRET", secret)
+                print("Ключи записаны в .env.")
+                return True
+        else:
+            print("\n".join(problems))
+        if attempt < attempts:
+            print(f"Попробуйте ещё раз ({attempt + 1} из {attempts}).")
+    print("Ключи не записаны.")
+    return False
 
 
 def main(argv: list[str]) -> int:

@@ -16,7 +16,6 @@ import platform
 import sys
 import tempfile
 import time
-import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -30,6 +29,7 @@ class Report:
     def __init__(self):
         self.lines: list[str] = []
         self.results: list[tuple[str, str]] = []
+        self.hints: set[str] = set()
 
     def p(self, text: str = "") -> None:
         print(text, flush=True)
@@ -42,9 +42,13 @@ class Report:
             res = fn(*a, **kw)
             status = "WARN" if res == "warn" else "OK"
         except Exception as e:
+            from bot.exchange.client import explain
             status = "FAIL"
             self.p(f"   ОШИБКА: {type(e).__name__}: {e}")
-            self.p("   " + traceback.format_exc().strip().splitlines()[-1][:300])
+            hint = explain(getattr(e, "code", 0) or 0)
+            if hint:
+                self.p(f"   ЧТО ЭТО ЗНАЧИТ: {hint}")
+                self.hints.add(hint)
             res = None
         self.results.append((name, status))
         self.p(f"   → {status} ({time.time() - t0:.1f} с)")
@@ -203,14 +207,20 @@ def main(argv=None) -> int:
         from bot.engine.stream import BybitStream
         s = BybitStream(syms, mode, *st["keys"], domain=cfg.exchange.domain, tld=cfg.exchange.tld)
         s.start()
-        time.sleep(20)
+        for _ in range(20):
+            time.sleep(1)
+            if s._last_public is not None and s.private_ok():
+                break
         age = s.public_age_s()
-        R.p(f"   Публичный поток: последнее сообщение {age:.1f} с назад" if age is not None else "   нет сообщений")
-        R.p(f"   Приватный поток: {'подключён' if s.priv is not None else 'НЕ подключён'}")
-        ok = s._last_public is not None and s.priv is not None
+        pub = s._last_public is not None
+        R.p(f"   Публичный поток: {'последнее сообщение %.1f с назад' % age if pub else 'сообщений НЕТ'}")
+        R.p(f"   Приватный поток: {'авторизован' if s.private_ok() else 'НЕ авторизован (ключ/секрет или сеть)'}")
         s.stop()
-        if not ok:
-            raise RuntimeError("WebSocket не работает: бот не будет открывать позиции (ws_required)")
+        if not pub:
+            raise RuntimeError("публичный WebSocket не работает: бот не будет открывать позиции (ws_required)")
+        if not s.private_ok():
+            R.p("   Без приватного потока бот работает (сверка с биржей раз в минуту), но события приходят позже")
+            return "warn"
     R.check("WebSocket", ws)
 
     if not a.quick and mode == "demo":
@@ -327,6 +337,8 @@ def finish(R: Report, mode: str) -> int:
         R.p(f"   {status:4s}  {name}")
     fails = [n for n, s in R.results if s == "FAIL"]
     R.p("Всё готово." if not fails else f"Есть ошибки ({len(fails)}): бот запускать нельзя, пока они не исправлены.")
+    for h in sorted(R.hints):
+        R.p(f"Что сделать: {h}.")
     out = PROJECT_ROOT / "reports" / "selfcheck"
     out.mkdir(parents=True, exist_ok=True)
     path = out / f"selfcheck_{mode}_{datetime.now(timezone.utc):%Y%m%d_%H%M}.txt"

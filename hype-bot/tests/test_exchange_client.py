@@ -130,3 +130,13 @@ def test_isolated_margin_switch_once():
     done = c.ensure_isolated_one_way()
     assert done == ["маржа: изолированная"]
     assert c.s.calls[1] == ("set_margin_mode", {"setMarginMode": "ISOLATED_MARGIN"})
+
+
+def test_signature_error_hides_api_key_and_is_explained():
+    from bot.exchange.client import explain
+    c, _ = client(get_account_info=[inv(10004, "Error sign, please check your signature generation algorithm: "
+                                               "origin_string[1790962697226tLs1YQ8B2OGOj5nbFx5000]")])
+    with pytest.raises(ExchangeError) as e:
+        c.account_info()
+    assert "tLs1YQ8B2OGOj5nbFx" not in str(e.value) and "скрыто" in str(e.value)
+    assert e.value.code == 10004 and "секрет" in explain(10004)
