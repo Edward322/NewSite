@@ -166,7 +166,7 @@ def main(argv: list[str] | None = None) -> int:
     dsub.add_parser("fees")
     dsub.add_parser("pack")
     bp = dsub.add_parser("basket")
-    bp.add_argument("--threads", type=int, default=4)
+    bp.add_argument("--threads", type=int, default=3)
     up = dsub.add_parser("unpack")
     up.add_argument("zip")
     args = p.parse_args(argv)

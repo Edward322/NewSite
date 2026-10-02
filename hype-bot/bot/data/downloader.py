@@ -29,6 +29,8 @@ log = logging.getLogger(__name__)
 MINUTE_MS = 60_000
 DAY_MS = 86_400_000
 KLINE_LIMIT = 1000
+# Временные сбои на стороне Bybit (документация V5, error.mdx): повторяем с паузой.
+TRANSIENT_CODES = {10000, 10016, 10019, 429, 170007, 170032, 3400214}
 FUNDING_LIMIT = 200
 CHUNK_REQUESTS = 100  # запросов на одну порцию сохранения (~69 дней минутных свечей)
 
@@ -54,7 +56,7 @@ class Caller:
     """Вызов метода pybit с повтором сетевых ошибок (публичные GET идемпотентны)."""
 
     pause_s: float = 0.12
-    max_attempts: int = 5
+    max_attempts: int = 8
     sleep: Callable[[float], None] = time.sleep
     requests_made: int = field(default=0, init=False)
 
@@ -80,8 +82,10 @@ class Caller:
                     ) from e
                 err: Exception = e
             except InvalidRequestError as e:
-                # Ошибка параметров/бизнес-логики — повтор не поможет.
-                raise DownloadError(f"Bybit отклонил запрос: {e}") from e
+                if getattr(e, "status_code", None) not in TRANSIENT_CODES:
+                    # Ошибка параметров/бизнес-логики — повтор не поможет.
+                    raise DownloadError(f"Bybit отклонил запрос: {e}") from e
+                err = e   # временный сбой сервера Bybit — повторяем
             except requests.exceptions.ProxyError as e:
                 # Соединение запрещает прокси/файрвол на нашей стороне — до Bybit запрос не дошёл.
                 raise DownloadError(
@@ -92,7 +96,7 @@ class Caller:
                 err = e
             if attempt == self.max_attempts:
                 raise DownloadError(f"Сеть недоступна после {attempt} попыток: {err}") from err
-            log.warning("Ошибка сети (%s), повтор через %.0f с", err, delay)
+            log.warning("Временная ошибка (%s), повтор через %.0f с", str(err).splitlines()[0], delay)
             self.sleep(delay)
             delay = min(delay * 2, 30)
         raise AssertionError("unreachable")

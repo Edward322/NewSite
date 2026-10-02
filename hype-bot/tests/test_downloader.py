@@ -147,3 +147,35 @@ def test_caller_reports_proxy_block_without_retries():
     with pytest.raises(downloader.DownloadError, match="блокирует сеть"):
         Caller(pause_s=0, sleep=lambda s: None)(blocked)
     assert attempts["n"] == 1
+
+
+def _invalid(code):
+    from pybit.exceptions import InvalidRequestError
+    return InvalidRequestError(request="GET /v5/market/kline", message="svc error: Get kline failed",
+                               status_code=code, time="0", resp_headers={})
+
+
+def test_caller_retries_bybit_server_error_10016():
+    attempts = {"n": 0}
+
+    def flaky(**_):
+        attempts["n"] += 1
+        if attempts["n"] < 4:
+            raise _invalid(10016)
+        return {"retCode": 0, "result": {}}
+
+    sleeps = []
+    assert Caller(pause_s=0, sleep=sleeps.append)(flaky)["retCode"] == 0
+    assert attempts["n"] == 4 and sleeps == [1.0, 2.0, 4.0]
+
+
+def test_caller_does_not_retry_parameter_errors():
+    attempts = {"n": 0}
+
+    def bad(**_):
+        attempts["n"] += 1
+        raise _invalid(10001)
+
+    with pytest.raises(downloader.DownloadError, match="отклонил"):
+        Caller(pause_s=0, sleep=lambda s: None)(bad)
+    assert attempts["n"] == 1
