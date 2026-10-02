@@ -52,11 +52,12 @@ def dsr(sr: float, sr_all: list[float], t: int, skew: float, kurt: float) -> tup
     return N01.cdf((sr - sr0) * math.sqrt(t - 1) / math.sqrt(den)), sr0
 
 
-def basket_bh(start_ms: int, end_ms: int, taker: float) -> pd.Series:
+def basket_bh(start_ms: int, end_ms: int, taker: float, panel=None) -> pd.Series:
     """Buy & hold корзины: равные доли в доступных монетах, ежедневная ребалансировка, плечо 1,
-    финансирование и комиссия на оборот ребалансировки. Возвращает дневной капитал (старт 1)."""
-    cfg = load_config()
-    panel = load_basket_dev(cfg)
+    финансирование и комиссия на оборот ребалансировки. Возвращает дневной капитал (старт 1).
+    panel=None — данные периода разработки."""
+    if panel is None:
+        panel = load_basket_dev(load_config())
     b = aggregate_panel(panel, "1d")
     n = b.n_trade
     sel = (b.ts >= start_ms) & (b.close_ts <= end_ms)
