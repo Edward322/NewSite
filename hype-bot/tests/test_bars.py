@@ -27,8 +27,7 @@ def test_partial_edge_bars_are_dropped():
 def test_bar_with_missing_minute_is_dropped_and_does_not_leak_into_neighbours():
     md = random_walk(3 * 60, seed=2)
     keep = np.ones(len(md), bool); keep[70] = False          # дыра во второй свече
-    from bot.data.bars import MinuteData
-    md2 = MinuteData(**{k: v[keep] for k, v in md.__dict__.items()})
+    md2 = md.select(keep)
     b = aggregate(md2, "1h")
     assert list(b.ts) == [T0, T0 + 2 * 3_600_000]
     assert b.high[1] == md.high[120:180].max()                # третья свеча не захватила минуты второй

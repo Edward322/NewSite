@@ -40,6 +40,7 @@ class MinuteData:
     mark_high: np.ndarray
     mark_low: np.ndarray
     mark_close: np.ndarray
+    base_ms: int = MINUTE_MS    # шаг ряда: 1 минута (HYPE) или 15 минут (корзина)
 
     def __len__(self) -> int:
         return len(self.ts)
@@ -47,7 +48,10 @@ class MinuteData:
     def slice(self, start_ms: int | None = None, end_ms: int | None = None) -> "MinuteData":
         lo = 0 if start_ms is None else int(np.searchsorted(self.ts, start_ms, "left"))
         hi = len(self.ts) if end_ms is None else int(np.searchsorted(self.ts, end_ms, "left"))
-        return MinuteData(**{k: v[lo:hi] for k, v in self.__dict__.items()})
+        return MinuteData(**{k: (v[lo:hi] if isinstance(v, np.ndarray) else v) for k, v in self.__dict__.items()})
+
+    def select(self, mask: np.ndarray) -> "MinuteData":
+        return MinuteData(**{k: (v[mask] if isinstance(v, np.ndarray) else v) for k, v in self.__dict__.items()})
 
     @classmethod
     def from_frames(cls, last: pd.DataFrame, mark: pd.DataFrame | None = None) -> "MinuteData":
@@ -83,7 +87,7 @@ def load_funding(data_dir: Path, symbol: str) -> tuple[np.ndarray, np.ndarray]:
 
 @dataclass
 class Bars:
-    """Свечи таймфрейма + индексы их минут в MinuteData: минуты [m_start, m_end)."""
+    """Свечи таймфрейма + индексы их строк в MinuteData: строки [m_start, m_end)."""
     tf: str
     ts: np.ndarray          # время открытия
     close_ts: np.ndarray    # время закрытия = ts + tf
@@ -104,9 +108,11 @@ class Bars:
 
 
 def aggregate(md: MinuteData, tf: str) -> Bars:
-    """Собирает полные свечи tf из минут. Неполные свечи по краям отбрасываются."""
-    n = TF_MINUTES[tf]
-    step = n * MINUTE_MS
+    """Собирает полные свечи tf из ряда с шагом md.base_ms. Неполные свечи отбрасываются."""
+    step = TF_MINUTES[tf] * MINUTE_MS
+    if step % md.base_ms:
+        raise ValueError(f"Таймфрейм {tf} не кратен шагу данных {md.base_ms // MINUTE_MS} мин")
+    n = step // md.base_ms
     if len(md) == 0:
         e = np.array([], dtype="int64")
         z = np.array([], dtype="float64")
@@ -119,7 +125,7 @@ def aggregate(md: MinuteData, tf: str) -> Bars:
     high = np.maximum.reduceat(md.high, starts)
     low = np.minimum.reduceat(md.low, starts)
     volume = np.add.reduceat(md.volume, starts)
-    full = (ends - starts) == n   # свеча полная, если у неё все n минут
+    full = (ends - starts) == n   # свеча полная, если у неё все n строк
     starts, ends = starts[full], ends[full]
     ts = bucket[starts]
     return Bars(
