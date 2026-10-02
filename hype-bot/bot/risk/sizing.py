@@ -119,3 +119,34 @@ def size_position(
         notional=notional, margin=notional / lev, liq_price=liq,
         planned_loss=qty * per_unit_loss, risk_budget=risk_budget, reduced_by_margin=reduced,
     )
+
+
+def size_by_margin(side: int, entry_ref: float, stop: float, margin_budget: float, available: float,
+                   inst: Instrument, p: SizingParams) -> Sizing | Skip:
+    """Объём от доли маржи при максимальном плече биржи (правило «маржа = доля баланса»).
+
+    Плечо — максимум биржи для уровня риска (и собственный лимит, если задан); правило «ликвидация
+    дальше стопа» здесь НЕ действует: при большом плече ликвидация ближе стопа, и потеря сделки —
+    вся маржа. planned_loss = маржа + комиссии входа и выхода (максимальная потеря позиции).
+    """
+    if margin_budget <= 0 or available <= 0:
+        return Skip("нет капитала")
+    stop = inst.round_price(stop, "down" if side == LONG else "up")
+    if (side == LONG and stop >= entry_ref) or (side == SHORT and stop <= entry_ref) or stop <= 0:
+        return Skip("стоп с неправильной стороны от входа")
+    margin = min(margin_budget, available / (1 + 2 * p.taker_fee * inst.max_leverage))
+    lev = inst.max_leverage if p.max_leverage is None else min(inst.max_leverage, p.max_leverage)
+    for _ in range(5):                      # уровень риска зависит от объёма позиции
+        lev = inst.floor_leverage(lev)
+        qty = inst.floor_qty(margin * lev / entry_ref)
+        tier = inst.tier_for(qty * entry_ref)
+        if tier.max_leverage >= lev:
+            break
+        lev = tier.max_leverage
+    if qty < inst.min_qty or qty * entry_ref < inst.min_notional:
+        return Skip(f"объём ниже минимума биржи (нужно ≥ {inst.min_notional} USDT)")
+    notional = qty * entry_ref
+    liq = liquidation_price(side, entry_ref, lev, tier.mmr, p.taker_fee)
+    return Sizing(side=side, qty=qty, leverage=lev, entry_ref=entry_ref, stop=stop, notional=notional,
+                  margin=notional / lev, liq_price=liq, planned_loss=notional / lev + 2 * notional * p.taker_fee,
+                  risk_budget=margin_budget, reduced_by_margin=margin < margin_budget)

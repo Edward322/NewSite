@@ -25,7 +25,7 @@ import pandas as pd
 from bot.data.bars import TF_MINUTES
 from bot.data.panel import BASE_MS, PanelBars
 from bot.market import Instrument
-from bot.risk.sizing import Sizing, SizingParams, Skip, size_position
+from bot.risk.sizing import Sizing, SizingParams, Skip, size_by_margin, size_position
 
 DAY_MS = 86_400_000
 EPS = 1e-9
@@ -52,6 +52,8 @@ class PortfolioRules:
     vol_ref_days: int = 365
     vol_ref_min_days: int = 180
     liquidity: LiquidityRule | None = None
+    sizing: str = "risk"            # risk — от риска до стопа; margin — маржа = доля баланса, плечо максимальное
+    margin_fraction: float = 0.25
 
 
 @dataclass(frozen=True)
@@ -172,6 +174,14 @@ class PortfolioRisk:
                    book: list[Exposure]) -> Sizing | Skip:
         """Объём новой позиции по всем портфельным правилам (места и маржу проверяет вызывающий)."""
         R = self.rules
+        if R.sizing == "margin":
+            s = size_by_margin(side, px, stop, equity * R.margin_fraction * risk_mult * float(self.vol_mult[k]),
+                               available, inst, sp)
+            if isinstance(s, Skip):
+                return s
+            if s.planned_loss > R.max_open_risk * equity * (1 + EPS) - sum(e.risk for e in book):
+                return Skip("превышен суммарный риск открытых позиций")
+            return s
         base = equity * sp.risk_per_trade * risk_mult * float(self.vol_mult[k])
         used = sum(e.risk for e in book)
         sum_room = R.max_open_risk * equity * (1 + EPS) - used

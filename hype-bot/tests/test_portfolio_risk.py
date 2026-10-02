@@ -246,3 +246,18 @@ def test_drawdown_step_halves_planned_loss_in_backtest():
     eq_before = 1000.0 + t.loc["S0USDT", "net_pnl"] + t.loc["S2USDT", "net_pnl"]
     assert eq_before <= 800.0                                   # просадка ≥ 20 %
     assert t.loc["S1USDT", "planned_loss"] == pytest.approx(eq_before * 0.2 * 0.5, rel=0.02)
+
+
+def test_margin_fraction_sizing_uses_max_leverage_and_liquidates_before_stop():
+    from bot.risk.sizing import size_by_margin
+    inst = hype()                                         # плечо до 75
+    s = size_by_margin(LONG, 40.0, 37.5, margin_budget=6.25, available=25.0, inst=inst, p=SP)
+    assert s.leverage == 75
+    assert s.qty == pytest.approx(inst.floor_qty(6.25 * 75 / 40.0))
+    assert s.liq_price > s.stop                           # ликвидация ближе стопа: стоп не спасает
+    assert s.planned_loss == pytest.approx(s.margin + 2 * s.notional * SP.taker_fee)
+    # режим по умолчанию не изменился: объём от риска до стопа
+    pr = _prisk(PortfolioRules(sizing="risk"))
+    r = pr.plan_entry(k=len(pr.bars) - 1, row=0, side=LONG, px=40.0, stop=37.5, equity=25.0, available=25.0,
+                      inst=inst, sp=SP, risk_mult=1.0, book=[])
+    assert r.planned_loss <= 0.5 + 1e-9 and r.liq_price < r.stop

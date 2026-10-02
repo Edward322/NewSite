@@ -216,8 +216,11 @@ class PortfolioBacktester:
             return
         tier = inst.tier_for(s.qty * fill)
         dist = abs(fill - s.stop) / fill
-        lev = inst.floor_leverage(min(s.leverage, tier.max_leverage, max_leverage_for_stop(
-            dist, tier.mmr, fee, self.sp.liq_buffer)))
+        if self.rules.sizing == "margin":       # плечо — максимум биржи, правило ликвидации не действует
+            lev = inst.floor_leverage(min(s.leverage, tier.max_leverage))
+        else:
+            lev = inst.floor_leverage(min(s.leverage, tier.max_leverage, max_leverage_for_stop(
+                dist, tier.mmr, fee, self.sp.liq_buffer)))
         qty = s.qty
         if lev < 1:
             self.skips.append((ts, P.symbols[r], "ликвидация не помещается за стопом"))
@@ -240,7 +243,9 @@ class PortfolioBacktester:
             row=r, symbol=P.symbols[r], side=side, qty=qty, entry_price=fill, entry_ts=ts,
             decision_ts=decision_ts, stop=s.stop, stop_initial=s.stop, take_profit=tp, leverage=lev,
             margin=qty * fill / lev, liq_price=liquidation_price(side, fill, lev, tier.mmr, fee),
-            entry_fee=entry_fee, planned_loss=qty * (abs(fill - s.stop) + fill * cost + s.stop * cost),
+            entry_fee=entry_fee,
+            planned_loss=(qty * fill / lev + 2 * qty * fill * fee) if self.rules.sizing == "margin" else
+            qty * (abs(fill - s.stop) + fill * cost + s.stop * cost),
             tag=d.tag,
         )
 
