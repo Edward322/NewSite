@@ -171,7 +171,7 @@ def main() -> None:
         s = s.clip(lower=0.01)
         ax.plot(s.index, s.values, color=S[i], linewidth=2, label=name)
         y = float(s.iloc[-1])
-        dy = -9 * sum(abs(math.log10(y / q)) < 0.08 for q in placed)     # близкие подписи — ниже
+        dy = sum((9 if y > q else -9) for q in placed if abs(math.log10(y / q)) < 0.08)   # близкие подписи — врозь
         placed.append(y)
         ax.annotate(f"{y:.2f}", (s.index[-1], y), xytext=(4, dy), textcoords="offset points",
                     color=INK2, fontsize=8, va="center")
