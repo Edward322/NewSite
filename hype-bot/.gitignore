@@ -40,3 +40,6 @@ data/basket/
 
 # Журнал обращений к отложенным данным хранится в git — для прозрачности
 !reports/holdout_access.log
+
+# Результаты walk-forward корзины (воспроизводятся скриптами research/basket_*.py)
+reports/basket/*.pkl

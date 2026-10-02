@@ -1,0 +1,33 @@
+Критерии отбора (протокол, раздел 5), результаты walk-forward «ref60», проверочные кварталы 2024-01-01 — 2026-04-01
+
+  семейство тф  кварталов с торговлей  сделок    PF  ср. R P(ср.R≤0)  приб. кварталов доходность   Шарп Кальмар макс. просадка   DSR 10 USDT итог  10 USDT остановлен  прошла
+      tsmom 4h                      9     250 0.991  0.162     0.269                3     -10.2%  0.475  -0.059          78.5% 0.103         9.18                True   False
+      tsmom 1d                      0       0     —      —         —                0      +0.0%      —       —          -0.0% 0.032        10.00               False   False
+   breakout 4h                      8     210 0.999  0.333     0.329                3      -1.4%  0.547  -0.009          78.0% 0.136        12.88                True   False
+   breakout 1d                      0       0     —      —         —                0      +0.0%      —       —          -0.0% 0.032        10.00               False   False
+      xsmom 4h                      9      95 0.449 -0.280     0.986                0     -78.3% -1.367  -0.626          78.6% 0.000         4.69               False   False
+      xsmom 1d                      2      18 0.887 -0.012     0.560                1      -2.0% -0.059  -0.069          14.4% 0.027         9.15               False   False
+      carry 4h                      4     401 1.239  0.174     0.000                3    +998.5%  1.698   3.531          65.4% 0.740       117.61               False   False
+      carry 1d                      0       0     —      —         —                0      +0.0%      —       —          -0.0% 0.032        10.00               False   False
+oi_breakout 4h                      8     271 0.887  0.010     0.474                2     -52.5%  0.064  -0.423          73.4% 0.039         3.76               False   False
+      crowd 4h                      5     581 0.858 -0.007     0.587                1     -66.6% -0.244  -0.527          80.0% 0.015         3.69               False   False
+      crowd 1d                      4      25 3.283  0.813     0.053                3    +127.8%  1.292   2.670          16.6% 0.488        21.34               False   False
+
+Выполнение критериев (True — выполнен):
+  семейство тф  1 сделок≥400  2 PF≥1.3  3 бутстрэп  4 кварталы≥5  5 DSR≥0.95  6 >B&H  7 10 USDT
+      tsmom 4h         False     False       False         False       False    True      False
+      tsmom 1d         False     False       False         False       False   False      False
+   breakout 4h         False     False       False         False       False    True      False
+   breakout 1d         False     False       False         False       False   False      False
+      xsmom 4h         False     False       False         False       False   False      False
+      xsmom 1d         False     False       False         False       False   False      False
+      carry 4h          True     False        True         False       False    True       True
+      carry 1d         False     False       False         False       False   False      False
+oi_breakout 4h         False     False       False         False       False   False      False
+      crowd 4h          True     False       False         False       False   False      False
+      crowd 1d         False      True       False         False       False    True       True
+
+Buy & hold корзины за тот же период: доходность -32.3%, Шарп 0.201, Кальмар -0.208, макс. просадка 76.4%
+Порог дефлированного Шарпа SR0 (дневной) = 0.0684 при N = 11 попытках
+
+Прошли все критерии: нет
