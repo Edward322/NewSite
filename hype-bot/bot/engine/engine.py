@@ -188,6 +188,8 @@ class Engine:
                 self._blocker("account", f"режим маржи {mm}, нужен ISOLATED_MARGIN")
         except ExchangeError as e:
             self._blocker("account", f"не удалось включить изолированную маржу / одну позицию: {e}")
+        if self.mode == "live" and self.db.get("exec_baseline") is None:
+            self.db.set("exec_baseline", self._demo_execution_baseline())
         self.stream.start()
         self.reconcile()
         self.data.update(int(self.db.get("anchor_ms")), now)
@@ -198,6 +200,13 @@ class Engine:
         self.event("info", "start", f"Движок запущен ({self.mode}), капитал {eq:.2f} USDT, позиций "
                                     f"{len(self.db.positions())}", notify=True)
         return True
+
+    def _op_bar(self, t_close: int, reason: str) -> None:
+        """Свеча, на которой движок по операционной причине вёл себя не как бэктест (для сравнения)."""
+        ops = self.db.get("op_bars", [])
+        if not ops or ops[-1][0] != t_close:
+            ops.append([int(t_close), reason])
+            self.db.set("op_bars", ops[-2000:])
 
     def _blocker(self, key: str, reason: str | None) -> None:
         ev = self.guard.set_blocker(self.now(), key, reason) if self.guard else None
@@ -276,9 +285,11 @@ class Engine:
         """True — свеча обработана (или пропущена окончательно); False — ждём данные."""
         now = self.now()
         last = int(self.db.get("last_bar_close", 0))
-        if t_close - last > self.tf_ms:
+        if t_close - last > self.tf_ms and last > 0:
             self.event("warn", "missed", f"Пропущено свечей 4h: {(t_close - last) // self.tf_ms - 1} "
                                          "(бот был выключен или без связи); по ним входов нет", notify=True)
+            for b in range(last + self.tf_ms, t_close, self.tf_ms):
+                self._op_bar(b, "бот был выключен или без связи")
         lag = (now - t_close) / 1000
         try:
             self.data.update(self.db.get("anchor_ms"), t_close)
@@ -291,9 +302,11 @@ class Engine:
             return False
         entries_allowed = lag <= self.E.max_bar_lag_s and not missing
         if missing:
+            self._op_bar(t_close, "неполные данные")
             self.event("warn", "data", f"Неполные данные на {_utc(t_close)}: {', '.join(missing)} — новые входы "
                                        "по этой свече не открываются", notify=True)
         if lag > self.E.max_bar_lag_s:
+            self._op_bar(t_close, "свеча обработана поздно")
             self.event("warn", "late", f"Свеча {_utc(t_close)} обрабатывается с опозданием {lag:.0f} с — "
                                        "только выходы и стопы")
         out = self.plan_bar(t_close, entries_allowed)
@@ -305,6 +318,8 @@ class Engine:
             self.db.event(now, "info", "decision", f"{_utc(t)} {s} {d}")
         for t, s, why in plan.skips:
             self.db.event(now, "info", "skip", f"{_utc(t)} {s}: {why}")
+            if why.startswith("блокировка") or why.startswith("новые входы"):
+                self._op_bar(t_close, why)
         # исполнение: выходы → стопы → входы (как в бэктесте)
         for r, (_, reason) in plan.exits.items():
             self._exit(syms[r], t_close, reason, float(last_px[r]))
@@ -314,7 +329,37 @@ class Engine:
             self._enter(syms[r], t_close, d, s, insts[r])
         self.db.set("last_bar_close", t_close)
         self.reconcile()
+        if self.mode == "live" or self.db.get("exec_baseline") is not None:
+            self.check_execution()
         return True
+
+    # ===================================================== исполнение против демо
+    def _demo_execution_baseline(self) -> dict:
+        from bot.engine.control import paths
+        from bot.report.execution import baseline
+        db_path, data_dir = paths(self.cfg, "demo")
+        trades = []
+        if db_path.exists():
+            demo = StateDB(db_path)
+            trades = demo.trades()
+            demo.close()
+        b = baseline(trades, data_dir, self.cfg.costs)
+        self.event("info", "execution", f"База исполнения ({b['source']}, сделок {b['n']}): проскальзывание "
+                                        f"{b['slip'] * 100:.3f}%, стопы {b['stop'] * 100:+.3f}%")
+        return b
+
+    def check_execution(self) -> None:
+        """Реальный счёт: исполнение заметно хуже демо → новые входы блокируются до ручного снятия."""
+        from bot.report.execution import execution_alarm
+        base = self.db.get("exec_baseline")
+        if not base or "execution" in self.guard.state.blockers:
+            return
+        L = self.cfg.live
+        why = execution_alarm(self.db.trades(), self.data.dir, self.cfg.costs, base, L.exec_window, L.exec_min_n,
+                              L.max_slip_excess, L.max_stop_excess)
+        if why:
+            self._blocker("execution", f"исполнение хуже демо: {why}. Снять — windows\\resume.bat live")
+            self._save_guard()
 
     def plan_bar(self, t_close: int, entries_allowed: bool = True, update_guard: bool = True):
         """Решения стратегии и план исполнения на закрытии свечи (без ордеров).
@@ -362,11 +407,11 @@ class Engine:
         return plan, syms, insts, last_px
 
     # ============================================================== ордера
-    def _confirm(self, link_id: str, attempts: int = 5) -> OrderInfo | None:
+    def _confirm(self, link_id: str, symbol: str | None = None, attempts: int = 5) -> OrderInfo | None:
         o = None
         for i in range(attempts):
             try:
-                o = self.client.order_by_link_id(link_id)
+                o = self.client.order_by_link_id(link_id, symbol)
             except NetworkError:
                 o = None
             if o is not None and o.done:
@@ -389,7 +434,7 @@ class Engine:
                 return None
         except NetworkError as e:
             self.db.update_order(o.link_id, status="unknown", error=str(e))
-        ex = self._confirm(o.link_id)
+        ex = self._confirm(o.link_id, o.symbol)
         if ex is None:
             self.event("warn", "order", f"{o.symbol}: ордер {o.link_id} не подтверждён биржей — проверка при сверке")
             return None
@@ -601,7 +646,7 @@ class Engine:
 
     def _resolve_orders(self) -> None:
         for o in self.db.orders(status=("pending", "sent", "unknown")):
-            ex = self.client.order_by_link_id(o.link_id)
+            ex = self.client.order_by_link_id(o.link_id, o.symbol)
             if ex is None:
                 if self.now() - o.created_ms > 120_000:
                     self.db.update_order(o.link_id, status="failed", error=(o.error or "") + "; на бирже не найден")

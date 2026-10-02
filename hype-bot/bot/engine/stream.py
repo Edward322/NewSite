@@ -49,7 +49,8 @@ class BybitStream:
         try:
             self.pub = WebSocket(testnet=False, channel_type="linear", domain=self.domain, tld=self.tld,
                                  retries=3, restart_on_error=True, ping_interval=20, ping_timeout=10)
-            self.pub.kline_stream(interval=15, symbol=self.symbols, callback=self._on_public)
+            for i in range(0, len(self.symbols), 10):          # не больше 10 тем в одном запросе подписки
+                self.pub.kline_stream(interval=15, symbol=self.symbols[i:i + 10], callback=self._on_public)
         except Exception as e:      # сеть, DNS — движок увидит «нет данных» и перезапустит позже
             self.errors += 1
             log.warning("WebSocket публичный: %s", e)

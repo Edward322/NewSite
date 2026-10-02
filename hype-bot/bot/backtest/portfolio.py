@@ -107,6 +107,7 @@ class PortfolioResult:
     halted: bool
     params: dict = field(default_factory=dict)
     risk_state: RiskState | None = None
+    open_positions: list[dict] = field(default_factory=list)   # при close_at_end=False
 
 
 class PortfolioBacktester:
@@ -399,6 +400,8 @@ class PortfolioBacktester:
             trades=trades, equity=equity, events=self.events, skips=self.skips, decisions=self.decisions,
             bars=bars, final_equity=self.cash, halted=bool(guard and guard.state.halted),
             risk_state=copy.deepcopy(guard.state) if guard else None,
+            open_positions=[{"symbol": p.symbol, "side": p.side, "qty": p.qty, "entry_price": p.entry_price,
+                             "decision_ts": p.decision_ts, "stop": p.stop} for p in getattr(self, "pos", {}).values()],
             params={"strategy": self.strategy.name, "timeframe": self.strategy.timeframe,
                     **self.strategy.params(), "costs": self.cfg.costs.model_dump()},
         )

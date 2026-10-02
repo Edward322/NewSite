@@ -1,6 +1,6 @@
 """Мастер первой настройки (запускается установщиком windows/install.bat).
 
-    python -m bot.setup_env            всё по шагам: конфиг, ключи демо-счёта, Telegram
+    python -m bot.setup_env [demo|live]  всё по шагам: конфиг, ключи счёта, Telegram
     python -m bot.setup_env keys demo  только ключи демо-счёта (или live)
 
 Ключи пишутся только в файл .env в папке бота (он не попадает в git и никуда не отправляется).
@@ -71,7 +71,14 @@ def main(argv: list[str]) -> int:
     ensure_config()
     if argv[:1] == ["keys"]:
         return 0 if ask_keys(argv[1] if len(argv) > 1 else "demo") else 1
-    if not ask_keys("demo"):
+    mode = argv[0] if argv[:1] and argv[0] in ("demo", "live") else "demo"
+    if mode == "live":
+        from bot.config import load_bot_config
+        if not load_bot_config().live.enabled:
+            print("Реальная торговля выключена (live.enabled: false в config/bot.yaml). Её включают только после "
+                  "вашего явного решения — см. README, раздел «Реальные деньги».")
+            return 1
+    if not ask_keys(mode):
         return 1
     from bot.engine.notify import setup as tg_setup
     tg_setup(ENV)

@@ -56,4 +56,4 @@ strategy:
 
 live:
   enabled: false                # реальная торговля — только после вашего явного «да»
-  min_size_only: true
+

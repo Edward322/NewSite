@@ -241,7 +241,7 @@ def order_test(R: Report, client, cfg, ExchangeError):
         R.p(f"   1. Вход {s} {inst.fmt_qty(qty)} по рынку со стопом {sl} одним запросом: orderId {oid[:8]}…")
         o = None
         for _ in range(10):
-            o = client.order_by_link_id(link)
+            o = client.order_by_link_id(link, s)
             if o and o.done:
                 break
             time.sleep(1)

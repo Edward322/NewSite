@@ -117,6 +117,9 @@ def setup(env_path=None) -> int:
     from bot.setup_env import set_env_value
     env_path = env_path or PROJECT_ROOT / ".env"
     load_env(env_path)
+    if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
+        if not input("Telegram уже настроен. Настроить заново? (да/нет): ").strip().lower().startswith("д"):
+            return 0
     print("\nНастройка Telegram (можно пропустить — нажмите Enter).")
     print("1) В Telegram найдите @BotFather, отправьте ему /newbot, придумайте имя бота.")
     print("2) BotFather пришлёт токен вида 123456789:AA...  Скопируйте его сюда.")

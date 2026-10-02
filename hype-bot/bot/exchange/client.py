@@ -280,9 +280,10 @@ class BybitClient:
         return [self._order(o) for o in self._pages("get_open_orders", category=self.category,
                                                      settleCoin=self.coin, limit=50)]
 
-    def order_by_link_id(self, link_id: str) -> OrderInfo | None:
+    def order_by_link_id(self, link_id: str, symbol: str | None = None) -> OrderInfo | None:
+        scope = {"symbol": symbol} if symbol else {"settleCoin": self.coin}
         for name in ("get_open_orders", "get_order_history"):
-            lst = self._get(name, category=self.category, orderLinkId=link_id, limit=1).get("list") or []
+            lst = self._get(name, category=self.category, orderLinkId=link_id, limit=1, **scope).get("list") or []
             if lst:
                 return self._order(lst[0])
         return None

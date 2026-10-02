@@ -100,3 +100,33 @@ def summary_text(s: dict) -> str:
             f"{'не хуже' if s['stop_ok'] else 'ХУЖЕ'}; комиссия {pct(s['fee_mean'])} "
             f"(заложено {s['fee_assumed'] * 100:.3f}%) — {'не хуже' if s['fee_ok'] else 'ХУЖЕ'}; "
             f"задержка входа после закрытия свечи: медиана {s['delay_median_s']:.0f} с.")
+
+
+def baseline(trades: list[dict], data_dir: Path, costs: CostsCfg) -> dict:
+    """База исполнения (по демо): средние проскальзывание и разница стопов; без сделок — допущения бэктеста."""
+    s = summary(per_trade(trades, data_dir, costs), costs) if trades else {"n": 0}
+    slip = s.get("slip_mean") if s.get("market_n") else None
+    stop = s.get("stop_excess_mean") if s.get("stop_n") else None
+    return {"slip": float(slip) if slip is not None and slip == slip else costs.slippage,
+            "stop": float(stop) if stop is not None and stop == stop else 0.0,
+            "n": int(s.get("n", 0)), "source": "демо" if trades else "допущения бэктеста"}
+
+
+def execution_alarm(trades: list[dict], data_dir: Path, costs: CostsCfg, base: dict, window: int, min_n: int,
+                    max_slip_excess: float, max_stop_excess: float) -> str | None:
+    """Текст причины, если исполнение заметно хуже базы (docs/LIVE_PROTOCOL.md), иначе None."""
+    recent = trades[-window:]
+    df = per_trade(recent, data_dir, costs)
+    if df.empty:
+        return None
+    market = pd.concat([df["entry_slip"], df["exit_slip"]]).dropna()
+    stops = df["stop_excess"].dropna()
+    if len(market) < min_n:
+        return None
+    if market.mean() > base["slip"] + max_slip_excess:
+        return (f"проскальзывание {market.mean() * 100:.3f}% против {base['slip'] * 100:.3f}% на демо "
+                f"(допуск +{max_slip_excess * 100:.2f} п.п.)")
+    if len(stops) and stops.mean() > base["stop"] + max_stop_excess:
+        return (f"стопы хуже модели на {stops.mean() * 100:.3f}% против {base['stop'] * 100:.3f}% на демо "
+                f"(допуск +{max_stop_excess * 100:.2f} п.п.)")
+    return None

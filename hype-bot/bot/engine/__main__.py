@@ -133,12 +133,21 @@ def cmd_resume(mode: str, reset_peak: bool) -> int:
     if stop.exists():
         stop.unlink()
     h = db.get("halted")
+    if h and not reset_peak and "просадк" in str(h.get("reason", "")):
+        print(f"Бот остановлен по просадке: {h.get('reason')}")
+        print("Если не сбросить пик капитала, бот сразу остановится снова.")
+        reset_peak = input("Начать отсчёт просадки заново от текущего капитала? (да/нет): ").strip().lower() \
+            .startswith("д")
+        if not reset_peak:
+            print("Остановка не снята.")
+            return 1
     db.delete("halted")
     st = db.get("risk_state")
     if st and reset_peak:
         db.delete("risk_state")      # пик и дневной лимит начнутся заново от текущего капитала
     elif st:
         st["halted"], st["halt_reason"] = False, ""
+        st.get("blockers", {}).pop("execution", None)
         db.set("risk_state", st)
     print(f"Остановка снята ({h.get('reason') if h else 'не была включена'}).",
           "Пик капитала сброшен." if reset_peak else "")

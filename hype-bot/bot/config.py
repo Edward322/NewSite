@@ -156,7 +156,7 @@ class EngineCfg(_Strict):
     """Боевой движок: тайминги, допуски, файлы."""
     loop_s: float = Field(10, ge=1, le=120)              # пауза основного цикла
     reconcile_every_s: float = Field(60, ge=10)          # сверка с биржей не реже
-    bar_delay_s: float = Field(5, ge=0, le=120)          # ждать после закрытия свечи 4h
+    bar_delay_s: float = Field(10, ge=0, le=120)         # ждать после закрытия свечи 4h
     max_bar_lag_s: float = Field(600, ge=60)             # позже — новые входы по этой свече не открываются
     data_wait_s: float = Field(180, ge=0)                # сколько ждать неполные данные
     ws_required: bool = True                             # без живого WebSocket новые позиции не открываются
@@ -170,8 +170,12 @@ class EngineCfg(_Strict):
 
 
 class LiveCfg(_Strict):
-    enabled: bool = False
-    min_size_only: bool = True
+    enabled: bool = False                               # реальная торговля — только явным флагом
+    min_size_only: bool = True                          # (не используется; оставлено для старых конфигов)
+    exec_window: int = Field(10, ge=3)                  # последних сделок для проверки исполнения
+    exec_min_n: int = Field(5, ge=1)                    # проверять, когда рыночных исполнений не меньше
+    max_slip_excess: float = Field(0.0005, ge=0)        # хуже демо на 0,05 п.п. → стоп новых входов
+    max_stop_excess: float = Field(0.001, ge=0)         # стопы хуже демо на 0,10 п.п. → стоп новых входов
 
 
 class Config(_Strict):

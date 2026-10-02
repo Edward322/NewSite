@@ -60,7 +60,9 @@ class LiveData:
         try:
             for s in self.symbols:
                 last = self.last_ts(s)
-                a = start_ms if last is None else last + BASE_MS
+                # последняя сохранённая свеча скачивается ещё раз: если биржа отдала её недозакрытой,
+                # запись исправится (merge_and_write оставляет более свежую версию)
+                a = start_ms if last is None else last
                 if a + BASE_MS <= end_ms:
                     df = download_klines(self.client.s, self.call, s, store.KIND_LAST, a, end_ms, interval="15",
                                          progress_every=0)
