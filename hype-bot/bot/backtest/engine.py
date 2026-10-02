@@ -22,6 +22,7 @@
 """
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -30,7 +31,7 @@ import pandas as pd
 from bot.config import CostsCfg, RiskCfg
 from bot.data.bars import Bars, MinuteData, aggregate
 from bot.market import Instrument
-from bot.risk.guards import GuardEvent, RiskGuard
+from bot.risk.guards import GuardEvent, RiskGuard, RiskState
 from bot.risk.sizing import (LONG, SHORT, Sizing, SizingParams, Skip, liquidation_price,
                              max_leverage_for_stop, size_position)
 from bot.strategy.base import Enter, Exit, MoveStop, PositionView, Strategy
@@ -46,6 +47,9 @@ class EngineConfig:
     trade_start_ms: int | None = None   # входы только при решении в [start, end)
     trade_end_ms: int | None = None
     close_at_end: bool = True
+    # Состояние ограничителей из предыдущего окна (пик капитала, серия, пауза, остановка) —
+    # для склейки окон walk-forward в непрерывную историю.
+    initial_risk_state: RiskState | None = None
 
 
 @dataclass
@@ -79,6 +83,7 @@ class BacktestResult:
     final_equity: float
     halted: bool
     params: dict = field(default_factory=dict)
+    risk_state: RiskState | None = None
 
 
 class Backtester:
@@ -106,7 +111,8 @@ class Backtester:
         eq_rows: list[tuple[int, float, float, int]] = []
         if len(bars) == 0:
             return self._result(bars, eq_rows)
-        self.guard = RiskGuard(cfg.risk, self.cash, int(bars.ts[0]))
+        state = copy.deepcopy(cfg.initial_risk_state) if cfg.initial_risk_state else None
+        self.guard = RiskGuard(cfg.risk, self.cash, int(bars.ts[0]), state)
         pending: tuple | None = None       # ("enter", decision_ts, Enter, Sizing) | ("exit", decision_ts, reason)
         pending_stop: float | None = None
 
@@ -345,6 +351,7 @@ class Backtester:
             trades=trades, equity=equity, events=self.events, skips=self.skips,
             decisions=self.decisions, bars=bars, final_equity=self.cash,
             halted=bool(getattr(self, "guard", None) and self.guard.state.halted),
+            risk_state=copy.deepcopy(self.guard.state) if getattr(self, "guard", None) else None,
             params={"strategy": self.strategy.name, "timeframe": self.strategy.timeframe,
                     **self.strategy.params(), "costs": self.cfg.costs.model_dump()},
         )

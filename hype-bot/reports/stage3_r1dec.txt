@@ -1,0 +1,22 @@
+Окна: [(datetime.date(2024, 12, 5), datetime.date(2025, 6, 3), datetime.date(2025, 8, 2)), (datetime.date(2025, 2, 3), datetime.date(2025, 8, 2), datetime.date(2025, 10, 1)), (datetime.date(2025, 4, 4), datetime.date(2025, 10, 1), datetime.date(2025, 11, 30)), (datetime.date(2025, 6, 3), datetime.date(2025, 11, 30), datetime.date(2026, 1, 29)), (datetime.date(2025, 8, 2), datetime.date(2026, 1, 29), datetime.date(2026, 3, 30)), (datetime.date(2025, 10, 1), datetime.date(2026, 3, 30), datetime.date(2026, 4, 2))]
+Вне выборки (OOS) всего: 302 дн.
+Раунд r1dec: ['donchian', 'momentum', 'meanrev', 'squeeze'] × ['15m', '30m', '1h', '4h']; минимум сделок в окне подбора 90
+Конфигураций в переборе: 1044 × 6 окон = 6264 прогонов подбора
+donchian  15m  | окон с торговлей 0/6 | OOS сделок    0 (0/6мес) | PF nan | ср.R +nan | SQN +nan | 10 USDT → +0.0% (DD -0%, сделок 0) | 38 с
+donchian  30m  | окон с торговлей 1/6 | OOS сделок    2 (1/6мес) | PF 0.00 | ср.R -0.926 | SQN -10.18 | 10 USDT → -9.1% (DD 9%, сделок 2) | 23 с
+donchian  1h   | окон с торговлей 0/6 | OOS сделок    0 (0/6мес) | PF nan | ср.R +nan | SQN +nan | 10 USDT → +0.0% (DD -0%, сделок 0) | 13 с
+donchian  4h   | окон с торговлей 0/6 | OOS сделок    0 (0/6мес) | PF nan | ср.R +nan | SQN +nan | 10 USDT → +0.0% (DD -0%, сделок 0) | 5 с
+momentum  15m  | окон с торговлей 0/6 | OOS сделок    0 (0/6мес) | PF nan | ср.R +nan | SQN +nan | 10 USDT → +0.0% (DD -0%, сделок 0) | 17 с
+momentum  30m  | окон с торговлей 0/6 | OOS сделок    0 (0/6мес) | PF nan | ср.R +nan | SQN +nan | 10 USDT → +0.0% (DD -0%, сделок 0) | 9 с
+momentum  1h   | окон с торговлей 0/6 | OOS сделок    0 (0/6мес) | PF nan | ср.R +nan | SQN +nan | 10 USDT → +0.0% (DD -0%, сделок 0) | 5 с
+momentum  4h   | окон с торговлей 0/6 | OOS сделок    0 (0/6мес) | PF nan | ср.R +nan | SQN +nan | 10 USDT → +0.0% (DD -0%, сделок 0) | 2 с
+meanrev   15m  | окон с торговлей 5/6 | OOS сделок  235 (142/6мес) | PF 0.99 | ср.R +0.008 | SQN +0.12 | 10 USDT → -4.3% (DD 38%, сделок 235) | 30 с
+meanrev   30m  | окон с торговлей 5/6 | OOS сделок  360 (217/6мес) | PF 0.94 | ср.R -0.009 | SQN -0.14 | 10 USDT → -29.1% (DD 43%, сделок 350) | 17 с
+meanrev   1h   | окон с торговлей 1/6 | OOS сделок   32 (19/6мес) | PF 0.93 | ср.R -0.013 | SQN -0.10 | 10 USDT → -3.9% (DD 19%, сделок 32) | 9 с
+meanrev   4h   | окон с торговлей 0/6 | OOS сделок    0 (0/6мес) | PF nan | ср.R +nan | SQN +nan | 10 USDT → +0.0% (DD -0%, сделок 0) | 3 с
+squeeze   15m  | окон с торговлей 0/6 | OOS сделок    0 (0/6мес) | PF nan | ср.R +nan | SQN +nan | 10 USDT → +0.0% (DD -0%, сделок 0) | 7 с
+squeeze   30m  | окон с торговлей 2/6 | OOS сделок   33 (20/6мес) | PF 0.57 | ср.R -0.217 | SQN -1.32 | 10 USDT → -32.7% (DD 45%, сделок 33) | 6 с
+squeeze   1h   | окон с торговлей 0/6 | OOS сделок    0 (0/6мес) | PF nan | ср.R +nan | SQN +nan | 10 USDT → +0.0% (DD -0%, сделок 0) | 4 с
+squeeze   4h   | окон с торговлей 0/6 | OOS сделок    0 (0/6мес) | PF nan | ср.R +nan | SQN +nan | 10 USDT → +0.0% (DD -0%, сделок 0) | 1 с
+
+Buy & hold за тот же OOS-период: доходность -11.1%, DD 67%, Sharpe 0.36, Calmar -0.20

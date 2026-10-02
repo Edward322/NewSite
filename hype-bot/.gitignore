@@ -30,3 +30,7 @@ dist/
 
 # Архив для передачи данных
 upload/
+
+# Посделочные файлы и кривые капитала исследования воспроизводятся скриптами research/
+reports/stage3/*_trades_*.parquet
+reports/stage3/*_equity_*.parquet
