@@ -17,6 +17,7 @@ def test_example_config_matches_user_parameters():
     assert r.margin_mode == "ISOLATED_MARGIN"
     assert cfg.research.holdout_months == 6
     assert cfg.live.enabled is False
+    assert cfg.costs.maker_fee == 0.0002 and cfg.costs.taker_fee == 0.00055
 
 
 def _risk(**over):
@@ -24,7 +25,7 @@ def _risk(**over):
                 daily_loss_limit=0.25, max_drawdown=0.8, loss_streak_pause_trades=4,
                 loss_streak_pause_hours=24)
     base.update(over)
-    return {"risk": base}
+    return {"risk": base, "costs": {"maker_fee": 0.0002, "taker_fee": 0.00055}}
 
 
 @pytest.mark.parametrize("over", [

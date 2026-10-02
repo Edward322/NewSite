@@ -38,6 +38,11 @@ class ResearchCfg(_Strict):
     holdout_months: int = Field(6, ge=1, le=24)
 
 
+class CostsCfg(_Strict):
+    maker_fee: float = Field(ge=0, le=0.01)
+    taker_fee: float = Field(ge=0, le=0.01)
+
+
 class RiskCfg(_Strict):
     starting_equity_usdt: float = Field(gt=0)
     max_leverage: float = Field(ge=1, le=100)
@@ -74,6 +79,7 @@ class Config(_Strict):
     exchange: ExchangeCfg = ExchangeCfg()
     data: DataCfg = DataCfg()
     research: ResearchCfg = ResearchCfg()
+    costs: CostsCfg
     risk: RiskCfg
     live: LiveCfg = LiveCfg()
 

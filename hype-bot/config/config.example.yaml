@@ -25,6 +25,12 @@ research:
   # Последние N месяцев не участвуют в подборе параметров.
   holdout_months: 6
 
+costs:
+  # Комиссии бессрочных контрактов, уровень Non-VIP (сайт Bybit, 2026-10-02).
+  # Перед реальной торговлей бот сверит их с /v5/account/fee-rate.
+  maker_fee: 0.0002     # 0.0200 %
+  taker_fee: 0.00055    # 0.0550 %
+
 risk:
   starting_equity_usdt: 10
   max_leverage: 50
