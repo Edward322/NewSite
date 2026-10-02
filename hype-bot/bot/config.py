@@ -35,17 +35,22 @@ class DataCfg(_Strict):
 
 
 class ResearchCfg(_Strict):
+    dev_start: str = "2025-01-01"
     holdout_months: int = Field(6, ge=1, le=24)
+    holdout_start: str = "2026-04-02"
+    holdout_end: str = "2026-10-02T09:28:00Z"
 
 
 class CostsCfg(_Strict):
     maker_fee: float = Field(ge=0, le=0.01)
     taker_fee: float = Field(ge=0, le=0.01)
+    slippage: float = Field(0.0002, ge=0, le=0.05)
+    stop_penetration: float = Field(0.25, ge=0, le=1)
 
 
 class RiskCfg(_Strict):
     starting_equity_usdt: float = Field(gt=0)
-    max_leverage: float = Field(ge=1, le=100)
+    max_leverage: float | None = Field(None, ge=1, le=200)  # None — без собственного лимита
     risk_per_trade: float = Field(gt=0, le=0.2)
     daily_loss_limit: float = Field(gt=0, lt=1)
     max_drawdown: float = Field(gt=0, lt=1)
