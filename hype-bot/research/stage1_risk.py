@@ -216,7 +216,7 @@ def main() -> None:
     final = None
     while True:
         runs = {(v, E): run(panel, base, v, r, E, start) for v in ("A", "B", "C") for E in (DEPOSIT, REF)}
-        L.append(f"2. ВАРИАНТЫ НА ВСЕЙ ИСТОРИИ (данные не чистые).")
+        L.append("2. ВАРИАНТЫ НА ВСЕЙ ИСТОРИИ (данные не чистые).")
         describe(runs, r)
         dd = {v: runs[(v, DEPOSIT)].max_dd() for v in ("A", "B", "C")}
         pick = "A"

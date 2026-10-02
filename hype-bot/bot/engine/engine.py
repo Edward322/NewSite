@@ -167,6 +167,7 @@ class Engine:
             w = self.client.wallet()
             off = max(0.0, w.equity - self.cfg.risk.starting_equity_usdt)
             self.db.set("equity_offset", off)
+            self.db.set("equity_start", w.equity - off)
             self.db.set("started_ms", now)
             self.db.set("mode", self.mode)
             self.event("info", "start", f"Первый запуск ({self.mode}): баланс счёта {w.equity:.2f} USDT, капитал бота "
@@ -295,13 +296,35 @@ class Engine:
         if lag > self.E.max_bar_lag_s:
             self.event("warn", "late", f"Свеча {_utc(t_close)} обрабатывается с опозданием {lag:.0f} с — "
                                        "только выходы и стопы")
+        out = self.plan_bar(t_close, entries_allowed)
+        if out is None:
+            self.db.set("last_bar_close", t_close)
+            return True
+        plan, syms, insts, last_px = out
+        for t, s, d in plan.decisions:
+            self.db.event(now, "info", "decision", f"{_utc(t)} {s} {d}")
+        for t, s, why in plan.skips:
+            self.db.event(now, "info", "skip", f"{_utc(t)} {s}: {why}")
+        # исполнение: выходы → стопы → входы (как в бэктесте)
+        for r, (_, reason) in plan.exits.items():
+            self._exit(syms[r], t_close, reason, float(last_px[r]))
+        for r, stop in plan.stops.items():
+            self._move_stop(syms[r], stop, t_close)
+        for r, _, d, s in plan.entries:
+            self._enter(syms[r], t_close, d, s, insts[r])
+        self.db.set("last_bar_close", t_close)
+        self.reconcile()
+        return True
+
+    def plan_bar(self, t_close: int, entries_allowed: bool = True, update_guard: bool = True):
+        """Решения стратегии и план исполнения на закрытии свечи (без ордеров).
+        None — свечи нет в данных, идёт разогрев или сработала остановка."""
         panel = self.data.panel(int(self.db.get("anchor_ms")), t_close)
         bars = aggregate_panel(panel, self.cfg.strategy.timeframe)
         ks = np.flatnonzero(bars.close_ts == t_close)
         if not len(ks):
             self.event("error", "data", f"Нет свечи {_utc(t_close)} в данных — свеча пропущена", notify=True)
-            self.db.set("last_bar_close", t_close)
-            return True
+            return None
         k = int(ks[0])
         strat = make_strategy(self.cfg)
         strat.prepare(bars)
@@ -326,30 +349,17 @@ class Engine:
         upl = sum(p.side * p.qty * (float(last_px[row[s]]) - p.entry_price) for s, p in dbp.items()
                   if s in row and not np.isnan(last_px[row[s]]))
         cash = eq - upl
-        self._guard_events(self.guard.update_equity(t_close, eq))
-        if self.guard.state.halted:
-            self._halt(self.guard.state.halt_reason)
-            return True
+        if update_guard:
+            self._guard_events(self.guard.update_equity(t_close, eq))
+            if self.guard.state.halted:
+                self._halt(self.guard.state.halt_reason)
+                return None
         if k < strat.warmup_bars:
-            self.db.set("last_bar_close", t_close)
-            return True
+            return None
         ds = strat.on_bar(k, views) or []
         planner = Planner(syms, insts, self.sp, self.rules, prisk, self.guard)
         plan = planner.plan(ds, k, t_close, held, cash, last_px, eq, entries_allowed=entries_allowed)
-        for t, s, d in plan.decisions:
-            self.db.event(now, "info", "decision", f"{_utc(t)} {s} {d}")
-        for t, s, why in plan.skips:
-            self.db.event(now, "info", "skip", f"{_utc(t)} {s}: {why}")
-        # исполнение: выходы → стопы → входы (как в бэктесте)
-        for r, (_, reason) in plan.exits.items():
-            self._exit(syms[r], t_close, reason, float(last_px[r]))
-        for r, stop in plan.stops.items():
-            self._move_stop(syms[r], stop, t_close)
-        for r, _, d, s in plan.entries:
-            self._enter(syms[r], t_close, d, s, insts[r])
-        self.db.set("last_bar_close", t_close)
-        self.reconcile()
-        return True
+        return plan, syms, insts, last_px
 
     # ============================================================== ордера
     def _confirm(self, link_id: str, attempts: int = 5) -> OrderInfo | None:

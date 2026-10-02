@@ -277,6 +277,7 @@ class SimBybit:
         self._enter("get_instruments_info")
         s = p.get("symbol")
         lst = [self.m[s].instrument] if s in self.m else ([] if s else [x.instrument for x in self.m.values()])
+        lst = [{"status": "Trading", **i} for i in lst]
         return self._ok({"category": "linear", "list": lst, "nextPageCursor": ""})
 
     def get_risk_limit(self, **p):
@@ -343,6 +344,11 @@ class SimBybit:
                 "unrealisedPnl": _s(upl), "totalPositionIM": _s(im), "totalOrderIM": "0",
                 "availableToWithdraw": _s(self.wallet_balance - im)}
         return self._ok({"list": [{"accountType": "UNIFIED", "totalEquity": _s(self.equity()), "coin": [coin]}]})
+
+    def get_api_key_information(self, **_):
+        self._enter("get_api_key_information")
+        return self._ok({"readOnly": 0, "ips": ["*"], "expiredAt": "",
+                         "permissions": {"ContractTrade": ["Order", "Position"], "Wallet": [], "Spot": []}})
 
     def get_fee_rates(self, **p):
         self._enter("get_fee_rates")

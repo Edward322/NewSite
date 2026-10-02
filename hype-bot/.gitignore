@@ -7,6 +7,9 @@
 
 # Локальный конфиг пользователя (шаблон — config/config.example.yaml)
 config/config.yaml
+config/bot.yaml
+STOP
+reports/live/
 
 # Данные и состояние бота
 data/raw/
@@ -43,3 +46,7 @@ data/basket/
 
 # Результаты walk-forward корзины (воспроизводятся скриптами research/basket_*.py)
 reports/basket/*.pkl
+data/live/
+data/state/
+*.lock
+reports/selfcheck/
