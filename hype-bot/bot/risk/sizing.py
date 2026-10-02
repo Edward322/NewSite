@@ -61,6 +61,19 @@ def liquidation_price(side: int, entry: float, leverage: float, mmr: float, clos
     return entry * (1 + 1 / leverage - mmr - close_fee)
 
 
+def liquidation_price_bybit(side: int, entry: float, leverage: float, mmr: float, mm_deduction: float = 0.0,
+                            qty: float | None = None) -> float:
+    """Формула Bybit (единый счёт, изолированная маржа, без довнесённой маржи):
+    лонг (E·S − E·S/L − D) / (S − S·MMR), шорт (E·S + E·S/L + D) / (S + S·MMR).
+    Сверено с биржей (самопроверка на демо): XRP, вход 1.4577, плечо 2, MMR 0,5 % → 0,73251, биржа 0,7326.
+    Ликвидация по ней дальше, чем по liquidation_price (та осторожнее и остаётся для бота).
+    """
+    d = mm_deduction / qty if (qty and mm_deduction) else 0.0
+    if side == LONG:
+        return (entry * (1 - 1 / leverage) - d) / (1 - mmr)
+    return (entry * (1 + 1 / leverage) + d) / (1 + mmr)
+
+
 def max_leverage_for_stop(stop_dist: float, mmr: float, close_fee: float, liq_buffer: float) -> float:
     """Наибольшее плечо, при котором расстояние до ликвидации ≥ liq_buffer × расстояние до стопа."""
     return 1.0 / (liq_buffer * stop_dist + mmr + close_fee)
@@ -122,7 +135,8 @@ def size_position(
 
 
 def size_by_margin(side: int, entry_ref: float, stop: float, margin_budget: float, available: float,
-                   inst: Instrument, p: SizingParams, stop_rule: str = "none", liq_gap: float = 0.035) -> Sizing | Skip:
+                   inst: Instrument, p: SizingParams, stop_rule: str = "none", liq_gap: float = 0.035,
+                   roi_gap: float = 0.04, liq_formula: str = "model") -> Sizing | Skip:
     """Объём от доли маржи (правило «маржа = доля баланса»), стоп по stop_rule.
 
     stop_rule:
@@ -130,12 +144,15 @@ def size_by_margin(side: int, entry_ref: float, stop: float, margin_budget: floa
                  вся маржа: planned_loss = маржа + комиссии входа и выхода;
       near_liq — плечо максимальное, стоп переносится к ликвидации: за liq_gap расстояния до ликвидации
                  до неё (если стоп стратегии ближе — остаётся он);
-      gap      — стоп стратегии, плечо снижается так, чтобы ликвидация была на liq_gap цены дальше стопа.
-    Для near_liq и gap planned_loss — убыток до стопа с издержками, как в size_position.
+      gap      — стоп стратегии, плечо снижается так, чтобы ликвидация была на liq_gap цены дальше стопа;
+      roi      — плечо максимальное, стоп на roi_gap доли маржи (пунктов ROI) раньше ликвидации: при 75x и
+                 ликвидации на −44 % ROI с roi_gap 0,04 стоп на −40 % (если стоп стратегии ближе — он).
+    liq_formula: model — liquidation_price (осторожная), bybit — liquidation_price_bybit (как на бирже).
+    Для near_liq, gap и roi planned_loss — убыток до стопа с издержками, как в size_position.
     """
     if margin_budget <= 0 or available <= 0:
         return Skip("нет капитала")
-    if stop_rule not in ("none", "near_liq", "gap"):
+    if stop_rule not in ("none", "near_liq", "gap", "roi"):
         raise ValueError(f"неизвестное правило стопа: {stop_rule}")
     stop = inst.round_price(stop, "down" if side == LONG else "up")
     if (side == LONG and stop >= entry_ref) or (side == SHORT and stop <= entry_ref) or stop <= 0:
@@ -160,9 +177,13 @@ def size_by_margin(side: int, entry_ref: float, stop: float, margin_budget: floa
     if qty < inst.min_qty or qty * entry_ref < inst.min_notional:
         return Skip(f"объём ниже минимума биржи (нужно ≥ {inst.min_notional} USDT)")
     notional = qty * entry_ref
-    liq = liquidation_price(side, entry_ref, lev, tier.mmr, p.taker_fee)
-    if stop_rule == "near_liq":
-        stop = tighter_stop(side, stop, stop_near_liq(side, entry_ref, liq, liq_gap, inst))
+    liq = liq_price_by(liq_formula, side, entry_ref, lev, tier, p.taker_fee, qty)
+    if stop_rule in ("near_liq", "roi"):
+        near = (stop_near_liq(side, entry_ref, liq, liq_gap, inst) if stop_rule == "near_liq"
+                else stop_before_liq_roi(side, entry_ref, liq, lev, roi_gap, inst))
+        if near is None:
+            return Skip("ликвидация ближе зазора до стопа")
+        stop = tighter_stop(side, stop, near)
         if (side == LONG and stop >= entry_ref) or (side == SHORT and stop <= entry_ref):
             return Skip("стоп у ликвидации совпал с ценой входа")
     if stop_rule == "none":
@@ -184,6 +205,24 @@ def stop_near_liq(side: int, entry: float, liq: float, gap: float, inst: Instrum
     """Стоп за gap расстояния до ликвидации до неё; округление — к цене входа (стоп не дальше)."""
     raw = entry - side * (1 - gap) * abs(entry - liq)
     return inst.round_price(raw, "up" if side == LONG else "down")
+
+
+def stop_before_liq_roi(side: int, entry: float, liq: float, leverage: float, roi_gap: float,
+                        inst: Instrument) -> float | None:
+    """Стоп на roi_gap доли маржи (пунктов ROI) раньше ликвидации; None — если ликвидация ближе зазора."""
+    dist = abs(entry - liq) - roi_gap * entry / leverage
+    if dist <= 0:
+        return None
+    return inst.round_price(entry - side * dist, "up" if side == LONG else "down")
+
+
+def liq_price_by(formula: str, side: int, entry: float, leverage: float, tier, close_fee: float,
+                 qty: float | None = None) -> float:
+    if formula == "bybit":
+        return liquidation_price_bybit(side, entry, leverage, tier.mmr, tier.mm_deduction, qty)
+    if formula != "model":
+        raise ValueError(f"неизвестная формула ликвидации: {formula}")
+    return liquidation_price(side, entry, leverage, tier.mmr, close_fee)
 
 
 def tighter_stop(side: int, a: float, b: float) -> float:

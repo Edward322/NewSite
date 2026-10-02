@@ -1,6 +1,7 @@
 """Портфельные правила риска (docs/RISK_PROTOCOL.md): лимиты, корреляция, волатильность,
 ликвидность, ступени просадки, теневые варианты стратегии."""
 import copy
+import math
 import numpy as np
 import pytest
 
@@ -349,3 +350,53 @@ def test_stop_beats_liquidation_option(optimistic, reason):
     assert -p["gross_pnl"] <= p["margin"] + 1e-9                     # убыток по цене — не больше маржи
     if optimistic:
         assert p["liq_price"] > p["exit_price"] and -p["gross_pnl"] < p["margin"]
+
+
+def test_bybit_liquidation_formula_matches_exchange():
+    """Самопроверка на демо: XRP, вход 1.4577, плечо 2, MMR 0,5 % — биржа показала ликвидацию 0,7326."""
+    from bot.risk.sizing import liquidation_price, liquidation_price_bybit
+    lp = liquidation_price_bybit(LONG, 1.4577, 2.0, 0.005)
+    assert math.ceil(lp * 10_000) / 10_000 == pytest.approx(0.7326)       # биржа округляет вверх до шага
+    assert liquidation_price(LONG, 1.4577, 2.0, 0.005, 0.00055) > lp      # осторожная формула бота ближе к входу
+    # DOGE, 75x, MMR 0,75 %: ликвидация около −44 % от маржи (пользователь видит на бирже «от 45»)
+    roi = (1 - liquidation_price_bybit(LONG, 1.0, 75.0, 0.0075)) * 75
+    assert 0.43 < roi < 0.45
+    assert liquidation_price_bybit(SHORT, 1.0, 75.0, 0.0075) == pytest.approx((1 + 1 / 75) / 1.0075)
+
+
+def test_margin_stop_roi_gap_before_liquidation():
+    """Правило пользователя: плечо максимальное, стоп на 4 пункта ROI раньше ликвидации (DOGE: −40 % при −44 %)."""
+    from bot.risk.sizing import size_by_margin
+    inst = hype()
+    for side, stop in ((LONG, 37.5), (SHORT, 42.5)):
+        s = size_by_margin(side, 40.0, stop, margin_budget=6.25, available=25.0, inst=inst, p=SP,
+                           stop_rule="roi", roi_gap=0.04, liq_formula="bybit")
+        assert s.leverage == 75
+        liq_roi = abs(40.0 - s.liq_price) / 40.0 * 75
+        stop_roi = abs(40.0 - s.stop) / 40.0 * 75
+        assert stop_roi == pytest.approx(liq_roi - 0.04, abs=float(inst.tick_size) / 40.0 * 75)
+        assert side * (s.stop - s.liq_price) > 0 and s.planned_loss < s.margin
+    # ликвидация ближе зазора — вход пропускается
+    assert isinstance(size_by_margin(LONG, 40.0, 37.5, 6.25, 25.0, inst, SP, stop_rule="roi", roi_gap=0.6,
+                                     liq_formula="bybit"), Skip)
+
+
+def test_margin_stop_roi_in_backtest():
+    panel = flat_panel(1, n=800)
+    j = 4 * 31
+    path = np.r_[40.0 - 0.01 * np.arange(1, 261), np.full(800 - j - 260, 37.4)]
+    panel.close[0, j:] = panel.low[0, j:] = path
+    panel.open[0, j:] = panel.high[0, j:] = np.r_[40.0, path[:-1]]
+    risk = RiskCfg(starting_equity_usdt=100, risk_per_trade=0.02, daily_loss_limit=0.98, max_drawdown=0.99,
+                   drawdown_steps=[])
+    rules = PortfolioRules(max_open_risk=10.0, sizing="margin", margin_stop="roi", roi_gap=0.04,
+                           liq_formula="bybit")
+    cfg = PortfolioConfig(risk=risk, costs=COSTS, initial_equity=100.0, max_open_risk=10.0, rules=rules)
+    t = PortfolioBacktester(panel, Script({1: [(0, Enter(LONG, 37.5))]}), cfg).run().trades
+    p = t.iloc[0]
+    from bot.risk.sizing import liquidation_price_bybit
+    assert p["exit_reason"] == "stop" and p["leverage"] == 75
+    assert p["liq_price"] == pytest.approx(liquidation_price_bybit(LONG, p["entry_price"], 75, 0.0067))
+    assert (p["entry_price"] - p["stop_initial"]) / p["entry_price"] * 75 == pytest.approx(
+        (p["entry_price"] - p["liq_price"]) / p["entry_price"] * 75 - 0.04,
+        abs=float(hype().tick_size) / p["entry_price"] * 75)                   # стоп округлён к входу на шаг цены

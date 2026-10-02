@@ -32,8 +32,9 @@ from bot.market import Instrument
 from bot.risk.guards import GuardEvent, RiskGuard, RiskState
 from bot.risk.planner import Held, Planner
 from bot.risk.portfolio import PortfolioRisk, PortfolioRules
-from bot.risk.sizing import (LONG, SHORT, Sizing, SizingParams, liquidation_price, max_leverage_for_gap,
-                             max_leverage_for_stop, stop_near_liq, tighter_stop)
+from bot.risk.sizing import (LONG, SHORT, Sizing, SizingParams, liq_price_by, liquidation_price,
+                             max_leverage_for_gap, max_leverage_for_stop, stop_before_liq_roi, stop_near_liq,
+                             tighter_stop)
 from bot.strategy.base import PositionView
 
 EPS = 1e-9
@@ -226,12 +227,6 @@ class PortfolioBacktester:
                                           max_leverage_for_gap(dist, R.liq_gap, tier.mmr, fee)))
         elif R.sizing == "margin":       # плечо — максимум биржи, правило «ликвидация вдвое дальше» не действует
             lev = inst.floor_leverage(min(s.leverage, tier.max_leverage))
-            if R.margin_stop == "near_liq" and lev >= 1:        # стоп — от фактической цены входа
-                stop = tighter_stop(side, d.stop, stop_near_liq(
-                    side, fill, liquidation_price(side, fill, lev, tier.mmr, fee), R.liq_gap, inst))
-                if (side == LONG and stop >= fill) or (side == SHORT and stop <= fill):
-                    self.skips.append((ts, P.symbols[r], "стоп у ликвидации совпал с ценой входа"))
-                    return
         else:
             lev = inst.floor_leverage(min(s.leverage, tier.max_leverage, max_leverage_for_stop(
                 dist, tier.mmr, fee, self.sp.liq_buffer)))
@@ -245,6 +240,18 @@ class PortfolioBacktester:
         if qty < inst.min_qty or qty * fill < inst.min_notional:
             self.skips.append((ts, P.symbols[r], "после пересчёта объём ниже минимума"))
             return
+        liq = (liq_price_by(R.liq_formula, side, fill, lev, tier, fee, qty) if R.sizing == "margin"
+               else liquidation_price(side, fill, lev, tier.mmr, fee))
+        if R.sizing == "margin" and R.margin_stop in ("near_liq", "roi"):   # стоп — от фактической цены входа
+            near = (stop_near_liq(side, fill, liq, R.liq_gap, inst) if R.margin_stop == "near_liq"
+                    else stop_before_liq_roi(side, fill, liq, lev, R.roi_gap, inst))
+            if near is None:
+                self.skips.append((ts, P.symbols[r], "ликвидация ближе зазора до стопа"))
+                return
+            stop = tighter_stop(side, d.stop, near)
+            if (side == LONG and stop >= fill) or (side == SHORT and stop <= fill):
+                self.skips.append((ts, P.symbols[r], "стоп у ликвидации совпал с ценой входа"))
+                return
         tp = d.take_profit
         if tp is not None:
             tp = inst.round_price(tp)
@@ -256,7 +263,7 @@ class PortfolioBacktester:
         self.pos[r] = Pos(
             row=r, symbol=P.symbols[r], side=side, qty=qty, entry_price=fill, entry_ts=ts,
             decision_ts=decision_ts, stop=stop, stop_initial=stop, take_profit=tp, leverage=lev,
-            margin=qty * fill / lev, liq_price=liquidation_price(side, fill, lev, tier.mmr, fee),
+            margin=qty * fill / lev, liq_price=liq,
             entry_fee=entry_fee,
             planned_loss=(qty * fill / lev + 2 * qty * fill * fee) if R.sizing == "margin" and R.margin_stop == "none"
             else qty * (abs(fill - stop) + fill * cost + stop * cost),
