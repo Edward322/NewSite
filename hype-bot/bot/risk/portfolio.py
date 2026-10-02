@@ -54,6 +54,8 @@ class PortfolioRules:
     liquidity: LiquidityRule | None = None
     sizing: str = "risk"            # risk — от риска до стопа; margin — маржа = доля баланса, плечо максимальное
     margin_fraction: float = 0.25
+    margin_stop: str = "none"       # для sizing=margin: none | near_liq | gap (bot.risk.sizing.size_by_margin)
+    liq_gap: float = 0.035
 
 
 @dataclass(frozen=True)
@@ -176,7 +178,7 @@ class PortfolioRisk:
         R = self.rules
         if R.sizing == "margin":
             s = size_by_margin(side, px, stop, equity * R.margin_fraction * risk_mult * float(self.vol_mult[k]),
-                               available, inst, sp)
+                               available, inst, sp, stop_rule=R.margin_stop, liq_gap=R.liq_gap)
             if isinstance(s, Skip):
                 return s
             if s.planned_loss > R.max_open_risk * equity * (1 + EPS) - sum(e.risk for e in book):

@@ -261,3 +261,69 @@ def test_margin_fraction_sizing_uses_max_leverage_and_liquidates_before_stop():
     r = pr.plan_entry(k=len(pr.bars) - 1, row=0, side=LONG, px=40.0, stop=37.5, equity=25.0, available=25.0,
                       inst=inst, sp=SP, risk_mult=1.0, book=[])
     assert r.planned_loss <= 0.5 + 1e-9 and r.liq_price < r.stop
+
+
+def test_margin_stop_near_liquidation_keeps_max_leverage():
+    """Правило «стоп у ликвидации»: плечо максимальное, стоп за 3,5 % расстояния до ликвидации до неё."""
+    from bot.risk.sizing import size_by_margin
+    inst = hype()
+    for side, stop in ((LONG, 37.5), (SHORT, 42.5)):
+        s = size_by_margin(side, 40.0, stop, margin_budget=6.25, available=25.0, inst=inst, p=SP,
+                           stop_rule="near_liq", liq_gap=0.035)
+        assert s.leverage == 75
+        liq_dist = abs(40.0 - s.liq_price)
+        assert abs(40.0 - s.stop) == pytest.approx(0.965 * liq_dist, abs=float(inst.tick_size))
+        assert side * (s.stop - s.liq_price) > 0 and side * (40.0 - s.stop) > 0   # между входом и ликвидацией
+        assert s.planned_loss < s.margin                    # стоп срабатывает раньше потери всей маржи
+
+
+def test_margin_stop_gap_lowers_leverage_behind_strategy_stop():
+    """Правило «ликвидация на 3,5 % цены дальше стопа»: стоп стратегии, плечо снижено."""
+    from bot.risk.sizing import size_by_margin
+    inst = hype()
+    for side, stop in ((LONG, 37.5), (SHORT, 42.5)):
+        s = size_by_margin(side, 40.0, stop, margin_budget=6.25, available=25.0, inst=inst, p=SP,
+                           stop_rule="gap", liq_gap=0.035)
+        assert s.stop == stop and 1 <= s.leverage < 75
+        assert side * (s.stop - s.liq_price) >= 0.035 * 40.0 - 1e-9      # ликвидация ≥ 3,5 % цены за стопом
+        assert s.margin == pytest.approx(6.25, rel=0.02)                 # маржа — по-прежнему 25 % баланса
+        assert s.planned_loss == pytest.approx(s.qty * (2.5 + (40.0 + stop) * (SP.taker_fee + SP.slippage)))
+    with pytest.raises(ValueError):
+        size_by_margin(LONG, 40.0, 37.5, 6.25, 25.0, inst, SP, stop_rule="??")
+
+
+@pytest.mark.parametrize("rule,reason", [("none", "liquidation"), ("near_liq", "stop"), ("gap", "stop")])
+def test_margin_stop_rules_in_backtest(rule, reason):
+    """Цена плавно падает на 6,5 %: без стопа у ликвидации — ликвидация, с правилами — выход по стопу."""
+    panel = flat_panel(1, n=800)
+    j = 4 * 31
+    path = np.r_[40.0 - 0.01 * np.arange(1, 261), np.full(800 - j - 260, 37.4)]
+    panel.close[0, j:] = panel.low[0, j:] = path
+    panel.open[0, j:] = panel.high[0, j:] = np.r_[40.0, path[:-1]]
+    risk = RiskCfg(starting_equity_usdt=100, risk_per_trade=0.02, daily_loss_limit=0.98, max_drawdown=0.99,
+                   drawdown_steps=[])
+    rules = PortfolioRules(max_open_risk=10.0, sizing="margin", margin_fraction=0.25, margin_stop=rule,
+                           liq_gap=0.035)
+    cfg = PortfolioConfig(risk=risk, costs=COSTS, initial_equity=100.0, max_open_risk=10.0, rules=rules)
+    t = PortfolioBacktester(panel, Script({1: [(0, Enter(LONG, 37.5))]}), cfg).run().trades
+    assert len(t) == 1 and t["exit_reason"].iloc[0] == reason
+    p = t.iloc[0]
+    if rule == "near_liq":
+        assert p["leverage"] == 75 and p["liq_price"] < p["stop_initial"] < p["entry_price"]
+    if rule == "gap":
+        assert p["stop_initial"] == 37.5 and p["liq_price"] <= 37.5 - 0.035 * p["entry_price"] + 1e-9
+    if rule != "none":
+        assert -p["net_pnl"] < p["margin"]                  # потеря меньше маржи
+
+
+def test_margin_stop_near_liquidation_does_not_survive_a_gap():
+    """Скачок цены сразу за ликвидацию: стоп у ликвидации не спасает — ликвидация, потеря всей маржи."""
+    panel = flat_panel(1, n=800)
+    for a in (panel.open, panel.high, panel.low, panel.close):
+        a[0, 4 * 31:] = 39.3
+    risk = RiskCfg(starting_equity_usdt=100, risk_per_trade=0.02, daily_loss_limit=0.98, max_drawdown=0.99,
+                   drawdown_steps=[])
+    rules = PortfolioRules(max_open_risk=10.0, sizing="margin", margin_stop="near_liq", liq_gap=0.035)
+    cfg = PortfolioConfig(risk=risk, costs=COSTS, initial_equity=100.0, max_open_risk=10.0, rules=rules)
+    t = PortfolioBacktester(panel, Script({1: [(0, Enter(LONG, 37.5))]}), cfg).run().trades
+    assert t["exit_reason"].iloc[0] == "liquidation"
