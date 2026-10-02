@@ -34,6 +34,17 @@ class DataCfg(_Strict):
     request_pause_s: float = Field(0.08, ge=0.02)
 
 
+class BasketCfg(_Strict):
+    history_start: str = "2023-01-01"
+    kline_interval: str = "15"
+    include: list[str] = Field(default_factory=lambda: ["HYPEUSDT"])
+    signal_only: list[str] = Field(default_factory=lambda: ["BTCUSDT", "ETHUSDT"])
+    n_max: int = Field(24, ge=1, le=100)
+    listed_before: str = "2024-01-01"
+    min_turnover_24h: float = Field(30_000_000, ge=0)
+    max_min_order_usdt: float = Field(5.5, gt=0)
+
+
 class ResearchCfg(_Strict):
     dev_start: str = "2025-01-01"
     holdout_months: int = Field(6, ge=1, le=24)
@@ -83,6 +94,7 @@ class Config(_Strict):
     category: Literal["linear"] = "linear"
     exchange: ExchangeCfg = ExchangeCfg()
     data: DataCfg = DataCfg()
+    basket: BasketCfg = BasketCfg()
     research: ResearchCfg = ResearchCfg()
     costs: CostsCfg
     risk: RiskCfg

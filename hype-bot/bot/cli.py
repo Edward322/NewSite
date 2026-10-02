@@ -16,6 +16,8 @@ from bot.config import PROJECT_ROOT, load_config
 from bot.data import downloader, store, transfer
 from bot.data.report import build_report
 
+import pandas as pd
+
 log = logging.getLogger("bot")
 
 
@@ -72,6 +74,63 @@ def cmd_fees(cfg, args) -> int:
     return 0
 
 
+def cmd_basket(cfg, args) -> int:
+    """Отбор корзины, загрузка всех рядов по каждой монете и упаковка в upload/basket-data.zip."""
+    import json
+
+    from bot.data import basket
+
+    b = cfg.basket
+    session = downloader.make_public_session(cfg.exchange.domain, cfg.exchange.tld, cfg.exchange.http_timeout_s)
+    call = downloader.Caller(pause_s=cfg.data.request_pause_s)
+    data_dir = PROJECT_ROOT / "data" / "basket"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    now_ms = downloader.server_time_ms(session, call)
+    instruments = basket.all_linear_instruments(session, call)
+    tickers = call(session.get_tickers, category="linear")["result"]["list"]
+    rule = {"listed_before": b.listed_before, "min_turnover_24h": b.min_turnover_24h,
+            "max_min_order_usdt": b.max_min_order_usdt, "n_max": b.n_max, "include": b.include}
+    chosen, table = basket.select_universe(instruments, tickers, rule)
+    symbols = chosen + [s for s in b.signal_only if s not in chosen]
+    table.to_csv(data_dir / "universe_table.csv", index=False)
+    store.write_json(data_dir / "universe.json", {"generated_at": basket.utc_now_iso(), "rule": rule,
+                                                  "tradable": chosen, "signal_only": b.signal_only})
+    log.info("Корзина (%d): %s; только сигналы: %s", len(chosen), chosen, b.signal_only)
+    start_ms = int(pd.Timestamp(b.history_start, tz="UTC").value // 1_000_000)
+
+    def one(sym: str) -> dict:
+        # у каждого потока своё соединение: requests.Session не рассчитан на общий доступ
+        s = downloader.make_public_session(cfg.exchange.domain, cfg.exchange.tld, cfg.exchange.http_timeout_s)
+        c = downloader.Caller(pause_s=cfg.data.request_pause_s)
+        return basket.download_symbol_basket(s, c, data_dir, sym, start_ms, now_ms, b.kline_interval)
+
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    failed = []
+    with ThreadPoolExecutor(max_workers=args.threads) as ex:
+        futures = {ex.submit(one, sym): sym for sym in symbols}
+        for k, fut in enumerate(as_completed(futures), 1):
+            sym = futures[fut]
+            try:
+                log.info("[%d/%d] %s готово: %s", k, len(symbols), sym, json.dumps(fut.result(), ensure_ascii=False))
+            except Exception as e:
+                failed.append(sym)
+                log.error("[%d/%d] %s: ошибка %s", k, len(symbols), sym, e)
+    if failed:
+        log.error("Не загружены: %s. Запустите ещё раз — загрузка продолжится с места остановки.", failed)
+        return 2
+    try:
+        n = basket.download_fear_greed(data_dir / "fear_greed.parquet")
+        log.info("Индекс страха и жадности: %d дней", n)
+    except Exception as e:  # внешний источник необязателен
+        log.warning("Индекс страха и жадности не скачан: %s", e)
+    out = PROJECT_ROOT / "upload" / "basket-data.zip"
+    manifest = transfer.pack(data_dir, symbols, out, extra_files=["universe.json", "universe_table.csv",
+                                                                  "fear_greed.parquet"])
+    print(f"Архив готов: {out} ({out.stat().st_size / 1e6:.1f} МБ, файлов: {len(manifest['files'])})")
+    return 0
+
+
 def cmd_pack(cfg, args) -> int:
     out = PROJECT_ROOT / "upload" / "hype-data.zip"
     manifest = transfer.pack(cfg.data_dir(), [cfg.symbol] + cfg.data.extra_symbols, out)
@@ -106,6 +165,8 @@ def main(argv: list[str] | None = None) -> int:
         sp.add_argument("--no-mark", action="store_true", help="без свечей mark-цены")
     dsub.add_parser("fees")
     dsub.add_parser("pack")
+    bp = dsub.add_parser("basket")
+    bp.add_argument("--threads", type=int, default=4)
     up = dsub.add_parser("unpack")
     up.add_argument("zip")
     args = p.parse_args(argv)
@@ -114,7 +175,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     cfg = load_config(args.config)
     handlers = {"download": cmd_download, "check": cmd_check, "fees": cmd_fees,
-                "pack": cmd_pack, "unpack": cmd_unpack}
+                "pack": cmd_pack, "unpack": cmd_unpack, "basket": cmd_basket}
     try:
         return handlers[args.cmd](cfg, args)
     except (downloader.DownloadError, transfer.TransferError) as e:

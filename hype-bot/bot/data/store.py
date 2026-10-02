@@ -32,7 +32,7 @@ def symbol_dir(data_dir: Path, symbol: str) -> Path:
 
 
 def kline_path(data_dir: Path, symbol: str, kind: str, interval: str = "1") -> Path:
-    suffix = "1m" if interval == "1" else interval
+    suffix = f"{interval}m" if interval.isdigit() else interval
     return symbol_dir(data_dir, symbol) / f"kline_{kind}_{suffix}.parquet"
 
 

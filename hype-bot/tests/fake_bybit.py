@@ -19,10 +19,11 @@ class FakeBybit:
     def price(self, ts: int) -> float:
         return 20 + 5 * math.sin(ts / (MIN * 600))
 
-    def _candles(self, start, end, limit, mark=False):
+    def _candles(self, start, end, limit, mark=False, interval="1"):
+        step = int(interval) * MIN
         first = max(start, self.launch_ms)
-        first = -(-first // MIN) * MIN
-        current_open = (self.now_ms // MIN) * MIN  # формирующаяся свеча тоже отдаётся, как на бирже
+        first = -(-first // step) * step
+        current_open = (self.now_ms // step) * step  # формирующаяся свеча тоже отдаётся, как на бирже
         out = []
         t = first
         while t <= min(end, current_open):
@@ -32,7 +33,7 @@ class FakeBybit:
                 if not mark:
                     row += ["100", str(100 * p)]
                 out.append(row)
-            t += MIN
+            t += step
         out = out[-limit:] if len(out) > limit else out
         return list(reversed(out))  # Bybit: сортировка по убыванию startTime
 
@@ -48,13 +49,14 @@ class FakeBybit:
         self.calls.append(("kline", p))
         assert p["limit"] <= 1000
         return self._ok({"symbol": p["symbol"], "category": p["category"],
-                         "list": self._candles(p["start"], p["end"], p["limit"])})
+                         "list": self._candles(p["start"], p["end"], p["limit"], interval=p["interval"])})
 
     def get_mark_price_kline(self, **p):
         self.calls.append(("mark", p))
         assert p["limit"] <= 1000
         return self._ok({"symbol": p["symbol"], "category": p["category"],
-                         "list": self._candles(p["start"], p["end"], p["limit"], mark=True)})
+                         "list": self._candles(p["start"], p["end"], p["limit"], mark=True,
+                                               interval=p["interval"])})
 
     def get_funding_rate_history(self, **p):
         self.calls.append(("funding", p))
@@ -83,3 +85,49 @@ class FakeBybit:
                              "list": [{"id": 1, "symbol": p["symbol"], "maintenanceMargin": "0.01"}]})
         return self._ok({"category": "linear", "nextPageCursor": "",
                          "list": [{"id": 2, "symbol": p["symbol"], "maintenanceMargin": "0.02"}]})
+
+
+H = 3_600_000
+
+
+class FakeBybitBasket(FakeBybit):
+    """+ эндпоинты для корзины: список инструментов, тикеры, OI, лонг/шорт, премиальный индекс."""
+
+    def __init__(self, launch_ms, now_ms, instruments=None, tickers=None, fail=()):
+        super().__init__(launch_ms, now_ms)
+        self.instruments, self.tickers, self.fail = instruments or [], tickers or [], set(fail)
+
+    def get_instruments_info(self, **p):
+        if "symbol" in p:
+            return super().get_instruments_info(**p)
+        self.calls.append(("instruments_all", p))
+        if p.get("cursor") is None:
+            return self._ok({"list": self.instruments[:2], "nextPageCursor": "p2" if len(self.instruments) > 2 else ""})
+        return self._ok({"list": self.instruments[2:], "nextPageCursor": ""})
+
+    def get_tickers(self, **p):
+        return self._ok({"list": self.tickers})
+
+    def _hourly(self, name, p, start_key, end_key, make):
+        if name in self.fail:
+            return {"retCode": 10001, "retMsg": "params error", "result": {}}
+        self.calls.append((name, p))
+        first = -(-max(p[start_key], self.launch_ms) // H) * H
+        ts = list(range(first, min(p[end_key], self.now_ms) + 1, H))
+        ts = list(reversed(ts))[: p["limit"]]
+        return self._ok({"list": [make(t) for t in ts], "nextPageCursor": ""})
+
+    def get_open_interest(self, **p):
+        return self._hourly("oi", p, "startTime", "endTime",
+                            lambda t: {"openInterest": str(1000 + t // H % 50), "timestamp": str(t)})
+
+    def get_long_short_ratio(self, **p):
+        return self._hourly("lsr", p, "startTime", "endTime",
+                            lambda t: {"symbol": p["symbol"], "buyRatio": "0.55", "sellRatio": "0.45", "timestamp": str(t)})
+
+    def get_premium_index_price_kline(self, **p):
+        self.calls.append(("premium", p))
+        first = -(-max(p["start"], self.launch_ms) // (60 * MIN)) * (60 * MIN)
+        cur_open = self.now_ms // (60 * MIN) * (60 * MIN)
+        ts = [t for t in range(first, min(p["end"], cur_open) + 1, 60 * MIN)][-p["limit"]:]
+        return self._ok({"list": [[str(t), "0.0001", "0.0002", "-0.0001", "0.00005"] for t in reversed(ts)]})

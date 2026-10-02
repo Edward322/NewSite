@@ -13,18 +13,25 @@ from bot.data import store
 from bot.data.downloader import write_manifest
 
 _MEMBER = re.compile(r"^raw/([A-Z0-9]{2,30})/([a-z0-9_]{1,40}\.(?:parquet|json))$")
+_ROOT_MEMBER = re.compile(r"^raw/([a-z0-9_]{1,40}\.(?:parquet|json|csv))$")
 
 
 class TransferError(RuntimeError):
     pass
 
 
-def pack(data_dir: Path, symbols: list[str], out_zip: Path) -> dict:
+def pack(data_dir: Path, symbols: list[str], out_zip: Path, extra_files: list[str] = ()) -> dict:
+    """extra_files — общие файлы в корне data_dir (состав корзины, внешние ряды)."""
     data_dir = Path(data_dir)
     out_zip = Path(out_zip)
     out_zip.parent.mkdir(parents=True, exist_ok=True)
     manifest_path = out_zip.parent / "manifest.json"
     manifest = write_manifest(data_dir, manifest_path, symbols)
+    for name in extra_files:
+        f = data_dir / name
+        if f.exists():
+            manifest["files"][name] = {"sha256": store.file_sha256(f), "bytes": f.stat().st_size}
+    store.write_json(manifest_path, manifest)
     if not manifest["files"]:
         raise TransferError(f"В {data_dir} нет данных для упаковки")
     tmp = Path(str(out_zip) + ".tmp")
@@ -54,10 +61,11 @@ def unpack(zip_path: Path, data_dir: Path, manifest_out: Path) -> dict:
         for name in names:
             if name == "manifest.json":
                 continue
-            m = _MEMBER.match(name)
-            if not m:
+            m, mr = _MEMBER.match(name), _ROOT_MEMBER.match(name)
+            if not (m or mr):
                 raise TransferError(f"Неожиданный файл в архиве: {name!r}")
-            if f"{m.group(1)}/{m.group(2)}" not in expected:
+            rel = f"{m.group(1)}/{m.group(2)}" if m else mr.group(1)
+            if rel not in expected:
                 raise TransferError(f"Файла {name} нет в манифесте")
         missing = [rel for rel in expected if f"raw/{rel}" not in names]
         if missing:
