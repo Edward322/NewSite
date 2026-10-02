@@ -1,0 +1,1029 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>С днём рождения</title>
+<!--
+  Абсурдная брейнрот-открытка «С днём рождения».
+  Эмодзи 🤓 🦐 💀 🔥 — Twemoji (jdecked/twemoji), CC-BY 4.0.
+  Шрифты Oswald и Russo One — SIL Open Font License.
+  ?export  — режим 1080×1920 без интерфейса (для скриншота).
+  ?still   — без анимации.
+  ?video   — 1080×1920 с анимацией (для записи видео, цикл 12 с).
+-->
+<style>
+  @font-face { font-family: "Oswald Card"; src: url("fonts/oswald-bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+  @font-face { font-family: "Russo Card"; src: url("fonts/russo-one.ttf") format("truetype"); font-display: block; }
+
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #07000f; }
+  body {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    overflow: hidden; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  #card {
+    display: block; flex: none;
+    height: calc(100dvh - 64px); width: auto; max-width: 100vw; aspect-ratio: 9 / 16;
+    filter: saturate(1.12) contrast(1.04);
+    user-select: none; -webkit-user-select: none;
+  }
+  .tools { height: 64px; display: flex; gap: 10px; align-items: center; }
+  .tools button {
+    font: 600 15px/1 system-ui, sans-serif; color: #fff; background: #ffffff1f;
+    border: 1px solid #ffffff38; border-radius: 999px; padding: 11px 16px; cursor: pointer;
+  }
+  .tools button:hover { background: #ffffff33; }
+  #portrait { cursor: pointer; }
+
+  body.export { display: block; overflow: visible; }
+  body.export #card { width: 1080px; height: 1920px; max-width: none; }
+  body.export .tools { display: none; }
+
+  /* ---------- анимации ---------- */
+  .fb  { transform-box: fill-box; transform-origin: 50% 50%; }
+  .fbb { transform-box: fill-box; transform-origin: 50% 100%; }
+  body:not(.still) .a-sway    { animation: sway 4s ease-in-out infinite; }
+  body:not(.still) .a-rays    { animation: spin 12s linear infinite; transform-origin: 540px 620px; }
+  body:not(.still) .a-fly     { animation: fly 3s ease-in-out infinite; }
+  body:not(.still) .a-prop    { animation: prop .12s linear infinite; }
+  body:not(.still) .a-nod     { animation: nod 1.5s ease-in-out infinite; }
+  body:not(.still) .a-bob     { animation: bob 2s ease-in-out infinite; }
+  body:not(.still) .a-bob2    { animation: bob 3s ease-in-out infinite -1s; }
+  body:not(.still) .a-jump    { animation: jump 1s cubic-bezier(.3,0,.4,1) infinite; }
+  body:not(.still) .a-twirl   { animation: twirl 2s ease-in-out infinite; }
+  body:not(.still) .a-pulse   { animation: pulse 1s ease-in-out infinite; }
+  body:not(.still) .a-wiggle  { animation: wiggle 1.5s ease-in-out infinite; }
+  body:not(.still) .a-ring    { animation: ring 1.5s ease-out infinite; }
+  body:not(.still) .a-ring2   { animation: ring 1.5s ease-out infinite -.75s; }
+  body:not(.still) .a-spin    { animation: spinStar 6s linear infinite; }
+  body:not(.still) .fw        { animation: burst 2s ease-out infinite; }
+  body:not(.still) .tw        { animation: twinkle 1.5s ease-in-out infinite; }
+  body:not(.still) .flame     { animation: flicker .3s ease-in-out infinite alternate; }
+  body:not(.still) .confetti  { animation: drift 3s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+
+  @keyframes sway    { 0%,100% { transform: rotate(-2deg) } 50% { transform: rotate(2deg) } }
+  @keyframes spin    { to { transform: rotate(30deg) } }
+  @keyframes spinStar{ to { transform: rotate(360deg) } }
+  @keyframes fly     { 0%,100% { transform: translate(0,0) rotate(0) } 50% { transform: translate(18px,-14px) rotate(-3deg) } }
+  @keyframes prop    { 0% { transform: scaleY(1) } 50% { transform: scaleY(-1) } 100% { transform: scaleY(1) } }
+  @keyframes nod     { 0%,100% { transform: rotate(-4deg) } 50% { transform: rotate(5deg) translateY(6px) } }
+  @keyframes bob     { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-14px) } }
+  @keyframes jump    { 0%,100% { transform: translateY(0) scale(1.03,.97) } 45% { transform: translateY(-38px) scale(.98,1.03) } }
+  @keyframes twirl   { 0%,100% { transform: rotate(-5deg) } 50% { transform: rotate(5deg) translateY(-10px) } }
+  @keyframes pulse   { 0%,100% { transform: scale(1) } 50% { transform: scale(1.045) } }
+  @keyframes wiggle  { 0%,55%,100% { transform: rotate(0) } 62% { transform: rotate(-16deg) } 72% { transform: rotate(14deg) } 82% { transform: rotate(-10deg) } 90% { transform: rotate(6deg) } }
+  @keyframes ring    { 0% { transform: scale(1); opacity: .8 } 100% { transform: scale(1.8); opacity: 0 } }
+  @keyframes burst   { 0% { transform: scale(.1); opacity: 0 } 10% { opacity: 1 } 65% { opacity: 1 } 100% { transform: scale(1.1); opacity: 0 } }
+  @keyframes twinkle { 0%,100% { opacity: .15; transform: scale(.5) } 50% { opacity: 1; transform: scale(1.2) } }
+  @keyframes flicker { from { transform: scale(1,1) } to { transform: scale(.82,1.18) } }
+  @keyframes drift   { 0%,100% { transform: translateY(0) rotate(0) } 50% { transform: translateY(10px) rotate(25deg) } }
+</style>
+</head>
+<body>
+<svg id="card" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" role="img" aria-label="Брейнрот-открытка «С днём рождения»: акула в кроссовках с шариками и тортом, крокодил-бомбардировщик, моаи в очках, балерина-капучино, шимпанзе в банане и миньон">
+<defs>
+  <!-- ===== фон ===== -->
+  <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#07001a"/>
+    <stop offset=".38" stop-color="#22074a"/>
+    <stop offset=".7" stop-color="#6d1170"/>
+    <stop offset=".9" stop-color="#d9286b"/>
+    <stop offset="1" stop-color="#ff8a3d"/>
+  </linearGradient>
+  <linearGradient id="gFloor" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2b0046"/>
+    <stop offset="1" stop-color="#06000e"/>
+  </linearGradient>
+  <radialGradient id="gGlow" cx="540" cy="620" r="640" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#ffd27a" stop-opacity=".8"/>
+    <stop offset=".35" stop-color="#ff6ab0" stop-opacity=".35"/>
+    <stop offset="1" stop-color="#ff6ab0" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="gRay" cx="540" cy="620" r="1150" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#fff3c4" stop-opacity=".34"/>
+    <stop offset="1" stop-color="#fff3c4" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="gVignette" cx=".5" cy=".5" r=".72">
+    <stop offset=".6" stop-color="#000" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000" stop-opacity=".65"/>
+  </radialGradient>
+  <linearGradient id="gTopScrim" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#000" stop-opacity=".7"/>
+    <stop offset="1" stop-color="#000" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="gBottomScrim" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#000" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000" stop-opacity=".55"/>
+  </linearGradient>
+
+  <!-- ===== фильтры ===== -->
+  <filter id="fSticker" x="-15%" y="-15%" width="130%" height="135%" color-interpolation-filters="sRGB">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="6" result="grow"/>
+    <feFlood flood-color="#ffffff"/>
+    <feComposite in2="grow" operator="in" result="outline"/>
+    <feGaussianBlur in="grow" stdDeviation="9" result="blur"/>
+    <feOffset in="blur" dx="8" dy="14" result="off"/>
+    <feFlood flood-color="#12001f" flood-opacity=".6"/>
+    <feComposite in2="off" operator="in" result="shadow"/>
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="outline"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="fShadow" x="-20%" y="-20%" width="140%" height="140%">
+    <feDropShadow dx="6" dy="14" stdDeviation="10" flood-color="#0a0014" flood-opacity=".6"/>
+  </filter>
+  <filter id="fGlow" x="-50%" y="-50%" width="200%" height="200%">
+    <feGaussianBlur stdDeviation="5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="fBlur8" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8"/></filter>
+  <filter id="fBlur3"><feGaussianBlur stdDeviation="3"/></filter>
+  <filter id="fGrain" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+  </filter>
+  <filter id="fStone" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".05 .08" numOctaves="4" seed="3" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 .1  0 0 0 0 .1  0 0 0 0 .12  0 0 0 -1.6 1.05" result="spots"/>
+    <feComposite in="spots" in2="SourceAlpha" operator="in" result="spotsIn"/>
+    <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="spotsIn"/></feMerge>
+  </filter>
+
+  <!-- ===== общие ===== -->
+  <radialGradient id="gHi" cx=".33" cy=".22" r=".5">
+    <stop offset="0" stop-color="#fff" stop-opacity=".6"/>
+    <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="gShadeDown" x1="0" y1="0" x2="0" y2="1">
+    <stop offset=".55" stop-color="#000830" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000830" stop-opacity=".45"/>
+  </linearGradient>
+  <radialGradient id="gEye" cx=".4" cy=".35" r=".7">
+    <stop offset="0" stop-color="#ffffff"/>
+    <stop offset=".8" stop-color="#e9eef2"/>
+    <stop offset="1" stop-color="#b9c4cc"/>
+  </radialGradient>
+  <radialGradient id="gIris" cx=".45" cy=".4" r=".6">
+    <stop offset="0" stop-color="#9a5524"/>
+    <stop offset=".7" stop-color="#4a250c"/>
+    <stop offset="1" stop-color="#1c0c03"/>
+  </radialGradient>
+  <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#fff6b0"/>
+    <stop offset=".45" stop-color="#ffc93c"/>
+    <stop offset="1" stop-color="#b87800"/>
+  </linearGradient>
+  <radialGradient id="gFlame" cx=".5" cy=".7" r=".6">
+    <stop offset="0" stop-color="#ffffff"/>
+    <stop offset=".35" stop-color="#fff36b"/>
+    <stop offset=".75" stop-color="#ff9a1f"/>
+    <stop offset="1" stop-color="#ff4d00"/>
+  </radialGradient>
+
+  <!-- ===== акула ===== -->
+  <linearGradient id="gShark" x1="0" x2="1" y1="0" y2="0">
+    <stop offset="0" stop-color="#123769"/>
+    <stop offset=".2" stop-color="#2a66ad"/>
+    <stop offset=".5" stop-color="#5c9fe2"/>
+    <stop offset=".8" stop-color="#2a66ad"/>
+    <stop offset="1" stop-color="#123769"/>
+  </linearGradient>
+  <linearGradient id="gFin" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#4b8fd6"/>
+    <stop offset="1" stop-color="#173f78"/>
+  </linearGradient>
+  <linearGradient id="gBelly" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#ffffff"/>
+    <stop offset="1" stop-color="#b4c6da"/>
+  </linearGradient>
+  <linearGradient id="gMouth" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2a0208"/>
+    <stop offset="1" stop-color="#7a1424"/>
+  </linearGradient>
+  <linearGradient id="gShoe" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#5ab0ff"/>
+    <stop offset="1" stop-color="#1450c4"/>
+  </linearGradient>
+  <path id="sharkBody" d="M540,380 C650,380 735,520 748,690 C760,860 745,1040 700,1130 Q540,1185 380,1130 C335,1040 320,860 332,690 C345,520 430,380 540,380Z"/>
+  <path id="mouthShape" d="M410,705 Q540,845 670,705 Q540,740 410,705Z"/>
+  <clipPath id="cMouth"><use href="#mouthShape"/></clipPath>
+  <clipPath id="cEyeR"><ellipse cx="612" cy="600" rx="52" ry="58"/></clipPath>
+
+  <g id="sneaker">
+    <path d="M-46,38 L92,38 Q97,50 88,57 L-40,57 Q-51,51 -46,38Z" fill="#f4f6f8" stroke="#0b2a66" stroke-width="4"/>
+    <path d="M-38,-24 L12,-24 Q20,-2 50,4 Q86,12 88,32 L88,40 L-42,40 Q-47,10 -38,-24Z" fill="url(#gShoe)" stroke="#0b2a66" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M58,8 Q84,14 87,32 L87,39 L62,39 Q66,22 58,8Z" fill="#fff" opacity=".85"/>
+    <path d="M-26,6 L8,-4 L0,10 L38,4 L-6,32 L4,16Z" fill="#ffe100" stroke="#8a6d00" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M16,-16 L32,-4 M24,-20 L40,0 M14,-6 L36,-14" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="-13" cy="-24" rx="26" ry="7" fill="#0b2a66"/>
+    <path d="M-30,47 L84,47" stroke="#c9d1d9" stroke-width="3"/>
+  </g>
+  <g id="sneakerFront">
+    <path d="M-52,40 L52,40 Q57,52 48,59 L-48,59 Q-57,52 -52,40Z" fill="#f4f6f8" stroke="#0b2a66" stroke-width="4"/>
+    <path d="M-24,-24 L24,-24 Q30,-4 44,10 Q55,22 50,42 L-50,42 Q-55,22 -44,10 Q-30,-4 -24,-24Z" fill="url(#gShoe)" stroke="#0b2a66" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M-42,28 Q0,10 42,28 L47,41 L-47,41Z" fill="#fff" opacity=".85"/>
+    <path d="M-13,-14 L13,-6 M-13,-4 L13,4 M13,-14 L-13,-6 M13,-4 L-13,4" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="0" cy="-24" rx="24" ry="6" fill="#0b2a66"/>
+    <path d="M-20,30 L-4,22 L-8,30 L14,24" stroke="#ffe100" stroke-width="5" fill="none" stroke-linejoin="round"/>
+  </g>
+
+  <!-- ===== шарики ===== -->
+  <radialGradient id="gBalloonShade" cx=".38" cy=".32" r=".75">
+    <stop offset="0" stop-color="#fff" stop-opacity=".45"/>
+    <stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000" stop-opacity=".45"/>
+  </radialGradient>
+
+  <!-- ===== торт ===== -->
+  <linearGradient id="gCakeSide" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#a3305f"/>
+    <stop offset=".35" stop-color="#ff8fbd"/>
+    <stop offset=".6" stop-color="#ff6fa8"/>
+    <stop offset="1" stop-color="#8f2552"/>
+  </linearGradient>
+  <radialGradient id="gIcing" cx=".4" cy=".35" r=".7">
+    <stop offset="0" stop-color="#ffffff"/>
+    <stop offset="1" stop-color="#ffdcea"/>
+  </radialGradient>
+  <clipPath id="cPortrait"><circle r="56"/></clipPath>
+
+  <!-- ===== самолёт-крокодил ===== -->
+  <linearGradient id="gPlane" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#a7b574"/>
+    <stop offset=".5" stop-color="#66773a"/>
+    <stop offset="1" stop-color="#3c4720"/>
+  </linearGradient>
+  <linearGradient id="gCroc" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#94d65e"/>
+    <stop offset=".55" stop-color="#4e9a2c"/>
+    <stop offset="1" stop-color="#2d5c18"/>
+  </linearGradient>
+  <linearGradient id="gWing" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8a9a52"/>
+    <stop offset="1" stop-color="#4c5a26"/>
+  </linearGradient>
+  <linearGradient id="gGlass" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#e6fbff"/>
+    <stop offset="1" stop-color="#2f8fd0"/>
+  </linearGradient>
+
+  <!-- ===== моаи ===== -->
+  <linearGradient id="gStone" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#4d555e"/>
+    <stop offset=".3" stop-color="#8f9aa5"/>
+    <stop offset=".5" stop-color="#aeb8c2"/>
+    <stop offset=".7" stop-color="#8f9aa5"/>
+    <stop offset="1" stop-color="#4d555e"/>
+  </linearGradient>
+  <linearGradient id="gStoneNose" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#727d88"/>
+    <stop offset=".45" stop-color="#ccd4db"/>
+    <stop offset="1" stop-color="#6a747e"/>
+  </linearGradient>
+  <pattern id="pHat" width="44" height="44" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+    <rect width="44" height="44" fill="#ff3d9a"/>
+    <rect width="22" height="44" fill="#39e6ff"/>
+    <circle cx="33" cy="12" r="5" fill="#fff36b"/>
+  </pattern>
+
+  <!-- ===== шимпанзе в банане ===== -->
+  <radialGradient id="gFur" cx=".4" cy=".3" r=".75">
+    <stop offset="0" stop-color="#8f5e2e"/>
+    <stop offset=".6" stop-color="#5b3a1e"/>
+    <stop offset="1" stop-color="#341d0b"/>
+  </radialGradient>
+  <linearGradient id="gBanana" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#fff59a"/>
+    <stop offset=".45" stop-color="#ffd60a"/>
+    <stop offset="1" stop-color="#d99a00"/>
+  </linearGradient>
+  <linearGradient id="gBananaIn" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fffbe6"/>
+    <stop offset="1" stop-color="#f3dd8a"/>
+  </linearGradient>
+
+  <!-- ===== балерина-капучино ===== -->
+  <linearGradient id="gPorcelain" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#b9c8d6"/>
+    <stop offset=".35" stop-color="#ffffff"/>
+    <stop offset=".7" stop-color="#eef3f7"/>
+    <stop offset="1" stop-color="#a9b9c8"/>
+  </linearGradient>
+  <linearGradient id="gBodice" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#ff7ab6"/>
+    <stop offset="1" stop-color="#d0156f"/>
+  </linearGradient>
+  <radialGradient id="gTutu" cx=".5" cy=".3" r=".7">
+    <stop offset="0" stop-color="#ffe0f0"/>
+    <stop offset="1" stop-color="#ff7ab6"/>
+  </radialGradient>
+
+  <!-- ===== миньон ===== -->
+  <linearGradient id="gMinion" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#c98f00"/>
+    <stop offset=".25" stop-color="#f7c600"/>
+    <stop offset=".5" stop-color="#ffe45c"/>
+    <stop offset=".75" stop-color="#f7c600"/>
+    <stop offset="1" stop-color="#b98200"/>
+  </linearGradient>
+  <linearGradient id="gDenim" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#4f8ddb"/>
+    <stop offset="1" stop-color="#1f4a88"/>
+  </linearGradient>
+  <linearGradient id="gChrome" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#ffffff"/>
+    <stop offset=".5" stop-color="#8d97a1"/>
+    <stop offset="1" stop-color="#e1e6ea"/>
+  </linearGradient>
+  <rect id="minionBody" x="-150" y="-270" width="300" height="520" rx="150"/>
+  <clipPath id="cMinion"><use href="#minionBody"/></clipPath>
+
+  <!-- ===== заголовок ===== -->
+  <text id="t1" x="540" y="1062" font-family="'Oswald Card', Impact, sans-serif" font-weight="700" font-size="172" text-anchor="middle" letter-spacing="4">С ДНЁМ</text>
+  <text id="t2" x="540" y="1238" font-family="'Oswald Card', Impact, sans-serif" font-weight="700" font-size="190" text-anchor="middle" letter-spacing="4">РОЖДЕНИЯ</text>
+  <linearGradient id="gTitle" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fffbe0"/>
+    <stop offset=".42" stop-color="#ffe03a"/>
+    <stop offset=".58" stop-color="#ffb800"/>
+    <stop offset="1" stop-color="#ff6a00"/>
+  </linearGradient>
+  <linearGradient id="gTitleShine" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".75"/>
+    <stop offset=".45" stop-color="#fff" stop-opacity=".1"/>
+    <stop offset=".46" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
+  <radialGradient id="gBurst" cx=".5" cy=".5" r=".5">
+    <stop offset="0" stop-color="#fff36b"/>
+    <stop offset=".6" stop-color="#ff9d00"/>
+    <stop offset="1" stop-color="#ff2d55"/>
+  </radialGradient>
+
+  <!-- ===== Twemoji (CC-BY 4.0) ===== -->
+  <symbol id="emNerd" viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="#FFCC4D"/><path fill="#664500" d="M27.335 23.629a.501.501 0 0 0-.635-.029c-.039.029-3.922 2.9-8.7 2.9-4.766 0-8.662-2.871-8.7-2.9a.5.5 0 0 0-.729.657C8.7 24.472 11.788 29.5 18 29.5s9.301-5.028 9.429-5.243a.499.499 0 0 0-.094-.628z"/><path fill="#65471B" d="M18 26.591c-.148 0-.291-.011-.438-.016v4.516h.875v-4.517c-.145.005-.289.017-.437.017z"/><path fill="#FFF" d="M22 26c.016-.004-1.45.378-2.446.486-.366.042-.737.076-1.117.089v4.517H20c1.1 0 2-.9 2-2V26zm-8 0c-.016-.004 1.45.378 2.446.486.366.042.737.076 1.117.089v4.517H16c-1.1 0-2-.9-2-2V26z"/><path fill="#65471B" d="M27.335 23.629a.501.501 0 0 0-.635-.029c-.03.022-2.259 1.668-5.411 2.47-.443.113-1.864.43-3.286.431-1.424 0-2.849-.318-3.292-.431-3.152-.802-5.381-2.448-5.411-2.47a.501.501 0 0 0-.729.657c.097.162 1.885 3.067 5.429 4.481v-1.829c-.016-.004 1.450.378 2.446.486.366.042.737.076 1.117.089.146.005.289.016.437.016.148 0 .291-.011.438-.016.38-.013.751-.046 1.117-.089.996-.108 2.462-.49 2.446-.486v1.829c3.544-1.414 5.332-4.319 5.429-4.481a.5.5 0 0 0-.095-.628zm-.711-9.605c0 1.714-.938 3.104-2.096 3.104-1.157 0-2.096-1.390-2.096-3.104s.938-3.104 2.096-3.104c1.158 0 2.096 1.390 2.096 3.104zm-17.167 0c0 1.714.938 3.104 2.096 3.104 1.157 0 2.096-1.390 2.096-3.104s-.938-3.104-2.096-3.104c-1.158 0-2.096 1.390-2.096 3.104z"/><path fill="#292F33" d="M34.808 9.627c-.171-.166-1.267.274-2.376-.291-2.288-1.166-8.070-2.291-11.834.376-.403.285-2.087.333-2.558.313-.471.021-2.155-.027-2.558-.313-3.763-2.667-9.545-1.542-11.833-.376-1.109.565-2.205.125-2.376.291-.247.239-.247 1.196.001 1.436.246.239 1.477.515 1.722 1.232.247.718.249 4.958 2.213 6.424 1.839 1.372 6.129 1.785 8.848.238 2.372-1.349 2.289-4.189 2.724-5.881.155-.603.592-.907 1.26-.907s1.105.304 1.26.907c.435 1.691.351 4.532 2.724 5.881 2.719 1.546 7.009 1.133 8.847-.238 1.965-1.465 1.967-5.706 2.213-6.424.245-.717 1.476-.994 1.722-1.232.248-.24.249-1.197.001-1.436zm-20.194 3.650c-.077 1.105-.274 3.227-1.597 3.980-.811.462-1.868.743-2.974.743h-.001c-1.225 0-2.923-.347-3.587-.842-.83-.619-1.146-3.167-1.265-4.120-.076-.607-.28-2.090.388-2.318 1.06-.361 2.539-.643 4.052-.643.693 0 3.021.043 4.155.741 1.005.617.872 1.851.829 2.459zm16.278-.253c-.119.954-.435 3.515-1.265 4.134-.664.495-2.362.842-3.587.842h-.001c-1.107 0-2.163-.281-2.975-.743-1.323-.752-1.520-2.861-1.597-3.966-.042-.608-.176-1.851.829-2.468 1.135-.698 3.462-.746 4.155-.746 1.513 0 2.991.277 4.052.638.668.228.465 1.702.389 2.309z"/></symbol>
+  <symbol id="emShrimp" viewBox="0 0 36 36"><path fill="#BE1931" d="M4.458 7.429c-4.53.32-4.775-5.511 3.801-4.738 8.576.773 17.964 3.4 20.218 1.789 1.789-1.279 1.416-3.608.966-4.078-.45-.469-1.132-.045-.787.682.344.728-.062 2.678-2.262 2.875-2.199.197-10.4-1.352-15.575-2.081C5.534 1.136 1.287 1.504.364 4.46c-.919 2.947 1.944 3.873 3.458 4.017 1.514.143.636-1.048.636-1.048z"/><path fill="#DD2E44" d="M6.083 6.708c-4.542 0-4.375-5.833 4.125-4.458S27.887 6.907 30.25 5.458c1.875-1.15 1.666-3.5 1.25-4s-1.125-.125-.833.625-.25 2.667-2.458 2.708c-2.208.043-10.279-2.08-15.39-3.171C7.6.506 3.337.575 2.208 3.458c-1.125 2.875 1.667 4 3.167 4.25s.708-1 .708-1z"/><path fill="#DD2E44" d="M33.378 13.246c-2.541-3.928-6.765-6.629-11.255-7.484C14.806 4.369 4.812 4.938 2 9c-.562.812-.478 4.671 3 6 1.763.674 6.542-.162 9.841-.462l-.22 1.737a1 1 0 0 0 1.984.252l.264-2.082c.796.02 1.572.1 2.336.232l-.599 1.959a1 1 0 0 0 1.912.585l.638-2.088c.742.223 1.479.5 2.219.826l-1.043 1.695a1 1 0 0 0 1.703 1.048l1.14-1.854c.088.047.174.089.262.138 2.808 1.558 4.526 5.937 4.454 7.555-.036.812.169 1.406.608 1.771.792.652 2.078.343 3.018.117.318-.077.647-.156.799-.153l.302-.992.098-.285c1.981-5.772.366-9.121-1.338-11.753z"/><path fill="#BE1931" d="M22.193 8.503c-.609 1.144.135.936 1.025.066.596-.583 1.541-1.218 2.541-1.671a17.51 17.51 0 0 0-1.714-.641c-.785.756-1.522 1.628-1.852 2.246zm5.981 3.096c1.271-.63 2.827-.215 4.356.481a16.74 16.74 0 0 0-2.296-2.389c-.717.044-1.431.26-2.034.703-1.005.737-2.215 2.288-.026 1.205zm3.863 3.908c-1.196.349-2.864 1.392-.438 1.124 1.411-.156 2.731.768 3.93 1.947a10.78 10.78 0 0 0-.782-2.82c-.832-.37-1.791-.519-2.71-.251zm2.44 8.633c-.402-.205-2.004 1.771-3.686-.738-.003-.005-.008-.005-.011-.01-.076-1.172-.625-6.221-5.888-8.991a13.550 13.550 0 0 0-1.837-.8 17.274 17.274 0 0 0-2.827-.713 21.437 21.437 0 0 0-1.686-.221c-.103-.009-.209-.011-.313-.019a23.302 23.302 0 0 0-3.025-.003c-.665.039-1.333.097-1.998.168-3.97.423-7.844 1.242-10.491.452.506.706 1.24 1.336 2.285 1.735 1.491.569 5.137.06 8.222-.292l.002.228a1 1 0 0 0 2-.018l-.004-.411a16.190 16.190 0 0 1 1.589-.066c.33.007.656.028.98.055l-.097.406a1 1 0 1 0 1.946.463l.137-.577c.788.165 1.566.386 2.342.667l-.265.525a1.003 1.003 0 0 0 .441 1.344 1.003 1.003 0 0 0 1.345-.441l.327-.648c.488.232.977.477 1.472.752 2.792 1.55 4.506 5.887 4.453 7.526a2.095 2.095 0 0 0-.03.387c.01.508-.112 1.094-.365 1.743-.511 1.316-1.538 2.8-2.619 3.779-.416.379-.718.801-.895 1.254-.32.829-.167 1.685.385 2.131.107.087.224.151.346.197 3.333-3.019 2.071-1.367 2.898 1.117.332.61.822.757 1.065.789.706.091 1.403-.398 1.779-1.249l.049-.118c.564-1.452 2.175-8.657 2.328-9.716a.66.66 0 0 0-.354-.687z"/><path fill="#292F33" d="M26.714 34.003c.39.147.839.092 1.244-.174.538-.353.893-.405 1.033-.343.147.064.274.35.339.762.059.367.16.649.282.872-.828-2.484 1.947-6.731-2.898-1.117z"/><circle cx="7" cy="9" r="1" fill="#292F33"/></symbol>
+  <symbol id="emSkull" viewBox="0 0 36 36"><path fill="#CCD6DD" d="M34 16C34 6 26.837 0 18 0 9.164 0 2 6 2 16c0 5.574.002 10.388 6 12.64V33a3 3 0 1 0 6 0v-3.155c.324.027.659.05 1 .07V33a3 3 0 1 0 6 0v-3.085c.342-.021.676-.043 1-.07V33a3 3 0 0 0 6 0v-4.36c5.998-2.252 6-7.066 6-12.64z"/><circle cx="11" cy="14" r="5" fill="#292F33"/><circle cx="25" cy="14" r="5" fill="#292F33"/><path fill="#292F33" d="M19.903 23.062C19.651 22.449 18.9 22 18 22s-1.652.449-1.903 1.062A1.494 1.494 0 0 0 15 24.5a1.5 1.5 0 0 0 1.5 1.5c.655 0 1.206-.422 1.41-1.007.03.001.059.007.09.007s.06-.006.09-.007a1.496 1.496 0 1 0 1.813-1.931z"/></symbol>
+  <symbol id="emFire" viewBox="0 0 36 36"><path fill="#F4900C" d="M35 19a16.96 16.96 0 0 0-1.04-5.868c-.46 5.389-3.333 8.157-6.335 6.868-2.812-1.208-.917-5.917-.777-8.164.236-3.809-.012-8.169-6.931-11.794 2.875 5.5.333 8.917-2.333 9.125-2.958.231-5.667-2.542-4.667-7.042-3.238 2.386-3.332 6.402-2.333 9 1.042 2.708-.042 4.958-2.583 5.208-2.84.28-4.418-3.041-2.963-8.333A16.936 16.936 0 0 0 1 19c0 9.389 7.611 17 17 17s17-7.611 17-17z"/><path fill="#FFCC4D" d="M28.394 23.999c.148 3.084-2.561 4.293-4.019 3.709-2.106-.843-1.541-2.291-2.083-5.291s-2.625-5.083-5.708-6c2.25 6.333-1.247 8.667-3.08 9.084-1.872.426-3.753-.001-3.968-4.007A11.964 11.964 0 0 0 6 30c0 .368.023.73.055 1.09C9.125 34.124 13.342 36 18 36s8.875-1.876 11.945-4.91c.032-.36.055-.722.055-1.09 0-2.187-.584-4.236-1.606-6.001z"/></symbol>
+
+  <!-- трубка (Material Icons, Apache 2.0) -->
+  <path id="handset" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+</defs>
+
+<!-- ================= ФОН ================= -->
+<rect width="1080" height="1190" fill="url(#gSky)"/>
+<rect y="1185" width="1080" height="735" fill="url(#gFloor)"/>
+<g id="grid" stroke="#ff4fd8" stroke-width="3" opacity=".55" filter="url(#fGlow)"></g>
+<g class="a-rays"><g id="rays" fill="url(#gRay)"></g></g>
+<ellipse cx="540" cy="640" rx="640" ry="700" fill="url(#gGlow)"/>
+<g id="stars"></g>
+<g id="fireworks" filter="url(#fGlow)"></g>
+<g id="confettiBack"></g>
+
+<!-- ================= БОМБАРДИРО КРОКОДИЛО ================= -->
+<g transform="translate(222 400)">
+ <g class="a-fly">
+  <g transform="rotate(11) scale(.74)" filter="url(#fSticker)">
+    <g fill="#ffffff" opacity=".5">
+      <circle cx="-245" cy="-6" r="22"/><circle cx="-292" cy="-16" r="28"/><circle cx="-352" cy="-8" r="34"/>
+    </g>
+    <path d="M-30,-28 L50,-28 L-20,-150 L-75,-150Z" fill="#4c5a26" stroke="#1e2410" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="14" cy="-92" rx="30" ry="15" fill="#3d4a1c" stroke="#1e2410" stroke-width="4"/>
+    <path d="M-140,-22 L-196,-104 L-160,-104 L-108,-32Z" fill="url(#gCroc)" stroke="#1e2410" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-150,2 L-218,-14 L-214,20 L-150,18Z" fill="#4c5a26" stroke="#1e2410" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-175,-8 Q-120,-46 0,-44 Q100,-42 155,-26 L155,30 Q100,44 0,42 Q-120,36 -175,6Z" fill="url(#gPlane)" stroke="#1e2410" stroke-width="5"/>
+    <g id="crocScales" fill="#4e9a2c" stroke="#1e2410" stroke-width="3"></g>
+    <path d="M-150,14 Q0,30 150,16" stroke="#2b3315" stroke-width="3" fill="none" opacity=".6"/>
+    <g fill="#2b3315" opacity=".7">
+      <circle cx="-110" cy="-6" r="3"/><circle cx="-80" cy="-8" r="3"/><circle cx="-50" cy="-9" r="3"/><circle cx="-20" cy="-9" r="3"/><circle cx="10" cy="-9" r="3"/><circle cx="40" cy="-9" r="3"/>
+    </g>
+    <path d="M58,-42 Q80,-74 120,-64 Q140,-56 142,-34Z" fill="url(#gGlass)" stroke="#1e2410" stroke-width="4"/>
+    <path d="M78,-50 Q92,-64 112,-60" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".8"/>
+    <!-- голова -->
+    <path d="M140,6 L292,10 Q302,24 282,32 Q210,42 140,32Z" fill="url(#gCroc)" stroke="#1e2410" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M140,-4 L300,-6 L292,10 L140,6Z" fill="#7a1424"/>
+    <g id="crocTeeth" fill="#fff" stroke="#9a9a8a" stroke-width="1"></g>
+    <path d="M135,-36 Q170,-60 215,-46 Q270,-40 300,-22 Q314,-12 302,-4 L140,-2Z" fill="url(#gCroc)" stroke="#1e2410" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="190" cy="-52" rx="22" ry="17" fill="url(#gCroc)" stroke="#1e2410" stroke-width="4"/>
+    <ellipse cx="192" cy="-54" rx="12" ry="10" fill="#ffd400"/>
+    <ellipse cx="194" cy="-54" rx="3.5" ry="8.5" fill="#000"/>
+    <path d="M170,-72 L214,-62" stroke="#1e2410" stroke-width="7" stroke-linecap="round"/>
+    <ellipse cx="292" cy="-22" rx="6" ry="3.5" fill="#1e2410"/>
+    <g fill="#2d5c18" opacity=".7"><circle cx="230" cy="-34" r="4"/><circle cx="250" cy="-30" r="3.5"/><circle cx="214" cy="-30" r="3"/></g>
+    <!-- ближнее крыло -->
+    <path d="M-36,18 L64,18 L6,160 L-66,160Z" fill="url(#gWing)" stroke="#1e2410" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="-22" cy="118" r="24" fill="#ff3d8b" stroke="#1e2410" stroke-width="3"/>
+    <circle cx="-22" cy="118" r="15" fill="#fff"/>
+    <circle cx="-22" cy="118" r="7" fill="#29a3ff"/>
+    <ellipse cx="34" cy="78" rx="42" ry="20" fill="url(#gPlane)" stroke="#1e2410" stroke-width="4"/>
+    <ellipse cx="76" cy="78" rx="8" ry="11" fill="#222"/>
+    <g transform="translate(82 78)">
+      <g class="a-prop fb">
+        <ellipse rx="7" ry="60" fill="#e4e8ec" opacity=".45"/>
+        <rect x="-4" y="-58" width="8" height="116" rx="4" fill="#2b2b2b"/>
+      </g>
+    </g>
+  </g>
+ </g>
+</g>
+
+<!-- ================= МОАИ ================= -->
+<g transform="translate(905 398) scale(.72)">
+ <g class="a-nod fbb" filter="url(#fSticker)">
+  <path d="M-120,150 Q0,178 120,150 L150,300 L-150,300Z" fill="url(#gStone)" stroke="#2a2f35" stroke-width="6" filter="url(#fStone)"/>
+  <g filter="url(#fStone)">
+    <path d="M-92,-70 Q-130,-64 -128,0 Q-126,64 -96,72Z" fill="#6d7680" stroke="#2a2f35" stroke-width="6"/>
+    <path d="M92,-70 Q130,-64 128,0 Q126,64 96,72Z" fill="#6d7680" stroke="#2a2f35" stroke-width="6"/>
+    <path d="M-84,-150 Q0,-174 84,-150 L98,-60 Q104,50 88,125 Q60,172 0,174 Q-60,172 -88,125 Q-104,50 -98,-60Z" fill="url(#gStone)" stroke="#2a2f35" stroke-width="6"/>
+    <path d="M-90,-62 Q0,-86 90,-62 L88,-34 Q0,-50 -88,-34Z" fill="#2a2f35" opacity=".45"/>
+    <path d="M-14,-52 L14,-52 L34,46 Q0,64 -34,46Z" fill="url(#gStoneNose)" stroke="#2a2f35" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="-17" cy="46" rx="9" ry="5" fill="#2a2f35"/>
+    <ellipse cx="17" cy="46" rx="9" ry="5" fill="#2a2f35"/>
+    <path d="M-46,92 Q0,78 46,92 Q0,106 -46,92Z" fill="#3a4048"/>
+    <path d="M-40,112 Q0,122 40,112" stroke="#3a4048" stroke-width="6" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- цепь с кулоном 67 -->
+  <path d="M-84,160 Q0,244 84,160" stroke="url(#gGold)" stroke-width="11" fill="none" stroke-dasharray="15 6" stroke-linecap="round"/>
+  <circle cx="0" cy="226" r="40" fill="url(#gGold)" stroke="#7a4d00" stroke-width="5"/>
+  <text x="0" y="242" font-family="'Russo Card', sans-serif" font-size="44" text-anchor="middle" fill="#6b3d00">67</text>
+  <!-- сигара -->
+  <g transform="translate(28 100) rotate(16)">
+    <rect x="0" y="-10" width="118" height="20" rx="10" fill="#6b3d1f" stroke="#2a160a" stroke-width="4"/>
+    <rect x="18" y="-10" width="18" height="20" fill="#d4a017" stroke="#2a160a" stroke-width="3"/>
+    <circle cx="114" cy="0" r="9" fill="#ff5a1f" filter="url(#fGlow)"/>
+    <path d="M124,-12 q14,-22 0,-44 q-14,-22 6,-48" stroke="#e8e8e8" stroke-width="7" fill="none" opacity=".55" stroke-linecap="round"/>
+  </g>
+  <g id="dealWithIt" transform="translate(-112 -64) rotate(-3)"></g>
+  <!-- колпак -->
+  <g transform="translate(14 -148) rotate(14)">
+    <path d="M-60,0 L0,-176 L60,0 Q0,18 -60,0Z" fill="url(#pHat)" stroke="#5a003a" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-62,0 Q0,22 62,0" stroke="#fff36b" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="1 14"/>
+    <circle cx="0" cy="-180" r="22" fill="#fff36b" stroke="#5a003a" stroke-width="4"/>
+  </g>
+ </g>
+</g>
+
+<!-- ================= ТРАЛАЛЕРО ТРАЛАЛА + шарики + торт ================= -->
+<g class="a-sway fbb">
+  <!-- шарики (за акулой) -->
+  <g id="balloons"></g>
+
+  <g transform="translate(540 300) scale(.965) translate(-540 -380)" filter="url(#fShadow)">
+    <path d="M478,440 C515,360 575,318 650,302 C628,362 625,402 622,452Z" fill="url(#gFin)" stroke="#0e2a52" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M690,1050 C760,1040 820,990 860,920 C852,1000 832,1060 806,1096 C850,1122 882,1170 902,1232 C842,1192 762,1152 690,1140Z" fill="url(#gFin)" stroke="#0e2a52" stroke-width="5" stroke-linejoin="round"/>
+    <g fill="none" stroke-linecap="round">
+      <path d="M455,1080 L390,1428 M625,1080 L690,1428 M540,1080 L540,1440" stroke="#0e2a52" stroke-width="54"/>
+      <path d="M455,1080 L390,1428 M625,1080 L690,1428 M540,1080 L540,1440" stroke="#3a78bf" stroke-width="44"/>
+      <path d="M446,1090 L384,1420 M616,1090 L680,1420 M532,1090 L532,1430" stroke="#6aa8e6" stroke-width="10" opacity=".7"/>
+    </g>
+    <use href="#sneaker" transform="translate(390 1430) scale(-1 1)"/>
+    <use href="#sneaker" transform="translate(690 1430)"/>
+    <use href="#sneakerFront" transform="translate(540 1444)"/>
+
+    <use href="#sharkBody" fill="url(#gShark)" stroke="#0e2a52" stroke-width="6"/>
+    <use href="#sharkBody" fill="url(#gHi)"/>
+    <path d="M418,1124 C392,1010 396,880 432,792 Q540,812 648,792 C684,880 688,1010 662,1124 Q540,1170 418,1124Z" fill="url(#gBelly)"/>
+    <use href="#sharkBody" fill="url(#gShadeDown)"/>
+    <use href="#sharkBody" fill="none" stroke="#0e2a52" stroke-width="6"/>
+    <g fill="none" stroke="#0e2a52" stroke-width="6" stroke-linecap="round" opacity=".7">
+      <path d="M370,770 q-14,30 0,64"/><path d="M390,778 q-12,28 0,58"/><path d="M410,790 q-10,24 0,48"/>
+      <path d="M710,770 q14,30 0,64"/><path d="M690,778 q12,28 0,58"/><path d="M670,790 q10,24 0,48"/>
+    </g>
+    <ellipse cx="515" cy="468" rx="9" ry="5" fill="#0e2a52"/>
+    <ellipse cx="565" cy="468" rx="9" ry="5" fill="#0e2a52"/>
+    <ellipse cx="402" cy="690" rx="28" ry="15" fill="#ff7aa8" opacity=".35"/>
+    <ellipse cx="678" cy="690" rx="28" ry="15" fill="#ff7aa8" opacity=".35"/>
+
+    <!-- глаза -->
+    <ellipse cx="468" cy="600" rx="52" ry="58" fill="url(#gEye)"/>
+    <circle cx="480" cy="612" r="30" fill="url(#gIris)"/>
+    <circle cx="482" cy="614" r="15" fill="#050505"/>
+    <circle cx="470" cy="601" r="9" fill="#fff"/>
+    <circle cx="492" cy="625" r="4" fill="#fff" opacity=".8"/>
+    <ellipse cx="468" cy="600" rx="52" ry="58" fill="none" stroke="#0e2a52" stroke-width="5"/>
+
+    <ellipse cx="612" cy="600" rx="52" ry="58" fill="url(#gEye)"/>
+    <circle cx="600" cy="614" r="30" fill="url(#gIris)"/>
+    <circle cx="598" cy="616" r="15" fill="#050505"/>
+    <circle cx="588" cy="603" r="9" fill="#fff"/>
+    <path clip-path="url(#cEyeR)" d="M552,530 L672,530 L672,590 Q612,570 552,590Z" fill="#3f7fc4" stroke="#0e2a52" stroke-width="5"/>
+    <ellipse cx="612" cy="600" rx="52" ry="58" fill="none" stroke="#0e2a52" stroke-width="5"/>
+
+    <path d="M416,524 Q460,474 516,508" stroke="#0e2a52" stroke-width="16" stroke-linecap="round" fill="none"/>
+    <path d="M566,540 Q614,524 666,546" stroke="#0e2a52" stroke-width="16" stroke-linecap="round" fill="none"/>
+
+    <!-- пасть -->
+    <use href="#mouthShape" fill="url(#gMouth)"/>
+    <g clip-path="url(#cMouth)">
+      <ellipse cx="540" cy="808" rx="64" ry="28" fill="#e2587a"/>
+      <g id="sharkTeeth" fill="#fffef5" stroke="#c9c2b0" stroke-width="1.5" stroke-linejoin="round"></g>
+    </g>
+    <use href="#mouthShape" fill="none" stroke="#0e2a52" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M402,716 q-10,-14 4,-26" stroke="#0e2a52" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M678,716 q10,-14 -4,-26" stroke="#0e2a52" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+    <!-- плавники-руки -->
+    <path d="M352,838 C300,850 250,900 215,975 C270,965 330,940 366,904Z" fill="url(#gFin)" stroke="#0e2a52" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M728,838 C780,850 830,900 865,975 C810,965 750,940 714,904Z" fill="url(#gFin)" stroke="#0e2a52" stroke-width="5" stroke-linejoin="round"/>
+  </g>
+
+  <!-- торт на плавнике -->
+  <g id="cake" filter="url(#fShadow)">
+    <ellipse cx="880" cy="868" rx="150" ry="28" fill="#e6ecf2" stroke="#6b7785" stroke-width="4"/>
+    <ellipse cx="880" cy="862" rx="124" ry="20" fill="#c7d0da"/>
+    <path d="M745,715 L745,845 A135,36 0 0 0 1015,845 L1015,715Z" fill="url(#gCakeSide)" stroke="#7a2142" stroke-width="5"/>
+    <path d="M748,838 A132,34 0 0 0 1012,838" stroke="#fff" stroke-width="16" fill="none" stroke-dasharray="1 17" stroke-linecap="round"/>
+    <g id="drips" fill="#fff4f8" stroke="#e8c7d5" stroke-width="2"></g>
+    <path d="M745,715 A135,36 0 0 0 1015,715 L1015,730 A135,36 0 0 1 745,730Z" fill="#fff4f8"/>
+    <ellipse cx="880" cy="715" rx="135" ry="36" fill="url(#gIcing)" stroke="#e8c7d5" stroke-width="3"/>
+    <g id="sprinkles"></g>
+    <g id="candles"></g>
+    <g id="portrait" transform="translate(880 790)">
+      <circle r="68" fill="#fff8e7" stroke="#ffcf3f" stroke-width="10"/>
+      <g clip-path="url(#cPortrait)">
+        <circle r="56" fill="#8fd3ff"/>
+        <use id="portraitEmoji" href="#emNerd" x="-50" y="-48" width="100" height="100"/>
+        <image id="portraitImg" x="-56" y="-56" width="112" height="112" preserveAspectRatio="xMidYMid slice" style="display:none"/>
+      </g>
+      <g id="piping" fill="#fff"></g>
+    </g>
+  </g>
+</g>
+
+<!-- ================= ЗАГОЛОВОК ================= -->
+<g transform="rotate(-4 540 1130)">
+  <g class="a-pulse fb">
+    <use href="#t1" fill="none" stroke="#ffcf40" stroke-width="54" stroke-linejoin="round" opacity=".45" filter="url(#fBlur8)"/>
+    <use href="#t2" fill="none" stroke="#ffcf40" stroke-width="54" stroke-linejoin="round" opacity=".45" filter="url(#fBlur8)"/>
+    <g id="extrude"></g>
+    <use href="#t1" fill="#2a0a00" stroke="#2a0a00" stroke-width="24" stroke-linejoin="round"/>
+    <use href="#t2" fill="#2a0a00" stroke="#2a0a00" stroke-width="24" stroke-linejoin="round"/>
+    <use href="#t1" fill="url(#gTitle)" stroke="#fff6c0" stroke-width="3"/>
+    <use href="#t2" fill="url(#gTitle)" stroke="#fff6c0" stroke-width="3"/>
+    <use href="#t1" fill="url(#gTitleShine)"/>
+    <use href="#t2" fill="url(#gTitleShine)"/>
+    <g id="titleSparkles" fill="#fff" filter="url(#fGlow)"></g>
+  </g>
+  <use href="#emShrimp" x="640" y="846" width="96" height="96" transform="rotate(8 688 894)"/>
+</g>
+
+<!-- стикеры -->
+<g transform="translate(955 1010) rotate(12)" filter="url(#fShadow)">
+  <g class="a-pulse fb">
+    <g class="a-spin fb"><path id="burstStar" fill="url(#gBurst)" stroke="#fff" stroke-width="7" stroke-linejoin="round"/></g>
+    <text y="-6" font-family="'Russo Card', sans-serif" font-size="46" text-anchor="middle" fill="#fff" stroke="#6a0018" stroke-width="9" paint-order="stroke" stroke-linejoin="round">+1000</text>
+    <text y="42" font-family="'Russo Card', sans-serif" font-size="40" text-anchor="middle" fill="#fff" stroke="#6a0018" stroke-width="9" paint-order="stroke" stroke-linejoin="round">АУРЫ</text>
+  </g>
+</g>
+<g transform="translate(120 950) rotate(-14)"><g class="a-bob fb"><use href="#emSkull" x="-52" y="-52" width="104" height="104" filter="url(#fSticker)"/></g></g>
+<g transform="translate(236 1010) rotate(10)"><g class="a-bob2 fb"><use href="#emFire" x="-40" y="-40" width="80" height="80"/></g></g>
+
+<!-- ================= БАЛЕРИНА КАПУЧИНА ================= -->
+<g transform="translate(168 1566)">
+ <g class="a-twirl fbb" filter="url(#fSticker)">
+  <!-- руки -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M-30,-62 C-130,-84 -132,-262 -16,-282" stroke="#9c6446" stroke-width="30"/>
+    <path d="M30,-62 C130,-84 132,-262 16,-282" stroke="#9c6446" stroke-width="30"/>
+    <path d="M-30,-62 C-130,-84 -132,-262 -16,-282" stroke="#f3c6a5" stroke-width="22"/>
+    <path d="M30,-62 C130,-84 132,-262 16,-282" stroke="#f3c6a5" stroke-width="22"/>
+  </g>
+  <ellipse cx="-12" cy="-288" rx="18" ry="13" fill="#f3c6a5" stroke="#9c6446" stroke-width="4" transform="rotate(-20 -12 -288)"/>
+  <ellipse cx="12" cy="-288" rx="18" ry="13" fill="#f3c6a5" stroke="#9c6446" stroke-width="4" transform="rotate(20 12 -288)"/>
+  <!-- пар -->
+  <g fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".6">
+    <path d="M-22,-212 q-12,-14 0,-28 q12,-14 0,-28"/><path d="M8,-214 q-12,-14 0,-28 q12,-14 0,-28"/>
+  </g>
+  <!-- нога в арабеске -->
+  <path d="M14,34 C70,52 130,64 176,44" stroke="#9c6446" stroke-width="30" fill="none" stroke-linecap="round"/>
+  <path d="M14,34 C70,52 130,64 176,44" stroke="#f3c6a5" stroke-width="22" fill="none" stroke-linecap="round"/>
+  <path d="M168,30 Q204,22 222,32 Q206,52 172,58Z" fill="#ff9cc8" stroke="#a3195b" stroke-width="4" stroke-linejoin="round"/>
+  <!-- опорная нога -->
+  <path d="M-8,34 C-14,120 -4,196 -8,250" stroke="#9c6446" stroke-width="30" fill="none" stroke-linecap="round"/>
+  <path d="M-8,34 C-14,120 -4,196 -8,250" stroke="#f3c6a5" stroke-width="22" fill="none" stroke-linecap="round"/>
+  <path d="M-22,236 Q-8,232 6,236 L2,282 Q-8,290 -18,282Z" fill="#ff9cc8" stroke="#a3195b" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M-20,236 L6,214 M4,236 L-22,214" stroke="#ff9cc8" stroke-width="4" stroke-linecap="round"/>
+  <!-- пачка -->
+  <path id="tutuBack" d="M-140,30 Q0,-10 140,30 Q0,74 -140,30Z" fill="#ff8fc2" opacity=".9"/>
+  <g id="tutuFrill" fill="url(#gTutu)" stroke="#e0458e" stroke-width="3"></g>
+  <path d="M-34,-72 Q-46,-12 -30,26 L30,26 Q46,-12 34,-72 Q0,-60 -34,-72Z" fill="url(#gBodice)" stroke="#a3195b" stroke-width="4"/>
+  <path d="M-30,16 Q0,24 30,16" stroke="#fff" stroke-width="5" fill="none" opacity=".7"/>
+  <rect x="-11" y="-96" width="22" height="30" fill="#f3c6a5" stroke="#9c6446" stroke-width="3"/>
+  <!-- блюдце-воротник -->
+  <ellipse cx="0" cy="-90" rx="88" ry="16" fill="url(#gPorcelain)" stroke="#7f95a9" stroke-width="4"/>
+  <!-- чашка-голова -->
+  <path d="M66,-178 C120,-180 120,-110 58,-112" stroke="#7f95a9" stroke-width="27" fill="none"/>
+  <path d="M66,-178 C120,-180 120,-110 58,-112" stroke="#f4f8fb" stroke-width="17" fill="none"/>
+  <path d="M-72,-198 L72,-198 Q70,-122 44,-96 L-44,-96 Q-70,-122 -72,-198Z" fill="url(#gPorcelain)" stroke="#7f95a9" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M-70,-180 L70,-180" stroke="#ffb3d6" stroke-width="6"/>
+  <ellipse cx="0" cy="-198" rx="72" ry="18" fill="#f7fbff" stroke="#7f95a9" stroke-width="5"/>
+  <ellipse cx="0" cy="-197" rx="62" ry="13" fill="#9a5a2a"/>
+  <ellipse cx="0" cy="-196" rx="55" ry="10" fill="#e6c49b"/>
+  <path d="M0,-189 C-16,-196 -10,-206 0,-200 C10,-206 16,-196 0,-189Z" fill="#fff"/>
+  <!-- лицо -->
+  <g stroke="#3a2a2a" stroke-width="4" fill="none" stroke-linecap="round">
+    <path d="M-46,-152 Q-30,-138 -14,-152"/><path d="M14,-152 Q30,-138 46,-152"/>
+    <path d="M-44,-150 l-8,-8 M-36,-145 l-5,-10 M-26,-143 l-2,-11"/><path d="M44,-150 l8,-8 M36,-145 l5,-10 M26,-143 l2,-11"/>
+    <path d="M-44,-170 Q-30,-178 -16,-172"/><path d="M16,-172 Q30,-178 44,-170"/>
+  </g>
+  <ellipse cx="-44" cy="-128" rx="14" ry="8" fill="#ff8fb8" opacity=".6"/>
+  <ellipse cx="44" cy="-128" rx="14" ry="8" fill="#ff8fb8" opacity=".6"/>
+  <path d="M-12,-122 Q-6,-128 0,-123 Q6,-128 12,-122 Q0,-110 -12,-122Z" fill="#e0245e"/>
+ </g>
+</g>
+
+<!-- ================= ШИМПАНЗИНИ БАНАНИНИ ================= -->
+<g transform="translate(918 1562)">
+ <g class="a-jump fbb" filter="url(#fSticker)">
+  <path d="M-70,-20 Q-150,8 -160,112 Q-130,86 -98,72 Q-82,30 -60,10Z" fill="url(#gBanana)" stroke="#6b4a00" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M70,-20 Q150,8 160,112 Q130,86 98,72 Q82,30 60,10Z" fill="url(#gBanana)" stroke="#6b4a00" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M-78,-30 Q-96,120 -44,232 Q-10,286 22,262 Q12,250 18,236 Q78,130 78,-30Z" fill="url(#gBanana)" stroke="#6b4a00" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M-34,254 Q-10,290 22,262 Q-4,264 -34,254Z" fill="#4a3000"/>
+  <path d="M24,-10 Q36,120 4,236" stroke="#c99a00" stroke-width="4" fill="none" opacity=".6"/>
+  <g fill="#7a5200" opacity=".55"><ellipse cx="-40" cy="150" rx="6" ry="4"/><ellipse cx="-20" cy="190" rx="4" ry="3"/><ellipse cx="40" cy="80" rx="5" ry="3"/><ellipse cx="-50" cy="90" rx="4" ry="3"/></g>
+  <!-- руки вверх -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M-56,-92 Q-118,-128 -134,-212" stroke="#2a1606" stroke-width="38"/>
+    <path d="M56,-92 Q118,-128 134,-212" stroke="#2a1606" stroke-width="38"/>
+    <path d="M-56,-92 Q-118,-128 -134,-212" stroke="#6b4423" stroke-width="28"/>
+    <path d="M56,-92 Q118,-128 134,-212" stroke="#6b4423" stroke-width="28"/>
+  </g>
+  <circle cx="-136" cy="-224" r="24" fill="#e3b98a" stroke="#2a1606" stroke-width="5"/>
+  <circle cx="136" cy="-224" r="24" fill="#e3b98a" stroke="#2a1606" stroke-width="5"/>
+  <ellipse cx="0" cy="-60" rx="74" ry="72" fill="url(#gFur)" stroke="#2a1606" stroke-width="5"/>
+  <ellipse cx="0" cy="-46" rx="42" ry="44" fill="#d9ad7c"/>
+  <!-- голова -->
+  <circle cx="-82" cy="-186" r="30" fill="#6b4423" stroke="#2a1606" stroke-width="5"/>
+  <circle cx="-82" cy="-186" r="16" fill="#e3b98a"/>
+  <circle cx="82" cy="-186" r="30" fill="#6b4423" stroke="#2a1606" stroke-width="5"/>
+  <circle cx="82" cy="-186" r="16" fill="#e3b98a"/>
+  <circle cx="0" cy="-182" r="80" fill="url(#gFur)" stroke="#2a1606" stroke-width="5"/>
+  <path d="M0,-200 C-20,-234 -68,-232 -68,-190 C-68,-160 -58,-130 -50,-120 Q0,-92 50,-120 C58,-130 68,-160 68,-190 C68,-232 20,-234 0,-200Z" fill="#e3b98a" stroke="#2a1606" stroke-width="4"/>
+  <path d="M-58,-208 Q-30,-230 -4,-208 M4,-208 Q30,-230 58,-208" stroke="#3a2008" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <circle cx="-28" cy="-186" r="16" fill="#fff" stroke="#2a1606" stroke-width="3"/>
+  <circle cx="28" cy="-186" r="16" fill="#fff" stroke="#2a1606" stroke-width="3"/>
+  <circle cx="-24" cy="-183" r="9" fill="#1a0e05"/><circle cx="24" cy="-183" r="9" fill="#1a0e05"/>
+  <circle cx="-27" cy="-187" r="3.5" fill="#fff"/><circle cx="21" cy="-187" r="3.5" fill="#fff"/>
+  <ellipse cx="0" cy="-138" rx="50" ry="33" fill="#f0cfa5" stroke="#2a1606" stroke-width="4"/>
+  <ellipse cx="-9" cy="-152" rx="5" ry="3.5" fill="#2a1606"/><ellipse cx="9" cy="-152" rx="5" ry="3.5" fill="#2a1606"/>
+  <path d="M-36,-140 Q0,-96 36,-140 Q0,-124 -36,-140Z" fill="#5a0d1a" stroke="#2a1606" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M-29,-136 Q0,-124 29,-136 L26,-128 Q0,-118 -26,-128Z" fill="#fff"/>
+  <!-- передний лепесток кожуры -->
+  <path d="M-42,-16 Q-36,70 -4,128 Q16,82 36,-16Z" fill="url(#gBananaIn)" stroke="#6b4a00" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M-26,-14 Q-34,-2 -42,-16 M36,-16 Q24,-4 20,-14" stroke="#ffd60a" stroke-width="10" fill="none"/>
+ </g>
+</g>
+
+<!-- ================= МИНЬОН ================= -->
+<g transform="translate(540 1592)">
+ <g class="a-bob fbb" filter="url(#fSticker)">
+  <!-- руки -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M-138,0 Q-196,-40 -210,-118" stroke="#3a2a00" stroke-width="44"/>
+    <path d="M138,0 Q196,-40 210,-118" stroke="#3a2a00" stroke-width="44"/>
+    <path d="M-138,0 Q-196,-40 -210,-118" stroke="#f2c200" stroke-width="34"/>
+    <path d="M138,0 Q196,-40 210,-118" stroke="#f2c200" stroke-width="34"/>
+  </g>
+  <g fill="#1d1d1d" stroke="#000" stroke-width="3">
+    <circle cx="-212" cy="-134" r="30"/><circle cx="-232" cy="-160" r="11"/><circle cx="-212" cy="-168" r="11"/><circle cx="-192" cy="-162" r="11"/>
+    <circle cx="212" cy="-134" r="30"/><circle cx="232" cy="-160" r="11"/><circle cx="212" cy="-168" r="11"/><circle cx="192" cy="-162" r="11"/>
+  </g>
+  <!-- ноги -->
+  <rect x="-66" y="226" width="52" height="46" fill="url(#gDenim)" stroke="#1d3c6b" stroke-width="4"/>
+  <rect x="14" y="226" width="52" height="46" fill="url(#gDenim)" stroke="#1d3c6b" stroke-width="4"/>
+  <ellipse cx="-48" cy="278" rx="50" ry="22" fill="#1a1a1a"/>
+  <ellipse cx="48" cy="278" rx="50" ry="22" fill="#1a1a1a"/>
+  <!-- волосы -->
+  <g stroke="#111" stroke-width="5" fill="none" stroke-linecap="round">
+    <path d="M-24,-266 q-12,-40 -36,-62"/><path d="M-6,-270 q-4,-46 4,-74"/><path d="M14,-268 q10,-40 30,-60"/><path d="M30,-262 q22,-30 50,-38"/>
+  </g>
+  <!-- тело -->
+  <use href="#minionBody" fill="url(#gMinion)" stroke="#3a2a00" stroke-width="6"/>
+  <use href="#minionBody" fill="url(#gHi)"/>
+  <g clip-path="url(#cMinion)">
+    <path d="M-160,124 L160,124 L160,260 L-160,260Z" fill="url(#gDenim)"/>
+    <path d="M-88,58 L88,58 L94,130 L-94,130Z" fill="url(#gDenim)"/>
+    <path d="M-86,70 L-170,8" stroke="#2f5d9e" stroke-width="26"/>
+    <path d="M86,70 L170,8" stroke="#2f5d9e" stroke-width="26"/>
+    <path d="M-160,124 L160,124" stroke="#1d3c6b" stroke-width="4"/>
+    <rect x="-160" y="-150" width="320" height="42" fill="#1a1a1a"/>
+    <use href="#minionBody" fill="url(#gShadeDown)"/>
+  </g>
+  <use href="#minionBody" fill="none" stroke="#3a2a00" stroke-width="6"/>
+  <path d="M-88,58 L88,58" stroke="#1d3c6b" stroke-width="4"/>
+  <path d="M-46,76 L46,76 L42,120 Q0,128 -42,120Z" fill="#3b6fb6" stroke="#9cc3f5" stroke-width="3" stroke-dasharray="7 5"/>
+  <text x="0" y="114" font-family="'Russo Card', sans-serif" font-size="38" text-anchor="middle" fill="#ffe14d">67</text>
+  <circle cx="-80" cy="70" r="10" fill="#111"/><circle cx="80" cy="70" r="10" fill="#111"/>
+  <!-- очко -->
+  <circle cx="0" cy="-129" r="98" fill="url(#gChrome)" stroke="#2b2b2b" stroke-width="5"/>
+  <circle cx="0" cy="-129" r="76" fill="#4a4f55"/>
+  <circle cx="0" cy="-129" r="69" fill="url(#gEye)"/>
+  <circle cx="10" cy="-120" r="36" fill="url(#gIris)"/>
+  <circle cx="12" cy="-118" r="18" fill="#050505"/>
+  <circle cx="-2" cy="-134" r="10" fill="#fff"/>
+  <circle cx="26" cy="-104" r="5" fill="#fff" opacity=".8"/>
+  <path d="M-48,-178 A62,62 0 0 1 22,-188" stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round" opacity=".55"/>
+  <g fill="#6b737b"><circle cx="-88" cy="-129" r="5"/><circle cx="88" cy="-129" r="5"/><circle cx="0" cy="-217" r="5"/><circle cx="0" cy="-41" r="5"/></g>
+  <!-- рот -->
+  <path id="minionMouth" d="M-66,-10 Q0,66 66,-10 Q0,12 -66,-10Z" fill="#5a0d1a" stroke="#3a2a00" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M-38,-2 Q0,9 38,-2 L36,14 Q0,22 -36,14Z" fill="#fff"/>
+  <ellipse cx="0" cy="34" rx="26" ry="11" fill="#e2587a"/>
+ </g>
+</g>
+
+<!-- передний план -->
+<g id="confettiFront"></g>
+<rect width="1080" height="1920" fill="url(#gVignette)"/>
+<rect width="1080" height="1920" filter="url(#fGrain)" opacity=".1" style="mix-blend-mode:overlay"/>
+
+<!-- ================= ИНТЕРФЕЙС ЗВОНКА ================= -->
+<rect width="1080" height="300" fill="url(#gTopScrim)"/>
+<rect y="1700" width="1080" height="220" fill="url(#gBottomScrim)"/>
+<g font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'DejaVu Sans', sans-serif" fill="#fff">
+  <text x="64" y="62" font-size="34" font-weight="700">00:00</text>
+  <g transform="translate(842 36)">
+    <rect x="0" y="18" width="8" height="10" rx="2"/><rect x="12" y="12" width="8" height="16" rx="2"/><rect x="24" y="6" width="8" height="22" rx="2" opacity=".35"/><rect x="36" y="0" width="8" height="28" rx="2" opacity=".35"/>
+    <text x="56" y="27" font-size="26" font-weight="700">5G</text>
+    <rect x="104" y="2" width="58" height="26" rx="7" fill="none" stroke="#fff" stroke-width="3" opacity=".8"/>
+    <rect x="164" y="10" width="5" height="10" rx="2" opacity=".8"/>
+    <rect x="108" y="6" width="5" height="18" rx="2" fill="#ff3b30"/>
+  </g>
+  <text x="540" y="146" font-size="36" text-anchor="middle" opacity=".85">Входящий видеозвонок…</text>
+  <text x="540" y="218" font-size="60" font-weight="700" text-anchor="middle" stroke="#000" stroke-opacity=".35" stroke-width="6" paint-order="stroke">Бомбардиро Крокодило</text>
+</g>
+<g transform="translate(380 1830)" filter="url(#fShadow)">
+  <circle r="68" fill="#ff3b30"/>
+  <use href="#handset" fill="#fff" transform="rotate(135) scale(3.3) translate(-12 -12)"/>
+</g>
+<g transform="translate(700 1830)">
+  <circle class="a-ring fb" r="68" fill="none" stroke="#34c759" stroke-width="6"/>
+  <circle class="a-ring2 fb" r="68" fill="none" stroke="#34c759" stroke-width="6"/>
+  <g class="a-wiggle fb" filter="url(#fShadow)">
+    <circle r="68" fill="#34c759"/>
+    <use href="#handset" fill="#fff" transform="scale(3.3) translate(-12 -12)"/>
+  </g>
+</g>
+</svg>
+
+<div class="tools">
+  <button id="btnPhoto" type="button">📷 Фото на торт</button>
+  <button id="btnSave" type="button">⬇️ Сохранить PNG</button>
+  <input id="file" type="file" accept="image/*" hidden>
+</div>
+
+<script>
+(() => {
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = id => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  if (params.has('export')) document.body.classList.add('export', 'still');
+  if (params.has('still')) document.body.classList.add('still');
+  if (params.has('video')) document.body.classList.add('export');
+
+  let seed = 20261002;
+  const rnd = () => {
+    seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const el = (tag, attrs, parent) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  const star4 = (x, y, s) =>
+    `M${x},${y - s} Q${x},${y} ${x + s},${y} Q${x},${y} ${x},${y + s} Q${x},${y} ${x - s},${y} Q${x},${y} ${x},${y - s}Z`;
+  const PARTY = ['#ff2d55', '#ffd60a', '#30d5ff', '#34c759', '#bf5af2', '#ff9f0a', '#ffffff', '#ff4fd8'];
+
+  // --- лучи
+  for (let i = 0; i < 24; i += 2) {
+    const a1 = (i / 24) * Math.PI * 2, a2 = ((i + 1) / 24) * Math.PI * 2, R = 1700;
+    el('path', { d: `M540,620 L${540 + R * Math.cos(a1)},${620 + R * Math.sin(a1)} L${540 + R * Math.cos(a2)},${620 + R * Math.sin(a2)}Z` }, $('rays'));
+  }
+
+  // --- неоновый пол
+  const H = 1185;
+  for (let i = 1; i <= 16; i++) {
+    const y = H + 735 * Math.pow(i / 16, 2.1);
+    el('line', { x1: 0, x2: 1080, y1: y, y2: y }, $('grid'));
+  }
+  for (let k = -14; k <= 14; k++) el('line', { x1: 540 + k * 14, y1: H, x2: 540 + k * 150, y2: 1920 }, $('grid'));
+
+  // --- звёзды
+  for (let i = 0; i < 90; i++) {
+    el('circle', { cx: rnd() * 1080, cy: rnd() * 1150, r: (rnd() * 2.2 + .6).toFixed(2), fill: '#fff', opacity: (.3 + rnd() * .6).toFixed(2) }, $('stars'));
+  }
+  for (let i = 0; i < 16; i++) {
+    const s = el('path', { d: star4(rnd() * 1080, 60 + rnd() * 1080, 8 + rnd() * 14), fill: '#fff', class: 'tw fb' }, $('stars'));
+    s.style.animationDelay = (-rnd() * 1.5).toFixed(2) + 's';
+  }
+
+  // --- салюты
+  const FW = [
+    [180, 300, 150, '#ffd34d', '#fff6c9'],
+    [880, 190, 125, '#ff4fd8', '#ffd1f5'],
+    [560, 175, 85, '#ff8a3d', '#ffe0c4'],
+    [70, 1015, 95, '#38e8ff', '#d2fbff'],
+    [1010, 1235, 95, '#7dff6b', '#e2ffd9'],
+    [350, 1000, 70, '#bf5af2', '#f0d9ff'],
+  ];
+  FW.forEach(([x, y, r, c1, c2], j) => {
+    const g = el('g', { class: 'fw fb' }, $('fireworks'));
+    g.style.animationDelay = (-j * 0.37).toFixed(2) + 's';
+    el('circle', { cx: x, cy: y, r: r * .22, fill: c2, opacity: .55, filter: 'url(#fBlur8)' }, g);
+    const n = 30;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + rnd() * .08;
+      const r1 = r * .2, r2 = r * (.72 + rnd() * .28);
+      el('line', {
+        x1: x + r1 * Math.cos(a), y1: y + r1 * Math.sin(a), x2: x + r2 * Math.cos(a), y2: y + r2 * Math.sin(a),
+        stroke: c1, 'stroke-width': 4, 'stroke-linecap': 'round', opacity: .9,
+      }, g);
+      el('circle', { cx: x + (r2 + 9) * Math.cos(a), cy: y + (r2 + 9) * Math.sin(a), r: 4.5, fill: c2 }, g);
+      if (i % 2 === 0) {
+        const r3 = r * (.45 + rnd() * .15);
+        el('circle', { cx: x + r3 * Math.cos(a + .1), cy: y + r3 * Math.sin(a + .1), r: 3, fill: '#fff' }, g);
+      }
+    }
+  });
+
+  // --- конфетти
+  const confetti = (parent, n, yMin, yMax) => {
+    for (let i = 0; i < n; i++) {
+      const x = rnd() * 1080, y = yMin + rnd() * (yMax - yMin), c = PARTY[Math.floor(rnd() * PARTY.length)];
+      const g = el('g', { transform: `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${Math.floor(rnd() * 360)})` }, parent);
+      const inner = el('g', { class: 'confetti fb' }, g);
+      inner.style.animationDelay = (-rnd() * 3).toFixed(2) + 's';
+      if (rnd() < .65) el('rect', { x: -9, y: -4, width: 18, height: 8, rx: 2, fill: c }, inner);
+      else el('circle', { r: 5.5, fill: c }, inner);
+    }
+  };
+  confetti($('confettiBack'), 80, 260, 1900);
+  confetti($('confettiFront'), 26, 280, 1700);
+
+  // --- шарики (нитки сходятся к левому плавнику)
+  const TIP = [226, 874];
+  const BALLOONS = [
+    [92, 548, '#ff2d55'], [205, 520, '#ffd60a'], [312, 560, '#30d5ff'],
+    [46, 660, '#34c759'], [150, 640, '#bf5af2'], [258, 652, '#ff9f0a'],
+    [96, 758, '#ff375f'], [204, 748, '#0a84ff'], [310, 756, '#f5f5f7'],
+  ];
+  const strings = el('g', { stroke: '#f2f2f2', 'stroke-width': 2.5, fill: 'none', opacity: .9 }, $('balloons'));
+  BALLOONS.forEach(([x, y]) => {
+    const bx = x, by = y + 74, mx = bx + (TIP[0] - bx) * .35 + (rnd() - .5) * 30, my = (by + TIP[1]) / 2;
+    el('path', { d: `M${bx},${by} Q${mx},${my} ${TIP[0]},${TIP[1]}` }, strings);
+  });
+  BALLOONS.forEach(([x, y, c]) => {
+    const g = el('g', {}, $('balloons'));
+    el('path', { d: `M${x - 9},${y + 76} L${x},${y + 64} L${x + 9},${y + 76}Z`, fill: c }, g);
+    el('ellipse', { cx: x, cy: y, rx: 58, ry: 70, fill: c }, g);
+    el('ellipse', { cx: x, cy: y, rx: 58, ry: 70, fill: 'url(#gBalloonShade)' }, g);
+    el('ellipse', { cx: x - 22, cy: y - 30, rx: 12, ry: 22, fill: '#fff', opacity: .65, transform: `rotate(28 ${x - 22} ${y - 30})` }, g);
+    el('circle', { cx: x - 30, cy: y - 2, r: 4, fill: '#fff', opacity: .5 }, g);
+  });
+
+  // --- зубы акулы
+  const teeth = $('sharkTeeth');
+  for (let i = 0; i < 10; i++) {
+    const t = (i + .5) / 10, x = 410 + 260 * t, y = 705 + 70 * t * (1 - t) - 3;
+    el('path', { d: `M${x - 13},${y} L${x + 13},${y} L${x},${y + 26}Z` }, teeth);
+  }
+  for (let i = 0; i < 8; i++) {
+    const t = (i + .5) / 8, x = 410 + 260 * t, y = 705 + 280 * t * (1 - t) + 3;
+    el('path', { d: `M${x - 12},${y} L${x + 12},${y} L${x},${y - 22}Z` }, teeth);
+  }
+
+  // --- чешуя и зубы крокодила
+  for (let x = -150; x <= 120; x += 22) el('path', { d: `M${x},-42 a11,11 0 0 1 22,0Z` }, $('crocScales'));
+  for (let x = 150; x <= 288; x += 15) {
+    el('path', { d: `M${x},-4 L${x + 10},-4 L${x + 5},6Z` }, $('crocTeeth'));
+    el('path', { d: `M${x + 6},7 L${x + 15},7 L${x + 10},-2Z` }, $('crocTeeth'));
+  }
+
+  // --- «deal with it» очки
+  const ROWS = [
+    'XXXXXXXXXXXXXXXXXXXXXX',
+    '.XWWXXXXXX..XWWXXXXXX.',
+    '..XWWXXXX....XWWXXXX..',
+    '...XXXXX......XXXXX...',
+  ];
+  ROWS.forEach((row, r) => [...row].forEach((ch, c) => {
+    if (ch === '.') return;
+    el('rect', { x: c * 10, y: r * 10, width: 10.4, height: 10.4, fill: ch === 'W' ? '#fff' : '#0a0a0a' }, $('dealWithIt'));
+  }));
+
+  // --- торт: подтёки, посыпка, свечи, бордюр портрета
+  const cx = 880, cy = 715, rx = 135, ry = 36;
+  for (let i = 0; i < 13; i++) {
+    const th = Math.PI * (i + .5) / 13, x = cx + rx * Math.cos(th), y = cy + ry * Math.sin(th);
+    const w = 18 + rnd() * 10, d = 22 + rnd() * 46;
+    el('rect', { x: x - w / 2, y: y - 6, width: w, height: d, rx: w / 2 }, $('drips'));
+  }
+  for (let i = 0; i < 40; i++) {
+    const a = rnd() * Math.PI * 2, rr = Math.sqrt(rnd());
+    const x = cx + Math.cos(a) * rx * .82 * rr, y = cy + Math.sin(a) * ry * .75 * rr;
+    el('rect', { x: x - 5, y: y - 1.5, width: 10, height: 3, rx: 1.5, fill: PARTY[i % 6], transform: `rotate(${Math.floor(rnd() * 180)} ${x} ${y})` }, $('sprinkles'));
+  }
+  const CANDLES = [[-84, 2, '#30d5ff'], [-44, -16, '#ffd60a'], [0, 8, '#ff4fd8'], [42, -14, '#34c759'], [84, 4, '#bf5af2']];
+  CANDLES.forEach(([dx, dy, c]) => {
+    const x = cx + dx, base = cy + dy, h = 62;
+    const g = el('g', {}, $('candles'));
+    el('rect', { x: x - 8, y: base - h, width: 16, height: h, rx: 4, fill: c, stroke: '#00000040', 'stroke-width': 2 }, g);
+    for (let s = 0; s < 4; s++) el('path', { d: `M${x - 8},${base - h + 10 + s * 15} L${x + 8},${base - h + 2 + s * 15} L${x + 8},${base - h + 7 + s * 15} L${x - 8},${base - h + 15 + s * 15}Z`, fill: '#fff', opacity: .85 }, g);
+    el('line', { x1: x, y1: base - h, x2: x, y2: base - h - 8, stroke: '#222', 'stroke-width': 2.5 }, g);
+    const fl = el('g', { filter: 'url(#fGlow)' }, g);
+    const f = el('path', { d: `M${x},${base - h - 40} Q${x + 13},${base - h - 20} ${x + 9},${base - h - 9} Q${x},${base - h - 1} ${x - 9},${base - h - 9} Q${x - 13},${base - h - 20} ${x},${base - h - 40}Z`, fill: 'url(#gFlame)', class: 'flame fbb' }, fl);
+    f.style.animationDelay = (-rnd() * .3).toFixed(2) + 's';
+  });
+  for (let i = 0; i < 20; i++) {
+    const a = (i / 20) * Math.PI * 2;
+    el('circle', { cx: 68 * Math.cos(a), cy: 68 * Math.sin(a), r: 7 }, $('piping'));
+  }
+
+  // --- пачка балерины
+  let frill = 'M-150,34';
+  for (let i = 0; i < 12; i++) {
+    const x0 = -150 + i * 25, x1 = x0 + 25;
+    frill += ` Q${x0 + 12.5},${70 + (i % 2) * 8} ${x1},34`;
+  }
+  frill += ' Q0,-6 -150,34Z';
+  el('path', { d: frill }, $('tutuFrill'));
+
+  // --- 3D-объём заголовка
+  const ext = $('extrude');
+  for (let i = 16; i >= 1; i--) {
+    const k = i / 16, col = `rgb(${Math.round(190 - 120 * k)},${Math.round(70 - 50 * k)},0)`;
+    ['#t1', '#t2'].forEach(id => el('use', {
+      href: id, x: (i * .7).toFixed(1), y: (i * 1.3).toFixed(1),
+      fill: col, stroke: col, 'stroke-width': 24, 'stroke-linejoin': 'round',
+    }, ext));
+  }
+  [[300, 920, 18], [742, 930, 14], [215, 1100, 16], [880, 1110, 20], [520, 1095, 12], [610, 950, 10]].forEach(([x, y, s], i) => {
+    const p = el('path', { d: star4(x, y, s), class: 'tw fb' }, $('titleSparkles'));
+    p.style.animationDelay = (-i * .27).toFixed(2) + 's';
+  });
+
+  // --- звезда-стикер «+1000 ауры»
+  let sp = '';
+  for (let i = 0; i < 36; i++) {
+    const a = (i / 36) * Math.PI * 2, r = i % 2 ? 80 : 112;
+    sp += (i ? 'L' : 'M') + (r * Math.cos(a)).toFixed(1) + ',' + (r * Math.sin(a)).toFixed(1);
+  }
+  $('burstStar').setAttribute('d', sp + 'Z');
+
+  // --- фото на торт
+  const file = $('file'), img = $('portraitImg'), emoji = $('portraitEmoji');
+  const pick = () => file.click();
+  $('btnPhoto').addEventListener('click', pick);
+  $('portrait').addEventListener('click', pick);
+  file.addEventListener('change', () => {
+    const f = file.files && file.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      img.setAttribute('href', reader.result);
+      img.style.display = '';
+      emoji.style.display = 'none';
+    };
+    reader.readAsDataURL(f);
+  });
+
+  // --- сохранить PNG
+  const toDataURL = blob => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob); });
+  $('btnSave').addEventListener('click', async () => {
+    const btn = $('btnSave'), label = btn.textContent;
+    btn.textContent = '⏳ Рисую…';
+    try {
+      const fonts = await Promise.all([
+        ['Oswald Card', 'fonts/oswald-bold.ttf', 700],
+        ['Russo Card', 'fonts/russo-one.ttf', 400],
+      ].map(async ([family, url, weight]) => {
+        const data = await toDataURL(await (await fetch(url)).blob());
+        return `@font-face{font-family:"${family}";src:url(${data}) format("truetype");font-weight:${weight};}`;
+      }));
+      const svg = $('card').cloneNode(true);
+      svg.setAttribute('width', 1080);
+      svg.setAttribute('height', 1920);
+      svg.removeAttribute('class');
+      const style = document.createElementNS(NS, 'style');
+      style.textContent = fonts.join('') + '*{animation:none!important}';
+      svg.insertBefore(style, svg.firstChild);
+      const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml' }));
+      const pic = new Image();
+      pic.src = url;
+      await pic.decode();
+      const canvas = Object.assign(document.createElement('canvas'), { width: 1080, height: 1920 });
+      canvas.getContext('2d').drawImage(pic, 0, 0, 1080, 1920);
+      URL.revokeObjectURL(url);
+      const a = Object.assign(document.createElement('a'), { download: 's-dnem-rozhdeniya.png', href: canvas.toDataURL('image/png') });
+      a.click();
+    } catch (err) {
+      alert('Не получилось сохранить — сделай скриншот 🙃');
+    } finally {
+      btn.textContent = label;
+    }
+  });
+})();
+</script>
+</body>
+</html>
