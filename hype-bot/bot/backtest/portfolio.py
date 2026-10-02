@@ -51,6 +51,9 @@ class PortfolioConfig:
     close_at_end: bool = True
     initial_risk_state: RiskState | None = None
     rules: PortfolioRules | None = None   # None — только max_positions и max_open_risk (как раньше)
+    # Оптимистичная модель: стоп (по последней цене) срабатывает раньше ликвидации (по маркировочной), даже если
+    # исполнился за ценой ликвидации; ликвидация — только когда свеча открылась за ней. Убыток не больше маржи.
+    stop_beats_liq: bool = False
 
     def portfolio_rules(self) -> PortfolioRules:
         return self.rules or PortfolioRules(max_positions=self.max_positions, max_open_risk=self.max_open_risk)
@@ -365,6 +368,10 @@ class PortfolioBacktester:
                 fill = base + c.stop_penetration * max(0.0, float(P.high[r, m]) - base)
             fill *= 1 - p.side * c.slippage
             beyond_liq = fill <= p.liq_price if p.side == LONG else fill >= p.liq_price
+            if beyond_liq and self.cfg.stop_beats_liq and (o > p.liq_price if p.side == LONG else o < p.liq_price):
+                bankrupt = p.entry_price * (1 - p.side / p.leverage)
+                fill = max(fill, bankrupt) if p.side == LONG else min(fill, bankrupt)
+                beyond_liq = False
             if not beyond_liq:
                 self._close(r, m, fill, reason, c.taker_fee)
                 if reason == "max_drawdown" and not self.guard.state.halted:

@@ -327,3 +327,25 @@ def test_margin_stop_near_liquidation_does_not_survive_a_gap():
     cfg = PortfolioConfig(risk=risk, costs=COSTS, initial_equity=100.0, max_open_risk=10.0, rules=rules)
     t = PortfolioBacktester(panel, Script({1: [(0, Enter(LONG, 37.5))]}), cfg).run().trades
     assert t["exit_reason"].iloc[0] == "liquidation"
+
+
+@pytest.mark.parametrize("optimistic,reason", [(False, "liquidation"), (True, "stop")])
+def test_stop_beats_liquidation_option(optimistic, reason):
+    """Свеча открылась до стопа и ушла за ликвидацию: по умолчанию — ликвидация (исполнение стопа за ценой
+    ликвидации), в оптимистичной модели — выход по стопу с убытком не больше маржи."""
+    panel = flat_panel(1, n=800)
+    j = 4 * 31
+    panel.low[0, j] = panel.close[0, j] = 39.0
+    for a in (panel.open, panel.high, panel.low, panel.close):
+        a[0, j + 1:] = 39.0
+    risk = RiskCfg(starting_equity_usdt=100, risk_per_trade=0.02, daily_loss_limit=0.98, max_drawdown=0.99,
+                   drawdown_steps=[])
+    rules = PortfolioRules(max_open_risk=10.0, sizing="margin", margin_stop="near_liq", liq_gap=0.035)
+    cfg = PortfolioConfig(risk=risk, costs=COSTS, initial_equity=100.0, max_open_risk=10.0, rules=rules,
+                          stop_beats_liq=optimistic)
+    t = PortfolioBacktester(panel, Script({1: [(0, Enter(LONG, 37.5))]}), cfg).run().trades
+    p = t.iloc[0]
+    assert p["exit_reason"] == reason
+    assert -p["gross_pnl"] <= p["margin"] + 1e-9                     # убыток по цене — не больше маржи
+    if optimistic:
+        assert p["liq_price"] > p["exit_price"] and -p["gross_pnl"] < p["margin"]

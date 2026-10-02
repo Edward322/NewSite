@@ -33,7 +33,8 @@ DEPOSIT = 25.0
 OUT = PROJECT_ROOT / "reports" / "margin25"
 
 
-def run_margin(panel, base, start: int, limits: bool, margin_stop: str = "none", liq_gap: float = 0.035):
+def run_margin(panel, base, start: int, limits: bool, margin_stop: str = "none", liq_gap: float = 0.035,
+               stop_beats_liq: bool = False):
     cfg = bot_config(base, 0.02, "A")
     risk = RiskCfg(starting_equity_usdt=DEPOSIT, risk_per_trade=0.02,
                    daily_loss_limit=0.06 if limits else 0.98, max_drawdown=0.40 if limits else 0.99,
@@ -42,7 +43,7 @@ def run_margin(panel, base, start: int, limits: bool, margin_stop: str = "none",
                            liquidity=LiquidityRule(), sizing="margin", margin_fraction=0.25,
                            margin_stop=margin_stop, liq_gap=liq_gap)
     pc = PortfolioConfig(risk=risk, costs=cfg.costs, initial_equity=DEPOSIT, max_positions=4,
-                         max_open_risk=10.0, trade_start_ms=start, rules=rules)
+                         max_open_risk=10.0, trade_start_ms=start, rules=rules, stop_beats_liq=stop_beats_liq)
     return PortfolioBacktester(panel, make_strategy(cfg), pc).run()
 
 
