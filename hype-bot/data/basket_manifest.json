@@ -1,0 +1,748 @@
+{
+  "generated_at": "2026-10-02T11:58:17+00:00",
+  "files": {
+    "XRPUSDT/funding.parquet": {
+      "sha256": "fcd510f7294e15d050884d20772adbfeb36082c629a2a0a700ce63899b20ddc2",
+      "bytes": 40214,
+      "rows": 4112,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "XRPUSDT/instrument.json": {
+      "sha256": "fe3f93a988b4e55449a3ccc32d0b2bcfd0f9ca79ce95f2c99e9ba3cb1fa75487",
+      "bytes": 1340
+    },
+    "XRPUSDT/kline_last_15m.parquet": {
+      "sha256": "c62704c5357128db8cf93023d9c2649ab4e329452ddcb16c2495b68523200d36",
+      "bytes": 4183982,
+      "rows": 131566,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "XRPUSDT/lsr_1h.parquet": {
+      "sha256": "9c4ffbe13bd39caf8f7a6f452dda1ef11fb17db38a38b0cb69f9afd017a5c971",
+      "bytes": 290377,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "XRPUSDT/oi_1h.parquet": {
+      "sha256": "0508106163b7be6bed7b9b31238adc168cef4efef6fe2f43c05a0754bebd8ce1",
+      "bytes": 442109,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "XRPUSDT/premium_1h.parquet": {
+      "sha256": "0accbb7def44c83385c477416baff6d89154b491621158182cf41885cdac6093",
+      "bytes": 1135093,
+      "rows": 32891,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "XRPUSDT/risk_limit.json": {
+      "sha256": "763f1b1b7b8b613164aa99ebc0e6e80b8685cbce3f478d835c17968d24456d1e",
+      "bytes": 8962
+    },
+    "NEARUSDT/funding.parquet": {
+      "sha256": "50c72f35a89d4a41f689acdafff9230d194e6404347c532afb1a7c9ae01b904c",
+      "bytes": 36038,
+      "rows": 4112,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "NEARUSDT/instrument.json": {
+      "sha256": "3c4dfd31c377e82576192101b79a772f0fea6a5de876e3c4195061844b47caf5",
+      "bytes": 1352
+    },
+    "NEARUSDT/kline_last_15m.parquet": {
+      "sha256": "f9964d463d1cc19635f06b88644fc59ae6c727005678ccb6084b0cf5157254dc",
+      "bytes": 4109326,
+      "rows": 131566,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "NEARUSDT/lsr_1h.parquet": {
+      "sha256": "c9783deaa40cae916e404394482358a1d591b6145f7dcfa9fcf59f760e600c25",
+      "bytes": 292771,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "NEARUSDT/oi_1h.parquet": {
+      "sha256": "a61b4d5d9847c8ecc4070b4b2dfd11ebceb3c4cd7d0f3d3c4b047bfd15df8d1c",
+      "bytes": 489301,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "NEARUSDT/premium_1h.parquet": {
+      "sha256": "8fee2c4df555ae216946fa97ec11e35896452a061caae919a25dde44b3f017d6",
+      "bytes": 1020067,
+      "rows": 32891,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "NEARUSDT/risk_limit.json": {
+      "sha256": "10bcb056ee7fa1251ff12d63da32d7eb7cb61415b6101d8c8df1c818c0bdcddc",
+      "bytes": 7953
+    },
+    "MOVRUSDT/funding.parquet": {
+      "sha256": "8473514b44688a83134b5923447d23f86c8ae2808e54a723cc9ec047a48974be",
+      "bytes": 44577,
+      "rows": 6172,
+      "first": "2023-11-23 08:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "MOVRUSDT/instrument.json": {
+      "sha256": "32ea2cc5707d2bd8b2d8a1f5504e86aaea1bf8eab9c4c18f87806daa4717531e",
+      "bytes": 1345
+    },
+    "MOVRUSDT/kline_last_15m.parquet": {
+      "sha256": "83dd5fb2f9926edd6a8675770e784f4d5a7d97b2fa7704656a5760399a30ce3e",
+      "bytes": 3039843,
+      "rows": 100229,
+      "first": "2023-11-23 10:15 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "MOVRUSDT/lsr_1h.parquet": {
+      "sha256": "296a06bbdc45d9edb847d05cdf6d5e46b1c8a21ae24a11e3ad764e5ad0c207aa",
+      "bytes": 166877,
+      "rows": 25057,
+      "first": "2023-11-23 11:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "MOVRUSDT/oi_1h.parquet": {
+      "sha256": "2a3fbef0f0eaf793d7e2d98c6e377164976c27d7f74f875329da080be7fd5818",
+      "bytes": 244833,
+      "rows": 25057,
+      "first": "2023-11-23 11:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "MOVRUSDT/premium_1h.parquet": {
+      "sha256": "2507829856d0ba326434d6fdb1dc4b48c73acff67f16ebd34e282aca7351279f",
+      "bytes": 539852,
+      "rows": 25058,
+      "first": "2023-11-23 09:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "MOVRUSDT/risk_limit.json": {
+      "sha256": "539a181a5d411ee44f022ff84a39f2a384ea7f0b3e10c0a117feff8eb19d30d4",
+      "bytes": 7649
+    },
+    "QNTUSDT/funding.parquet": {
+      "sha256": "01c72f75c950eec3f586865d39b3b05a1a37e2af32643256cd9714727711ddcc",
+      "bytes": 29534,
+      "rows": 3604,
+      "first": "2023-06-19 08:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "QNTUSDT/instrument.json": {
+      "sha256": "8d4a8f99238849a3da3b3060b0d7f3177ff7c4c36bb04aece5b09d7f292205a2",
+      "bytes": 1335
+    },
+    "QNTUSDT/kline_last_15m.parquet": {
+      "sha256": "027667a7097c48a1b45c1f88d3c45a4a54b5e0a493e81b0ac8fe3d031e556b0d",
+      "bytes": 3103412,
+      "rows": 115305,
+      "first": "2023-06-19 09:15 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "QNTUSDT/lsr_1h.parquet": {
+      "sha256": "811ec4d32defc4d5b18ad4d30a529e0d56219cf2756a5f498b0cf55c5f41e6c3",
+      "bytes": 188851,
+      "rows": 28826,
+      "first": "2023-06-19 10:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "QNTUSDT/oi_1h.parquet": {
+      "sha256": "725858bd1354e59688a2e1ff5f36803273b8894ee8e84f4b27ff8535340611a2",
+      "bytes": 294356,
+      "rows": 28826,
+      "first": "2023-06-19 10:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "QNTUSDT/premium_1h.parquet": {
+      "sha256": "deed3143c28fabfecc9e0020680a491e9e88f9f1f84d27d0d30441dba5e23445",
+      "bytes": 776786,
+      "rows": 28827,
+      "first": "2023-06-19 08:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "QNTUSDT/risk_limit.json": {
+      "sha256": "9cd126a7e2caed257210d2b499c810dc55b3fff64ed5949ea42cc7770d8d8046",
+      "bytes": 7584
+    },
+    "DOGEUSDT/funding.parquet": {
+      "sha256": "1d1a2a2431c560de0e6ee696c4310b8a8c2cc442936e1b55f93c9eb5e17f7fff",
+      "bytes": 41162,
+      "rows": 4112,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "DOGEUSDT/instrument.json": {
+      "sha256": "a1a0f3ce7b56f76c5049baba4420196bdf4dfd401706e85b8e26a37a2626316d",
+      "bytes": 1344
+    },
+    "DOGEUSDT/kline_last_15m.parquet": {
+      "sha256": "13d409aebe339112e946c6a141e8922e2dbcb105fda3b8f26c1fe65dc1f0c7ed",
+      "bytes": 4412457,
+      "rows": 131566,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "DOGEUSDT/lsr_1h.parquet": {
+      "sha256": "62002f450c2c914b9f48ab4ced4c5e5df7da51f4229467a3b6089713c01f3773",
+      "bytes": 291867,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "DOGEUSDT/oi_1h.parquet": {
+      "sha256": "adae2053e1bafc78f9a5fbd1f615e6979c8aed1145f60cc8721e6d70ec63f6ca",
+      "bytes": 470680,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "DOGEUSDT/premium_1h.parquet": {
+      "sha256": "6c85983ee9c635e0a57608722367e3e59d2f27149b5d78b2d6f6054dc2bd4e59",
+      "bytes": 1238051,
+      "rows": 32891,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "DOGEUSDT/risk_limit.json": {
+      "sha256": "f9176ea8d73f8c8890c27ea611e8c1892ee498beff24727132258c97d65d8805",
+      "bytes": 7680
+    },
+    "AAVEUSDT/funding.parquet": {
+      "sha256": "21b828d84223ccb387f6c4e5deb67bf1a7065d93120006310410ae70656fa3a1",
+      "bytes": 40067,
+      "rows": 4112,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "AAVEUSDT/instrument.json": {
+      "sha256": "7eb63db338882855f3f4c0954a5297278e94bd3ecd3cc80ba4e41e7ea6b63b42",
+      "bytes": 1337
+    },
+    "AAVEUSDT/kline_last_15m.parquet": {
+      "sha256": "03453bc8111c40a067f0c6ab1b2efa4c8c1f6b9e879121d2873141ce56b555c3",
+      "bytes": 4135710,
+      "rows": 131566,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "AAVEUSDT/lsr_1h.parquet": {
+      "sha256": "bf468e5159e3c281da6a5a6061a70b2c78b04feb25a5389693b411d8e82bc883",
+      "bytes": 294860,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "AAVEUSDT/oi_1h.parquet": {
+      "sha256": "c03185022d0fd317a7126483695fe44a528830bf3d55ec9c0f6a9ae2abcf0bd1",
+      "bytes": 504691,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "AAVEUSDT/premium_1h.parquet": {
+      "sha256": "2496c1450dd5b7e2bb4666fa27a73f520c545acbc916fb9a08ce84cf2d306ae0",
+      "bytes": 1223597,
+      "rows": 32891,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "AAVEUSDT/risk_limit.json": {
+      "sha256": "3ab2f319cb3eaa8e1bd0b4266fea7e16ee0564a82c1a43969ea99a0687da3c55",
+      "bytes": 7655
+    },
+    "WLDUSDT/funding.parquet": {
+      "sha256": "f8a3beccd3ceac33ec4ed01c55f719d30ffc12f8b3248d97171da6461cf6458f",
+      "bytes": 33115,
+      "rows": 3499,
+      "first": "2023-07-24 08:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "WLDUSDT/instrument.json": {
+      "sha256": "275a3750d96abe93417848825093c2a722eabc620ff6d7a90369e92b8bc42084",
+      "bytes": 1346
+    },
+    "WLDUSDT/kline_last_15m.parquet": {
+      "sha256": "4ede83cd365d2df3842ac70a46c4d2deda2098febf733a0381afe1c477a07cda",
+      "bytes": 3597215,
+      "rows": 111938,
+      "first": "2023-07-24 11:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "WLDUSDT/lsr_1h.parquet": {
+      "sha256": "532c1b538982a230317b378b168e1913acbe1ae9159d4c9e5d97e1c550202a22",
+      "bytes": 186488,
+      "rows": 27984,
+      "first": "2023-07-24 12:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "WLDUSDT/oi_1h.parquet": {
+      "sha256": "2982954e0addf5c088a1321f938e02846e6e30d13ffc8cdb2af5fe11c322f383",
+      "bytes": 324720,
+      "rows": 27984,
+      "first": "2023-07-24 12:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "WLDUSDT/premium_1h.parquet": {
+      "sha256": "077f49048d569d7a989cb7a25c6f26883dfe0f472026ca705958984744a08cbf",
+      "bytes": 867651,
+      "rows": 27985,
+      "first": "2023-07-24 10:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "WLDUSDT/risk_limit.json": {
+      "sha256": "77d2dbd2eea4a607058030f5a342fd8ff8825232a936613de81d855bb91a15b0",
+      "bytes": 7551
+    },
+    "1000PEPEUSDT/funding.parquet": {
+      "sha256": "ee0f64ea9ccf4f3003ff99f53a32d99e80d069074f26e5f495f9f9cea7d291ec",
+      "bytes": 33833,
+      "rows": 3744,
+      "first": "2023-05-03 16:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "1000PEPEUSDT/instrument.json": {
+      "sha256": "7f8a5dbd5d7c22af608c1f128550022e17700e4d2f217ed0bfc16df9ac36828e",
+      "bytes": 1357
+    },
+    "1000PEPEUSDT/kline_last_15m.parquet": {
+      "sha256": "e7229cc74692cd838cf08170f40ab0ed55f52348cf238a5890596961f8633e8d",
+      "bytes": 4877079,
+      "rows": 119810,
+      "first": "2023-05-03 11:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "1000PEPEUSDT/lsr_1h.parquet": {
+      "sha256": "f21e7632493219272d6068ef2905df44a4c2054aac31b597a40adeaaa5e4eda9",
+      "bytes": 196032,
+      "rows": 29952,
+      "first": "2023-05-03 12:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "1000PEPEUSDT/oi_1h.parquet": {
+      "sha256": "b0ade9c5925755396bb5580eb020e02ca475641b86de9a44f499549b094fd7fe",
+      "bytes": 363538,
+      "rows": 29952,
+      "first": "2023-05-03 12:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "1000PEPEUSDT/premium_1h.parquet": {
+      "sha256": "d0a6965404db5060f6e5798fba9cc5f5c653312294ae14b658747dc9a1ab3108",
+      "bytes": 1043177,
+      "rows": 29953,
+      "first": "2023-05-03 10:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "1000PEPEUSDT/risk_limit.json": {
+      "sha256": "4adeb69ef1dcbe98f86b3cb2061643f74dea527e44fc522dbecbbbe1d639e103",
+      "bytes": 7731
+    },
+    "ADAUSDT/funding.parquet": {
+      "sha256": "1037094ce37811d1962548178536637b9808a949fbb2348717bc92f21d6760aa",
+      "bytes": 38114,
+      "rows": 4112,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "ADAUSDT/instrument.json": {
+      "sha256": "bc8c17af496d74c984d3aa849cda1907b283d0abd4e256f97d4a2fb1bd29d918",
+      "bytes": 1335
+    },
+    "ADAUSDT/kline_last_15m.parquet": {
+      "sha256": "dfbc08b8d21f865c1afab00b04e2a074aa1a16491cb8ca4f8e225d2583b7d038",
+      "bytes": 3854894,
+      "rows": 131566,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "ADAUSDT/lsr_1h.parquet": {
+      "sha256": "33b877edfbe2af0343474b76a62c9f9eb149ba0ea1a643e8dd668a5a38e65975",
+      "bytes": 289927,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "ADAUSDT/oi_1h.parquet": {
+      "sha256": "676a867e7402d7cfb47df67de7b3b37042a7dec1063e46594ff3fe3ed210fcd1",
+      "bytes": 422815,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "ADAUSDT/premium_1h.parquet": {
+      "sha256": "ac61771df0e5e15246e8d15f444cc6b80514bce544060c1ee11c1c8f6aa49dd7",
+      "bytes": 1071327,
+      "rows": 32891,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "ADAUSDT/risk_limit.json": {
+      "sha256": "f51b0ad039b410d238739c3f45aec1e89a944fdea0d49903ec3c9e34fe481f92",
+      "bytes": 7625
+    },
+    "SANDUSDT/funding.parquet": {
+      "sha256": "ed668d55520c66479e6fc842633a4983f5700f3ef6982bac9a8ac0f9e1c92760",
+      "bytes": 37091,
+      "rows": 4115,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "SANDUSDT/instrument.json": {
+      "sha256": "d30909b6960905a015c3da70ca981562d5f23ba4cf688cf06b37e964cda6a39f",
+      "bytes": 1342
+    },
+    "SANDUSDT/kline_last_15m.parquet": {
+      "sha256": "bb4a76b653d4e4c6cdf33b3145ef5ef97487fc9c6ccab6f6cba7dae718e3eb89",
+      "bytes": 3956082,
+      "rows": 131566,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "SANDUSDT/lsr_1h.parquet": {
+      "sha256": "e78e7ab5bcfc2af8dea77b9f94362b9d605703bba2a13ff238e01a3101c39342",
+      "bytes": 293033,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "SANDUSDT/oi_1h.parquet": {
+      "sha256": "e83d15136e4904cd9e27ff24ddc23901a8eb111ea7a44026fd02d5c2ffbaa601",
+      "bytes": 427360,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "SANDUSDT/premium_1h.parquet": {
+      "sha256": "558d18894129d09c0af5c9a311080172d2f4558cdd2b6c0ed2fd208d05b710a0",
+      "bytes": 1145308,
+      "rows": 32891,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "SANDUSDT/risk_limit.json": {
+      "sha256": "8f81e1ae602a8b543e349761958775a1a7575ced19ae8c570f7f440273fdfc5e",
+      "bytes": 7677
+    },
+    "LINKUSDT/funding.parquet": {
+      "sha256": "ec72d46cb90ae3001e723ff4295739ab0ef47ab248eb51a015c54f5727859d5e",
+      "bytes": 39428,
+      "rows": 4112,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "LINKUSDT/instrument.json": {
+      "sha256": "91d26f30caf7861088a77e81a7556794f91fb00d6198229ed18a0f4095b29d52",
+      "bytes": 1343
+    },
+    "LINKUSDT/kline_last_15m.parquet": {
+      "sha256": "c09ce8e3bf13d51fc894e587e280cc1a66aa36f1ca4e42f9491e5ac9ec576f0d",
+      "bytes": 4158044,
+      "rows": 131566,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "LINKUSDT/lsr_1h.parquet": {
+      "sha256": "5e3db49ce86d4ed50fb4a1972a11f1be12654eee1842ab3fc250bba5f50c73b6",
+      "bytes": 293844,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "LINKUSDT/oi_1h.parquet": {
+      "sha256": "a6f1914ffdcc1d9c228a81a8058a1b36a11681c512b703339a0260c9a4fe5d37",
+      "bytes": 483707,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "LINKUSDT/premium_1h.parquet": {
+      "sha256": "5713c7669398f345b766ed22754692610daeae6b94dd5c61f80f10b3ef9b082c",
+      "bytes": 1240043,
+      "rows": 32891,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "LINKUSDT/risk_limit.json": {
+      "sha256": "60065df6ee2f636875f8477f23980d35ca5bc7f52299877c435e3067b40ce819",
+      "bytes": 7953
+    },
+    "UNIUSDT/funding.parquet": {
+      "sha256": "885ec5fd33b7cbfed66832d9c085e9842b47294d15e4fb59aa027ddc79d3025a",
+      "bytes": 38923,
+      "rows": 4112,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "UNIUSDT/instrument.json": {
+      "sha256": "3f95014646d2a8d5fdabbfe9af98502844ab5adc82859da37cb3b644e93e5e18",
+      "bytes": 1338
+    },
+    "UNIUSDT/kline_last_15m.parquet": {
+      "sha256": "a13a7a2f0ec846a974a22f3228d16889f7dd85da2fd1cb99efc4c9af1165e947",
+      "bytes": 3947782,
+      "rows": 131566,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "UNIUSDT/lsr_1h.parquet": {
+      "sha256": "0a45f258778eb91e09b4d8644b6f2fad52b7b59270f472c3041c77b9cb527f70",
+      "bytes": 293686,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "UNIUSDT/oi_1h.parquet": {
+      "sha256": "cce763d90e6c3281ad81cea47bbb6660e2433667ed0484835edfb62843c818ee",
+      "bytes": 477712,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "UNIUSDT/premium_1h.parquet": {
+      "sha256": "a2ba36fc6a6b3fb2945e0a6a52ec819274098b438097b4f979a24a0f959849ef",
+      "bytes": 1207886,
+      "rows": 32891,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "UNIUSDT/risk_limit.json": {
+      "sha256": "e8bb9c362947889a0dc0e27677cfa391a24ba81dd4ad4ceec08c92d434242e8f",
+      "bytes": 7919
+    },
+    "AVAXUSDT/funding.parquet": {
+      "sha256": "024bd283994e356ecf1297592bb85e0b9267d660661dbab8a74248c373b83f2a",
+      "bytes": 41281,
+      "rows": 4112,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "AVAXUSDT/instrument.json": {
+      "sha256": "4b21075946ecb5ce2dc062d20bde5f776038a776029d78ba0b646ec02028071d",
+      "bytes": 1345
+    },
+    "AVAXUSDT/kline_last_15m.parquet": {
+      "sha256": "963bae21bf5f4b90c05b9a9cce32c44c117d23030666c7c65ff685a006c5b116",
+      "bytes": 4104120,
+      "rows": 131566,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "AVAXUSDT/lsr_1h.parquet": {
+      "sha256": "c8c4544970eca2e94e4dd3417d620665418d3d22d2b3c008058f267c04caab7a",
+      "bytes": 291781,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "AVAXUSDT/oi_1h.parquet": {
+      "sha256": "a40133ca6e835f3b7a71ef7cb332e763a2860a8e063dfd2c1e707b9d9fc6d5e9",
+      "bytes": 482932,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "AVAXUSDT/premium_1h.parquet": {
+      "sha256": "1ed8eca42632d2c00142fb5a77253cb7f9fc73391c8d019b2d893a2a3064a903",
+      "bytes": 1233775,
+      "rows": 32891,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "AVAXUSDT/risk_limit.json": {
+      "sha256": "4ed30ca8ce1e5cb61e8ef423d8b8f64b469a5e6a11175b8b86cd1cd884bda8d6",
+      "bytes": 7950
+    },
+    "HBARUSDT/funding.parquet": {
+      "sha256": "a0350bb972ac01572ad5869f4bfd5304502e91b4993b73c9efbce3df4ef2a69a",
+      "bytes": 39341,
+      "rows": 4112,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "HBARUSDT/instrument.json": {
+      "sha256": "6e041eacf7312e3c1d8a8a16a9b701b6e555e2639c47c3bdb64d006db4cfb99d",
+      "bytes": 1340
+    },
+    "HBARUSDT/kline_last_15m.parquet": {
+      "sha256": "38dc9faf779890aee1200bb055f190b8772da3c5c5f22552759589d8b1096eb9",
+      "bytes": 4270688,
+      "rows": 131566,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "HBARUSDT/lsr_1h.parquet": {
+      "sha256": "6a7ae4108f7d144d9b07416984b249e2b5b318fdb15a6ae85bea766aa4f76919",
+      "bytes": 292964,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "HBARUSDT/oi_1h.parquet": {
+      "sha256": "e43104f288a13cfaa195a9662bf653473139b022e0465344c8ecb0e3aa768f88",
+      "bytes": 425600,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "HBARUSDT/premium_1h.parquet": {
+      "sha256": "9af5153ea9923b3fa841355488f5161d089f0ef65ee8948f1b0cc0777a05ff4f",
+      "bytes": 1185152,
+      "rows": 32891,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "HBARUSDT/risk_limit.json": {
+      "sha256": "f4ed6f489be6e14efa1ea8be5d9b9702f8e8b899d0813053dae568664b0be806",
+      "bytes": 7953
+    },
+    "HYPEUSDT/funding.parquet": {
+      "sha256": "32d9bf3465189fedcc33ae3885631b8a152490ccbde6db10a5db1f380a89b2a7",
+      "bytes": 19804,
+      "rows": 1999,
+      "first": "2024-12-05 08:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "HYPEUSDT/instrument.json": {
+      "sha256": "168fb0def1d0b0779ca36a9b2034741614aa40340e84dcc98fc79c86667006bb",
+      "bytes": 1352
+    },
+    "HYPEUSDT/kline_last_15m.parquet": {
+      "sha256": "c16bf8bd88e2f110f4db84c3863ca762f03d0aa871e95ff794b82a8078deee71",
+      "bytes": 2490721,
+      "rows": 63931,
+      "first": "2024-12-05 12:45 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "HYPEUSDT/lsr_1h.parquet": {
+      "sha256": "c993e40e8e3a6fd417b41d5af7dcc0634910830542ccdc1decad1e95d1b0132b",
+      "bytes": 109551,
+      "rows": 15983,
+      "first": "2024-12-05 13:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "HYPEUSDT/oi_1h.parquet": {
+      "sha256": "916ebe66a341a3be44d6c375bb0cee23cd35bfd15b0bfe346e60f70d09f6f711",
+      "bytes": 201917,
+      "rows": 15983,
+      "first": "2024-12-05 13:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "HYPEUSDT/premium_1h.parquet": {
+      "sha256": "e800d65394282b32ade49ab2644ab2ed89071763aad3dc2082872907d4aaaa5c",
+      "bytes": 563043,
+      "rows": 15982,
+      "first": "2024-12-05 13:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "HYPEUSDT/risk_limit.json": {
+      "sha256": "c5b4f6be0e85ccd469244722847730f0a465d4cb125b62b2025cb6692cdd2330",
+      "bytes": 7591
+    },
+    "BTCUSDT/funding.parquet": {
+      "sha256": "882fb92560f2a3d46ad1528d8422310431834ec2fbc9e3a7983d95a60668ae7f",
+      "bytes": 42715,
+      "rows": 4112,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "BTCUSDT/instrument.json": {
+      "sha256": "33b1f4c6ad0098abb76fb106da37d45007cd1eb607495b3080aa261e9c1f609b",
+      "bytes": 1346
+    },
+    "BTCUSDT/kline_last_15m.parquet": {
+      "sha256": "0ca8c6f86b173e723f9873a621df2dd57e3a4b167b4375a1bb577569be30e16c",
+      "bytes": 5645352,
+      "rows": 131566,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "BTCUSDT/lsr_1h.parquet": {
+      "sha256": "c65e5fb21c211d15c31009e04d2a8360ab02de5dc1603718dbe53a50489c632b",
+      "bytes": 293613,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "BTCUSDT/oi_1h.parquet": {
+      "sha256": "b71eaf059a167629b6e40e6c43a52f9d7f54f8bf84ada7ad0da8c4723f6537b2",
+      "bytes": 530450,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "BTCUSDT/premium_1h.parquet": {
+      "sha256": "f2365d77322fb1e56e9dda67bac921c22c89491eee81f0364f1e5f2d22509e56",
+      "bytes": 1255428,
+      "rows": 32891,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "BTCUSDT/risk_limit.json": {
+      "sha256": "d245fdc8caf34470de73dbc8d74c49c869a9aecd5963a0f081356d5b5969cf4a",
+      "bytes": 8964
+    },
+    "ETHUSDT/funding.parquet": {
+      "sha256": "01e807c53e95c695da0aca7aa91b6e9d4ad67cca98a6dfcff0d75a7a0322c08a",
+      "bytes": 42857,
+      "rows": 4112,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 08:00 UTC"
+    },
+    "ETHUSDT/instrument.json": {
+      "sha256": "e6c04aadd6f1f2ec36b8241fbe0ee00bd8cc297daf7af06fb2865b86e2774b40",
+      "bytes": 1344
+    },
+    "ETHUSDT/kline_last_15m.parquet": {
+      "sha256": "874bfd723d55ef6a874a3a9e83a97514522c0e45c5596086b519e903e6424f2d",
+      "bytes": 5205622,
+      "rows": 131566,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:15 UTC"
+    },
+    "ETHUSDT/lsr_1h.parquet": {
+      "sha256": "ec56cd8eff38ec865e3b2b10cdb57f92eeb2e3bac761309b5e7cc5420399c5e9",
+      "bytes": 300353,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "ETHUSDT/oi_1h.parquet": {
+      "sha256": "4a390a32ccef134cce4743ff68e52f42e9ce6bc5c3391f1ac1fda9e36fedea1a",
+      "bytes": 511852,
+      "rows": 32892,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 11:00 UTC"
+    },
+    "ETHUSDT/premium_1h.parquet": {
+      "sha256": "1e4357429065b825d8c2024b77f4a7bf749ff261f679da22490fd5e1e8763c27",
+      "bytes": 1268972,
+      "rows": 32891,
+      "first": "2023-01-01 00:00 UTC",
+      "last": "2026-10-02 10:00 UTC"
+    },
+    "ETHUSDT/risk_limit.json": {
+      "sha256": "68de701a043ea8c8354fb6d8a723a0c5cc74ce7a65baf193e45175627e15512d",
+      "bytes": 8960
+    },
+    "universe.json": {
+      "sha256": "dfcfff42899399f78cde7ffda67754d5c94bcccdc983d15dce9308e627404f2b",
+      "bytes": 569
+    },
+    "universe_table.csv": {
+      "sha256": "3f4dbc200ed9ab15293ba3fe419da9fce2dd60baf92e3c1a5b93ee59e80c1661",
+      "bytes": 125629
+    },
+    "fear_greed.parquet": {
+      "sha256": "4dc9c9a65e5610036634657763cdec7d565cc8719ad5e8c516e013fa58dee0a2",
+      "bytes": 28684
+    }
+  }
+}

@@ -37,3 +37,6 @@ reports/stage3/*_equity_*.parquet
 
 # Данные корзины монет (скачиваются отдельно)
 data/basket/
+
+# Журнал обращений к отложенным данным хранится в git — для прозрачности
+!reports/holdout_access.log
