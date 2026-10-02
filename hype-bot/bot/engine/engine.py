@@ -412,7 +412,7 @@ class Engine:
         for i in range(attempts):
             try:
                 o = self.client.order_by_link_id(link_id, symbol)
-            except NetworkError:
+            except (NetworkError, ExchangeError):
                 o = None
             if o is not None and o.done:
                 return o
@@ -609,7 +609,8 @@ class Engine:
         try:
             self._resolve_orders()
             ex_pos = {p.symbol: p for p in self.client.positions()}
-        except NetworkError as e:
+            self._adopt_unconfirmed(ex_pos)
+        except (NetworkError, ExchangeError) as e:
             self._blocker("api", f"сверка невозможна: {e}")
             return False
         self._blocker("api", None)
@@ -644,9 +645,36 @@ class Engine:
                 self.db.delete("mismatch_text")
         return not issues
 
+    def _adopt_unconfirmed(self, ex_pos: dict) -> None:
+        """Позиция на бирже без записи у бота, но с недавним неподтверждённым входом бота по этой монете
+        (биржа исполнила ордер, а подтвердить его не удалось): позиция принимается по данным биржи."""
+        dbp = self.db.positions()
+        for s, ep in ex_pos.items():
+            if s in dbp:
+                continue
+            cands = [o for o in self.db.orders(status=("sent", "unknown", "failed"))
+                     if o.symbol == s and o.purpose == "entry" and o.side == ep.side
+                     and self.now() - o.created_ms < DAY_MS and abs(o.qty - ep.size) <= 1e-9 * max(1.0, o.qty)]
+            if not cands:
+                continue
+            o = cands[-1]
+            fee = ep.size * ep.avg_price * self.cfg.costs.taker_fee
+            ex = OrderInfo(order_id=o.order_id or "", link_id=o.link_id, symbol=s, side=o.side, order_type="Market",
+                           qty=o.qty, filled_qty=ep.size, avg_price=ep.avg_price, status="Filled", reduce_only=False,
+                           stop_order_type="", fee=fee, created_ms=o.created_ms, updated_ms=self.now())
+            self.db.update_order(o.link_id, status="filled", filled_qty=ep.size, avg_price=ep.avg_price, fee=fee,
+                                 error=(o.error or "") + "; принят по позиции на бирже (комиссия оценена)")
+            self.event("warn", "order", f"{s}: вход {o.link_id} не подтверждён биржей, но позиция есть — принята по "
+                                        "данным позиции", notify=True)
+            self._apply_entry_fill(self.db.order(o.link_id), ex)
+
     def _resolve_orders(self) -> None:
         for o in self.db.orders(status=("pending", "sent", "unknown")):
-            ex = self.client.order_by_link_id(o.link_id, o.symbol)
+            try:
+                ex = self.client.order_by_link_id(o.link_id, o.symbol)
+            except ExchangeError as e:
+                self.db.update_order(o.link_id, error=f"поиск ордера: {e}")
+                ex = None
             if ex is None:
                 if self.now() - o.created_ms > 120_000:
                     self.db.update_order(o.link_id, status="failed", error=(o.error or "") + "; на бирже не найден")
@@ -674,12 +702,34 @@ class Engine:
                    if e.side == -dp.side and e.ts >= dp.entry_ts and e.link_id != dp.link_id]
         except NetworkError:
             return
+        except ExchangeError as e:                 # история исполнений недоступна — закрытый результат биржи
+            exs = []
+            self.db.event(now, "warn", "history", f"{dp.symbol}: исполнения недоступны ({e}), беру закрытый результат")
+            try:
+                cl = [c for c in self.client.closed_pnl(dp.symbol, dp.entry_ts - 60_000, now)
+                      if int(c.get("updatedTime") or 0) >= dp.entry_ts]
+            except (NetworkError, ExchangeError):
+                cl = []
+            if cl:
+                c = cl[0]
+                px = float(c["avgExitPrice"])
+                worse = (px <= dp.stop * 1.005) if dp.side > 0 else (px >= dp.stop * 0.995)
+                reason = "liquidation" if c.get("execType") in ("BustTrade", "AdlTrade") else \
+                    "stop" if worse else "external"
+                self.db.delete(f"close_wait_{dp.symbol}")
+                self._record_trade(dp, exit_price=px, exit_ts=int(c.get("updatedTime") or now),
+                                   exit_fee=dp.qty * px * self.cfg.costs.taker_fee, reason=reason,
+                                   exit_ref=dp.stop if reason == "stop" else None, exit_link="")
+                return
         if not exs:
             tries = int(self.db.get(f"close_wait_{dp.symbol}", 0)) + 1
             self.db.set(f"close_wait_{dp.symbol}", tries)
             if tries < 5:
                 return
-            px = self.client.ticker(dp.symbol).last
+            try:
+                px = self.client.ticker(dp.symbol).last
+            except (NetworkError, ExchangeError):
+                return
             self.event("error", "mismatch", f"{dp.symbol}: позиция исчезла, исполнений не найдено — записана по цене "
                                             f"{px:.6g}", notify=True)
             exs_price, exs_fee, ts, reason = px, 0.0, now, "external"

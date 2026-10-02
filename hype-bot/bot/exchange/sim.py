@@ -112,6 +112,7 @@ class SimBybit:
         self.links: set[str] = set()
         self.execs: list[dict] = []
         self.txlog: list[dict] = []
+        self.closed: list[dict] = []
         self.margin_mode = "REGULAR_MARGIN"
         self.position_mode_set = False
         self.extra_open_orders: list[dict] = []
@@ -253,6 +254,10 @@ class SimBybit:
         gross = p.side * p.size * (price - p.entry)
         fee = p.size * price * fee_rate
         self.wallet_balance += gross - fee
+        self.closed.append({"symbol": p.symbol, "side": "Sell" if p.side > 0 else "Buy", "qty": _s(p.size),
+                            "closedSize": _s(p.size), "avgEntryPrice": _s(p.entry), "avgExitPrice": _s(price),
+                            "closedPnl": _s(gross - fee), "execType": exec_type, "createdTime": str(t),
+                            "updatedTime": str(t)})
         oid = order_id or f"o{next(self._ids)}"
         self.execs.append({"execId": f"e{next(self._ids)}", "orderId": oid, "orderLinkId": link_id,
                            "symbol": p.symbol, "side": "Sell" if p.side > 0 else "Buy", "execPrice": _s(price),
@@ -397,6 +402,12 @@ class SimBybit:
         a, b = int(p.get("startTime", 0)), int(p.get("endTime", 2**62))
         lst = [e for e in self.execs if a <= int(e["execTime"]) <= b and
                (not p.get("symbol") or e["symbol"] == p["symbol"])]
+        return self._ok({"category": "linear", "list": list(reversed(lst)), "nextPageCursor": ""})
+
+    def get_closed_pnl(self, **p):
+        self._enter("get_closed_pnl")
+        a, b = int(p.get("startTime", 0)), int(p.get("endTime", 2**62))
+        lst = [x for x in self.closed if a <= int(x["updatedTime"]) <= b and x["symbol"] == p["symbol"]]
         return self._ok({"category": "linear", "list": list(reversed(lst)), "nextPageCursor": ""})
 
     def get_transaction_log(self, **p):

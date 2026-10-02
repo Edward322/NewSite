@@ -247,8 +247,10 @@ class BybitClient:
             self._post("switch_position_mode", category=self.category, coin=self.coin, mode=0)
             done.append("режим позиций: одна позиция на монету")
         except ExchangeError as e:
+            # на части счетов запрос не поддерживается; режим всё равно проверяется каждым ордером
+            # (positionIdx=0 в режиме хеджа биржа отклоняет)
             if e.code not in NOT_MODIFIED:
-                raise
+                done.append(f"режим одной позиции не подтверждён запросом (код {e.code}: {e.message[:80]})")
         return done
 
     def wallet(self) -> Wallet:
@@ -306,10 +308,17 @@ class BybitClient:
 
     def order_by_link_id(self, link_id: str, symbol: str | None = None) -> OrderInfo | None:
         scope = {"symbol": symbol} if symbol else {"settleCoin": self.coin}
+        errors = []
         for name in ("get_open_orders", "get_order_history"):
-            lst = self._get(name, category=self.category, orderLinkId=link_id, limit=1, **scope).get("list") or []
+            try:
+                lst = self._get(name, category=self.category, orderLinkId=link_id, limit=1, **scope).get("list") or []
+            except ExchangeError as e:       # метод может быть недоступен (например, на демо) — пробуем другой
+                errors.append(e)
+                continue
             if lst:
                 return self._order(lst[0])
+        if len(errors) == 2:
+            raise errors[-1]
         return None
 
     def set_leverage(self, symbol: str, leverage: float) -> None:
@@ -362,6 +371,16 @@ class BybitClient:
             a = b + 1
         uniq = {e.exec_id: e for e in out}
         return sorted(uniq.values(), key=lambda e: (e.ts, e.exec_id))
+
+    def closed_pnl(self, symbol: str, start_ms: int, end_ms: int) -> list[dict]:
+        """Закрытый результат по монете (/v5/position/closed-pnl), окнами по 7 дней."""
+        out, week, a = [], 7 * 86_400_000 - 1, start_ms
+        while a <= end_ms:
+            b = min(a + week, end_ms)
+            out += self._pages("get_closed_pnl", category=self.category, symbol=symbol, startTime=a, endTime=b,
+                               limit=100)
+            a = b + 1
+        return out
 
     def funding_paid(self, symbol: str, start_ms: int, end_ms: int) -> float | None:
         """Финансирование по монете за период (USDT, + — уплачено). None — журнал недоступен."""

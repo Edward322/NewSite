@@ -264,3 +264,41 @@ def test_with_funding_engine_matches_backtest_within_one_qty_step(tmp_path):
     assert list(a["exit_reason"]) == list(b["exit_reason"])
     assert (np.abs(a["qty"] - b["qty"]) <= 0.02 + 1e-9).all()
     np.testing.assert_allclose(a["net_pnl"], b["net_pnl"], rtol=0.02, atol=0.5)
+
+
+# ------------------------------------------- методы API, недоступные на демо
+def _unavailable(*_, **__):
+    from bot.exchange.sim import _err
+    raise _err(10001, "")
+
+
+def test_stop_outs_recorded_when_executions_endpoint_is_unavailable(tmp_path, full_run, monkeypatch):
+    ref_env, _ = full_run
+    env = make_env(tmp_path, start_day=START_DAY)
+    monkeypatch.setattr(env.sim, "get_executions", _unavailable)
+    assert env.engine.start()
+    env.run_until(T0 + END_DAY * DAY_MS)
+    tr = _trades(env)
+    assert "stop" in set(tr["exit_reason"])
+    a, b = _compare(tr, _trades(ref_env))
+    assert list(a.index) == list(b.index)
+    assert list(a["exit_reason"]) == list(b["exit_reason"])
+    np.testing.assert_allclose(a["net_pnl"], b["net_pnl"], rtol=1e-9, atol=1e-9)
+    assert not env.db.events(kinds=("mismatch",)) and not env.db.events(kinds=("loop",))
+
+
+def test_unconfirmed_fill_is_adopted_when_order_lookup_is_unavailable(tmp_path, full_run, monkeypatch):
+    ref_env, _ = full_run
+    t = _first_entry(ref_env)
+    env = make_env(tmp_path, start_day=START_DAY)
+    assert env.engine.start()
+    env.run_until(int(t.decision_ts) - 60_000)
+    monkeypatch.setattr(env.sim, "get_order_history", _unavailable)
+    monkeypatch.setattr(env.sim, "get_open_orders", _unavailable)
+    env.sim.fail_next["place_order"] = "after"          # исполнен, ответ потерян, подтвердить нечем
+    env.run_until(int(t.decision_ts) + 3_600_000)
+    pos = env.db.positions()
+    assert set(pos) == set(env.sim.pos)                   # всё, что есть на бирже, известно боту
+    assert not env.db.events(kinds=("mismatch",))
+    assert any("принята по данным позиции" in e["message"] for e in env.db.events(kinds=("order",)))
+    assert sum(1 for o in env.sim.orders if o["orderLinkId"].endswith("e")) == len(env.db.orders())

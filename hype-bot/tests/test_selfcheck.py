@@ -20,7 +20,8 @@ class FakeStream:
     def private_ok(self):
         return self.priv is not None
 
-    def stop(self): ...
+    def stop(self):
+        self.priv = None          # как у настоящего потока: после остановки авторизации нет
 
 
 def test_selfcheck_full_on_simulator(tmp_path, monkeypatch, capsys):
@@ -71,3 +72,25 @@ def test_selfcheck_explains_wrong_secret_and_hides_key(tmp_path, monkeypatch, ca
     assert rc == 1
     assert "tLs1YQ8B2OGOj5nbFx" not in out.replace("tLs1…", "")
     assert "секрет не подходит к ключу" in out
+
+
+def test_quick_selfcheck_passes_when_demo_hides_fee_rates(tmp_path, monkeypatch, capsys):
+    from bot.exchange.sim import _err
+    env = make_env(tmp_path, start_day=130)
+    sim = env.sim
+
+    def no_fees(**_):
+        raise _err(10001, "")
+    monkeypatch.setattr(sim, "get_fee_rates", no_fees)
+    monkeypatch.setenv("BYBIT_DEMO_API_KEY", "abcd1234abcd1234ab")
+    monkeypatch.setenv("BYBIT_DEMO_API_SECRET", "x" * 36)
+    monkeypatch.setattr(sc, "load_bot_config", lambda: env.cfg)
+    monkeypatch.setattr(sc, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr("bot.engine.control.make_session", lambda *a, **k: sim)
+    monkeypatch.setattr("bot.engine.stream.BybitStream", FakeStream)
+    monkeypatch.setattr(sc.time, "sleep", lambda s: None)
+    rc = sc.main(["--mode", "demo", "--quick"])
+    out = capsys.readouterr().out
+    assert rc == 0, out
+    assert "WARN  Комиссии" in out and "OK    WebSocket" in out
+    assert "Приватный поток: авторизован" in out

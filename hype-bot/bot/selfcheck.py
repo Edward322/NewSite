@@ -21,6 +21,7 @@ from pathlib import Path
 
 from bot.config import PROJECT_ROOT, load_bot_config
 from bot.envfile import get_keys, load_env
+from bot.exchange.client import ExchangeError
 
 TEST_SYMBOL = "XRPUSDT"
 
@@ -104,7 +105,7 @@ def main(argv=None) -> int:
         return finish(R, mode)
 
     from bot.engine.control import make_session
-    from bot.exchange.client import BybitClient, ExchangeError
+    from bot.exchange.client import BybitClient
     client = BybitClient(make_session(cfg, mode, *st["keys"]))
     syms = cfg.strategy.tradable + cfg.strategy.signal_only
 
@@ -147,6 +148,8 @@ def main(argv=None) -> int:
     def account():
         info = client.account_info()
         R.p(f"   Режим маржи: {info.get('marginMode')}, статус единого аккаунта: {info.get('unifiedMarginStatus')}")
+        if info.get("marginMode") != "ISOLATED_MARGIN":
+            R.p("   Бот при запуске сам переключит счёт на изолированную маржу (полная самопроверка проверит это).")
         w = client.wallet()
         R.p(f"   Баланс USDT: капитал {w.equity:.2f}, кошелёк {w.wallet_balance:.2f}, свободно {w.available:.2f}")
         pos = client.positions()
@@ -182,7 +185,13 @@ def main(argv=None) -> int:
     def fees():
         worse = []
         for s in cfg.strategy.tradable[:3]:
-            mk, tk = client.fee_rate(s)
+            try:
+                mk, tk = client.fee_rate(s)
+            except ExchangeError as e:
+                R.p(f"   Ставки комиссии через API недоступны (код {e.code}); на демо-счёте так бывает.")
+                R.p("   Фактическую комиссию покажут исполнения пробного ордера (полная самопроверка), а в работе —")
+                R.p("   отчёт по исполнению (комиссия считается по каждой сделке).")
+                return "warn"
             R.p(f"   {s}: мейкер {mk * 100:.4f}%, тейкер {tk * 100:.4f}%")
             if tk > cfg.costs.taker_fee + 1e-9:
                 worse.append(s)
@@ -214,11 +223,12 @@ def main(argv=None) -> int:
         age = s.public_age_s()
         pub = s._last_public is not None
         R.p(f"   Публичный поток: {'последнее сообщение %.1f с назад' % age if pub else 'сообщений НЕТ'}")
-        R.p(f"   Приватный поток: {'авторизован' if s.private_ok() else 'НЕ авторизован (ключ/секрет или сеть)'}")
+        priv = s.private_ok()
+        R.p(f"   Приватный поток: {'авторизован' if priv else 'НЕ авторизован (ключ/секрет или сеть)'}")
         s.stop()
         if not pub:
             raise RuntimeError("публичный WebSocket не работает: бот не будет открывать позиции (ws_required)")
-        if not s.private_ok():
+        if not priv:
             R.p("   Без приватного потока бот работает (сверка с биржей раз в минуту), но события приходят позже")
             return "warn"
     R.check("WebSocket", ws)
