@@ -75,3 +75,23 @@ def rsi(close: np.ndarray, n: int) -> np.ndarray:
 
 def rolling_median(x: np.ndarray, n: int) -> np.ndarray:
     return pd.Series(x).rolling(n).median().to_numpy()
+
+
+def adx(high: np.ndarray, low: np.ndarray, close: np.ndarray, n: int = 14) -> np.ndarray:
+    """ADX Уайлдера: сила тренда 0…100 (без направления)."""
+    up = np.diff(high, prepend=np.nan)
+    down = -np.diff(low, prepend=np.nan)
+    with np.errstate(invalid="ignore"):
+        plus_dm = np.where((up > down) & (up > 0), up, 0.0)
+        minus_dm = np.where((down > up) & (down > 0), down, 0.0)
+    plus_dm[np.isnan(up)] = np.nan
+    minus_dm[np.isnan(up)] = np.nan
+    prev = np.r_[np.nan, close[:-1]]
+    tr = np.nanmax(np.vstack([high - low, np.abs(high - prev), np.abs(low - prev)]), axis=0)
+    tr[np.isnan(up)] = np.nan
+    w = lambda x: pd.Series(x).ewm(alpha=1 / n, adjust=False, min_periods=n).mean().to_numpy()  # noqa: E731
+    atr_ = w(tr)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        pdi, mdi = 100 * w(plus_dm) / atr_, 100 * w(minus_dm) / atr_
+        dx = 100 * np.abs(pdi - mdi) / (pdi + mdi)
+    return w(dx)

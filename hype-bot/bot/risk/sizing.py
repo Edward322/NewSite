@@ -74,7 +74,9 @@ def size_position(
     available: float,
     inst: Instrument,
     p: SizingParams,
+    risk_budget: float | None = None,
 ) -> Sizing | Skip:
+    """risk_budget — допустимая потеря на стопе в USDT; по умолчанию risk_per_trade × капитал."""
     if side not in (LONG, SHORT):
         raise ValueError("side должен быть LONG или SHORT")
     if equity <= 0 or available <= 0:
@@ -86,7 +88,8 @@ def size_position(
 
     cost = p.taker_fee + p.slippage
     per_unit_loss = abs(entry_ref - stop) + entry_ref * cost + stop * cost
-    risk_budget = equity * p.risk_per_trade
+    if risk_budget is None:
+        risk_budget = equity * p.risk_per_trade
     qty = inst.floor_qty(risk_budget / per_unit_loss)
 
     stop_dist = abs(entry_ref - stop) / entry_ref

@@ -30,8 +30,9 @@ from bot.config import CostsCfg, RiskCfg
 from bot.data.panel import Panel, PanelBars, aggregate_panel
 from bot.market import Instrument
 from bot.risk.guards import GuardEvent, RiskGuard, RiskState
+from bot.risk.portfolio import Exposure, PortfolioRisk, PortfolioRules
 from bot.risk.sizing import (LONG, SHORT, Sizing, SizingParams, Skip, liquidation_price,
-                             max_leverage_for_stop, size_position)
+                             max_leverage_for_stop)
 from bot.strategy.base import Enter, Exit, MoveStop, PositionView
 
 EPS = 1e-9
@@ -48,6 +49,10 @@ class PortfolioConfig:
     trade_end_ms: int | None = None
     close_at_end: bool = True
     initial_risk_state: RiskState | None = None
+    rules: PortfolioRules | None = None   # None — только max_positions и max_open_risk (как раньше)
+
+    def portfolio_rules(self) -> PortfolioRules:
+        return self.rules or PortfolioRules(max_positions=self.max_positions, max_open_risk=self.max_open_risk)
 
 
 class PortfolioStrategy:
@@ -122,6 +127,8 @@ class PortfolioBacktester:
         bars = aggregate_panel(P, strat.timeframe)
         strat.prepare(bars)
         self.bars = bars
+        self.rules = cfg.portfolio_rules()
+        self.prisk = PortfolioRisk(bars, self.rules)
         self.cash = float(cfg.initial_equity)
         self.pos: dict[int, Pos] = {}
         self.trades: list[dict] = []
@@ -211,21 +218,22 @@ class PortfolioBacktester:
         px = float(self.bars.close[r, k])
         if np.isnan(px):
             return None
-        staying = [p for q, p in self.pos.items() if q not in exits]
-        if len(staying) + len(entries) >= cfg.max_positions:
+        if not self.prisk.is_liquid(r, k):
+            self.skips.append((t_close, sym, "монета не проходит правило ликвидности"))
+            return None
+        staying = [(q, p) for q, p in self.pos.items() if q not in exits]
+        if len(staying) + len(entries) >= self.rules.max_positions:
             self.skips.append((t_close, sym, "нет свободных мест"))
             return None
-        margin_used = sum(p.margin for p in staying) + sum(e[3].margin for e in entries)
+        margin_used = sum(p.margin for _, p in staying) + sum(e[3].margin for e in entries)
         available = self.cash - margin_used
-        s = size_position(d.side, px, d.stop, equity, available, self.inst[r], self.sp)
+        book = [Exposure(q, p.side, p.qty * max(0.0, p.side * (float(self.last_px[q]) - p.stop))) for q, p in staying]
+        book += [Exposure(e[0], e[2].side, e[3].planned_loss) for e in entries]
+        s = self.prisk.plan_entry(k=k, row=r, side=d.side, px=px, stop=d.stop, equity=equity, available=available,
+                                  inst=self.inst[r], sp=self.sp, risk_mult=self.guard.risk_multiplier(equity),
+                                  book=book)
         if isinstance(s, Skip):
             self.skips.append((t_close, sym, s.reason))
-            return None
-        open_risk = sum(p.qty * max(0.0, p.side * (float(self.last_px[q]) - p.stop))
-                        for q, p in self.pos.items() if q not in exits)
-        open_risk += sum(e[3].planned_loss for e in entries)
-        if open_risk + s.planned_loss > cfg.max_open_risk * equity * (1 + EPS):
-            self.skips.append((t_close, sym, "превышен суммарный риск открытых позиций"))
             return None
         return (r, t_close, d, s)
 

@@ -1,0 +1,59 @@
+# Конфигурация торгового бота (корзина, пробой канала 4h). Правила — docs/RISK_PROTOCOL.md,
+# выбор параметров — reports/STAGE1_RISK.md. Установщик копирует этот файл в config/bot.yaml.
+# Ключи API и Telegram здесь НЕ хранятся — только в файле .env.
+
+category: linear
+
+exchange:
+  domain: bybit          # аккаунт на bybit.com
+  tld: com
+  recv_window_ms: 5000
+  http_timeout_s: 10
+
+costs:
+  # Non-VIP: мейкер 0,02 %, тейкер 0,055 %. Те же издержки заложены в бэктест.
+  maker_fee: 0.0002
+  taker_fee: 0.00055
+  slippage: 0.0002
+  stop_penetration: 0.25
+
+risk:
+  starting_equity_usdt: 25      # капитал бота; на демо-счёте с большим балансом бот считает только его
+  max_leverage: null            # плечо — по правилу «ликвидация ≥ 2× дальше стопа»
+  risk_per_trade: 0.02          # 2 % — наименьший риск с пропуском ≤ 20 % сигналов (reports/STAGE1_RISK.md)
+  daily_loss_limit: 0.06        # от капитала на начало дня UTC
+  max_drawdown: 0.40            # от пика → полная остановка
+  drawdown_steps: [[0.20, 0.5]] # просадка ≥ 20 % → риск вдвое
+  loss_streak_pause_trades: null  # пауза после серии убытков убрана
+  margin_mode: ISOLATED_MARGIN
+  position_mode: one_way
+  sl_trigger_by: LastPrice
+  liq_distance_vs_stop_min: 2.0
+
+portfolio:                      # вариант B
+  max_positions: 4
+  max_open_risk: 0.06
+  downsize_to_fit: true
+  corr_cap: 0.04
+  corr_days: 30
+  vol_scaling: false
+  liquidity:
+    days: 30
+    max_tick_frac: 0.0004
+    min_turnover: 10000000
+    max_zero_volume_frac: 0.01
+
+strategy:
+  timeframe: 4h
+  params: {n: 38, k_stop: 2.5, k_trail: 4.0, sides: both, regime: none}
+  tradable: [XRPUSDT, NEARUSDT, MOVRUSDT, QNTUSDT, DOGEUSDT, AAVEUSDT, WLDUSDT, 1000PEPEUSDT,
+             ADAUSDT, SANDUSDT, LINKUSDT, UNIUSDT, AVAXUSDT, HBARUSDT, HYPEUSDT]
+  signal_only: [BTCUSDT, ETHUSDT]
+  shadows:
+    "S1 боковой рынок (ADX ≥ 20)": {adx_min: 20.0}
+    "S2 только лонг в бычьем режиме": {bull_long_only: true}
+    "S3 оба фильтра": {adx_min: 20.0, bull_long_only: true}
+
+live:
+  enabled: false                # реальная торговля — только после вашего явного «да»
+  min_size_only: true

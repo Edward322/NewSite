@@ -9,7 +9,10 @@
 - Максимальная просадка: капитал ≤ пик × (1 − max_drawdown) → остановка
   навсегда (флаг halted); закрыть позиции и отменить ордера должен вызывающий.
 - Серия: loss_streak_pause_trades убыточных сделок подряд → пауза на
-  loss_streak_pause_hours, после паузы счётчик с нуля.
+  loss_streak_pause_hours, после паузы счётчик с нуля (None — правило выключено).
+- Ступени по просадке (drawdown_steps): при просадке от пика ≥ порога риск новой сделки
+  умножается на множитель ступени (risk_multiplier); ступень снимается, когда просадка
+  снова меньше порога.
 - Блокировки (обрыв связи, устаревшие данные, расхождение с биржей) ставит
   боевой движок; пока хоть одна активна, новые позиции не открываются.
 """
@@ -91,7 +94,7 @@ class RiskGuard:
             s.loss_streak = 0
             return []
         s.loss_streak += 1
-        if s.loss_streak >= self.cfg.loss_streak_pause_trades:
+        if self.cfg.loss_streak_pause_trades is not None and s.loss_streak >= self.cfg.loss_streak_pause_trades:
             s.loss_streak = 0
             until = now_ms + int(self.cfg.loss_streak_pause_hours * HOUR_MS)
             if until > s.pause_until_ms:
@@ -119,6 +122,17 @@ class RiskGuard:
     @staticmethod
     def _loss_frac(equity: float, base: float) -> float:
         return 1 - equity / base if base > 0 else 1.0
+
+    def drawdown(self, equity: float) -> float:
+        return max(0.0, self._loss_frac(equity, self.state.peak_equity))
+
+    def risk_multiplier(self, equity: float) -> float:
+        """Множитель риска новой сделки по текущей просадке от пика (1 — без снижения)."""
+        dd, mult = self.drawdown(equity), 1.0
+        for thr, factor in sorted(self.cfg.drawdown_steps):
+            if dd >= thr - EPS:
+                mult = factor
+        return mult
 
     def drawdown_floor(self) -> float:
         return self.state.peak_equity * (1 - self.cfg.max_drawdown)

@@ -207,6 +207,42 @@ class Breakout(BasketStrategy):
         return self._ordered(exits, entries)
 
 
+class BreakoutShadow(Breakout):
+    """Пробой с теневыми фильтрами (docs/RISK_PROTOCOL.md, раздел 6) — в основную стратегию не входят.
+
+    adx_min > 0 — вход только при ADX(14) монеты ≥ adx_min (фильтр бокового рынка);
+    bull_long_only — пока BTC выше своей EMA за 50 дней, шорты не открываются.
+    """
+    family = "breakout_shadow"
+    grid = {**Breakout.grid, "adx_min": [0.0], "bull_long_only": [False]}
+
+    def prepare(self, bars: PanelBars) -> None:
+        super().prepare(bars)
+        if self.p["adx_min"] > 0:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", RuntimeWarning)
+                self.adx = np.vstack([ind.adx(self.h[r], self.l[r], self.c[r], ATR_N) for r in range(self.n)])
+        if self.p["bull_long_only"]:
+            bc = bars.close[bars.symbols.index("BTCUSDT")]
+            e = ind.ema(bc, BTC_EMA_DAYS * self.bpd)
+            with np.errstate(invalid="ignore"):
+                self.bull = bc > e          # NaN (разогрев) → False → обе стороны
+
+    def _signal_ok(self, r: int, k: int, side: int) -> bool:
+        if self.p["adx_min"] > 0 and not (self.adx[r, k] >= self.p["adx_min"]):
+            return False
+        if self.p["bull_long_only"] and side == SHORT and self.bull[k]:
+            return False
+        return True
+
+
+def make_breakout(timeframe: str, params: dict) -> Breakout:
+    """Пробой с фиксированными параметрами; с теневыми фильтрами — BreakoutShadow."""
+    if set(params) - set(Breakout.grid):
+        return BreakoutShadow(timeframe=timeframe, **params)
+    return Breakout(timeframe=timeframe, **params)
+
+
 # ------------------------------------------------------------------ F4
 class OiBreakout(Breakout):
     """Пробой (как breakout, трейлинг 3 × ATR) только при росте открытого интереса за те же

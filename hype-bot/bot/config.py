@@ -14,6 +14,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CONFIG = PROJECT_ROOT / "config" / "config.yaml"
 EXAMPLE_CONFIG = PROJECT_ROOT / "config" / "config.example.yaml"
+BOT_CONFIG = PROJECT_ROOT / "config" / "bot.yaml"
+BOT_EXAMPLE_CONFIG = PROJECT_ROOT / "config" / "bot.example.yaml"
 
 
 class _Strict(BaseModel):
@@ -65,8 +67,11 @@ class RiskCfg(_Strict):
     risk_per_trade: float = Field(gt=0, le=0.2)
     daily_loss_limit: float = Field(gt=0, lt=1)
     max_drawdown: float = Field(gt=0, lt=1)
-    loss_streak_pause_trades: int = Field(ge=1)
-    loss_streak_pause_hours: float = Field(gt=0)
+    # Пауза после серии убытков; None — правило выключено (решение пользователя для корзины).
+    loss_streak_pause_trades: int | None = Field(None, ge=1)
+    loss_streak_pause_hours: float = Field(24, gt=0)
+    # Ступени снижения риска по просадке от пика: [[0.20, 0.5]] — при просадке ≥ 20 % риск × 0.5.
+    drawdown_steps: list[tuple[float, float]] = Field(default_factory=list)
     day_boundary: Literal["UTC"] = "UTC"
     margin_mode: Literal["ISOLATED_MARGIN"] = "ISOLATED_MARGIN"
     position_mode: Literal["one_way"] = "one_way"
@@ -81,6 +86,69 @@ class RiskCfg(_Strict):
             raise ValueError("daily_loss_limit меньше risk_per_trade")
         if self.max_drawdown < self.daily_loss_limit:
             raise ValueError("max_drawdown меньше daily_loss_limit")
+        for dd, factor in self.drawdown_steps:
+            if not (0 < dd < self.max_drawdown) or not (0 < factor <= 1):
+                raise ValueError("ступень просадки должна быть меньше max_drawdown, множитель — в (0, 1]")
+        return self
+
+
+class LiquidityCfg(_Strict):
+    days: int = Field(30, ge=5)
+    max_tick_frac: float = Field(0.0004, gt=0)
+    min_turnover: float = Field(10_000_000, ge=0)
+    max_zero_volume_frac: float = Field(0.01, ge=0, le=1)
+
+
+class PortfolioCfg(_Strict):
+    """Портфельные правила риска (docs/RISK_PROTOCOL.md); общие для бэктеста и движка."""
+    max_positions: int = Field(4, ge=1, le=20)
+    max_open_risk: float = Field(0.06, gt=0, le=1)
+    downsize_to_fit: bool = True
+    corr_cap: float | None = Field(None, gt=0, le=1)
+    corr_days: int = Field(30, ge=5)
+    vol_scaling: bool = False
+    vol_days: int = Field(30, ge=5)
+    vol_ref_days: int = Field(365, ge=30)
+    vol_ref_min_days: int = Field(180, ge=10)
+    liquidity: LiquidityCfg | None = LiquidityCfg()
+
+    @model_validator(mode="after")
+    def _caps(self) -> "PortfolioCfg":
+        if self.corr_cap is not None and self.corr_cap > self.max_open_risk:
+            raise ValueError("corr_cap не может быть больше max_open_risk")
+        return self
+
+    def rules(self):
+        from bot.risk.portfolio import LiquidityRule, PortfolioRules
+        liq = LiquidityRule(**self.liquidity.model_dump()) if self.liquidity else None
+        d = self.model_dump(exclude={"liquidity"})
+        return PortfolioRules(**d, liquidity=liq)
+
+
+MAIN_PARAMS = {"n": 38, "k_stop": 2.5, "k_trail": 4.0, "sides": "both", "regime": "none"}
+BASKET = ["XRPUSDT", "NEARUSDT", "MOVRUSDT", "QNTUSDT", "DOGEUSDT", "AAVEUSDT", "WLDUSDT", "1000PEPEUSDT",
+          "ADAUSDT", "SANDUSDT", "LINKUSDT", "UNIUSDT", "AVAXUSDT", "HBARUSDT", "HYPEUSDT"]
+
+
+class StrategyCfg(_Strict):
+    """Пробой канала на корзине с фиксированными параметрами (центр плато) и теневые варианты."""
+    timeframe: str = "4h"
+    params: dict = Field(default_factory=lambda: dict(MAIN_PARAMS))
+    tradable: list[str] = Field(default_factory=lambda: list(BASKET))
+    signal_only: list[str] = Field(default_factory=lambda: ["BTCUSDT", "ETHUSDT"])
+    shadows: dict[str, dict] = Field(default_factory=lambda: {
+        "S1 боковой рынок (ADX ≥ 20)": {"adx_min": 20.0},
+        "S2 только лонг в бычьем режиме": {"bull_long_only": True},
+        "S3 оба фильтра": {"adx_min": 20.0, "bull_long_only": True},
+    })
+
+    @model_validator(mode="after")
+    def _tf(self) -> "StrategyCfg":
+        from bot.data.bars import TF_MINUTES
+        if TF_MINUTES.get(self.timeframe, 0) < 240:
+            raise ValueError("таймфрейм стратегии не ниже 4h")
+        if len(self.shadows) > 3:
+            raise ValueError("не больше 3 теневых вариантов")
         return self
 
 
@@ -99,6 +167,8 @@ class Config(_Strict):
     costs: CostsCfg
     risk: RiskCfg
     live: LiveCfg = LiveCfg()
+    portfolio: PortfolioCfg = PortfolioCfg()
+    strategy: StrategyCfg = StrategyCfg()
 
     def data_dir(self) -> Path:
         p = Path(self.data.dir)
@@ -112,3 +182,10 @@ def load_config(path: str | Path | None = None) -> Config:
     with open(path, encoding="utf-8") as fh:
         raw = yaml.safe_load(fh) or {}
     return Config.model_validate(raw)
+
+
+def load_bot_config(path: str | Path | None = None) -> Config:
+    """Конфиг торгового бота: config/bot.yaml, а если его нет — шаблон config/bot.example.yaml."""
+    if path is None:
+        path = BOT_CONFIG if BOT_CONFIG.exists() else BOT_EXAMPLE_CONFIG
+    return load_config(path)

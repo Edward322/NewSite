@@ -43,3 +43,23 @@ def test_invalid_risk_rejected(over):
 
 def test_live_disabled_by_default():
     assert Config.model_validate(_risk()).live.enabled is False
+
+
+def test_bot_config_matches_stage1_choice():
+    from bot.config import BOT_EXAMPLE_CONFIG
+    cfg = load_config(BOT_EXAMPLE_CONFIG)
+    r, p = cfg.risk, cfg.portfolio
+    assert r.starting_equity_usdt == 25 and r.risk_per_trade == 0.02
+    assert r.daily_loss_limit == 0.06 and r.max_drawdown == 0.40
+    assert r.drawdown_steps == [(0.20, 0.5)] and r.loss_streak_pause_trades is None
+    assert p.max_open_risk == 0.06 and p.corr_cap == 0.04 and not p.vol_scaling
+    assert cfg.strategy.timeframe == "4h"
+    assert cfg.strategy.params == {"n": 38, "k_stop": 2.5, "k_trail": 4.0, "sides": "both", "regime": "none"}
+    assert len(cfg.strategy.shadows) == 3
+    assert cfg.live.enabled is False
+
+
+def test_strategy_timeframe_not_below_4h():
+    from bot.config import StrategyCfg
+    with pytest.raises(ValidationError):
+        StrategyCfg(timeframe="1h")
