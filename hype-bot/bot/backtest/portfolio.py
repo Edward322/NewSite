@@ -30,10 +30,11 @@ from bot.config import CostsCfg, RiskCfg
 from bot.data.panel import Panel, PanelBars, aggregate_panel
 from bot.market import Instrument
 from bot.risk.guards import GuardEvent, RiskGuard, RiskState
-from bot.risk.portfolio import Exposure, PortfolioRisk, PortfolioRules
-from bot.risk.sizing import (LONG, SHORT, Sizing, SizingParams, Skip, liquidation_price,
+from bot.risk.planner import Held, Planner
+from bot.risk.portfolio import PortfolioRisk, PortfolioRules
+from bot.risk.sizing import (LONG, SHORT, Sizing, SizingParams, liquidation_price,
                              max_leverage_for_stop)
-from bot.strategy.base import Enter, Exit, MoveStop, PositionView
+from bot.strategy.base import PositionView
 
 EPS = 1e-9
 
@@ -141,6 +142,8 @@ class PortfolioBacktester:
             return self._result(bars, eq_rows)
         state = copy.deepcopy(cfg.initial_risk_state) if cfg.initial_risk_state else None
         self.guard = RiskGuard(cfg.risk, self.cash, int(bars.ts[0]), state)
+        self.planner = Planner(P.symbols, self.inst, self.sp, self.rules, self.prisk, self.guard,
+                               cfg.trade_start_ms, cfg.trade_end_ms)
         exits: dict[int, tuple[int, str]] = {}        # строка → (время решения, причина)
         entries: list[tuple] = []                     # (строка, время решения, Enter, Sizing)
         stops: dict[int, float] = {}
@@ -182,20 +185,11 @@ class PortfolioBacktester:
             views = {r: PositionView(p.side, p.entry_price, p.qty, p.stop, p.take_profit, p.entry_ts, p.bars_held)
                      for r, p in self.pos.items()}
             ds = strat.on_bar(k, views) or []
-            for r, d in ds:
-                if d is None:
-                    continue
-                self.decisions.append((t_close, P.symbols[r], repr(d)))
-                if isinstance(d, Exit) and r in self.pos:
-                    exits[r] = (t_close, d.reason)
-                elif isinstance(d, MoveStop) and r in self.pos and r not in exits:
-                    s = self._plan_stop(r, d.stop, float(self.last_px[r]))
-                    if s is not None:
-                        stops[r] = s
-                elif isinstance(d, Enter) and r not in self.pos:
-                    e = self._plan_entry(r, k, t_close, d, equity, exits, entries)
-                    if e is not None:
-                        entries.append(e)
+            held = {r: Held(p.side, p.qty, p.stop, p.margin) for r, p in self.pos.items()}
+            plan = self.planner.plan(ds, k, t_close, held, self.cash, self.last_px, equity)
+            exits, stops, entries = plan.exits, plan.stops, plan.entries
+            self.skips += plan.skips
+            self.decisions += plan.decisions
 
         if self.pos and cfg.close_at_end:
             last = len(P.ts) - 1
@@ -203,46 +197,6 @@ class PortfolioBacktester:
                 self._close_market(r, last, "end", at_close=True)
             eq_rows[-1] = (eq_rows[-1][0], self.cash, self.cash, 0)
         return self._result(bars, eq_rows)
-
-    # ------------------------------------------------------------ planning
-    def _plan_entry(self, r: int, k: int, t_close: int, d: Enter, equity: float, exits: dict, entries: list):
-        cfg = self.cfg
-        sym = self.panel.symbols[r]
-        if (cfg.trade_start_ms is not None and t_close < cfg.trade_start_ms) or \
-           (cfg.trade_end_ms is not None and t_close >= cfg.trade_end_ms):
-            return None
-        ok, why = self.guard.can_open(t_close)
-        if not ok:
-            self.skips.append((t_close, sym, why))
-            return None
-        px = float(self.bars.close[r, k])
-        if np.isnan(px):
-            return None
-        if not self.prisk.is_liquid(r, k):
-            self.skips.append((t_close, sym, "монета не проходит правило ликвидности"))
-            return None
-        staying = [(q, p) for q, p in self.pos.items() if q not in exits]
-        if len(staying) + len(entries) >= self.rules.max_positions:
-            self.skips.append((t_close, sym, "нет свободных мест"))
-            return None
-        margin_used = sum(p.margin for _, p in staying) + sum(e[3].margin for e in entries)
-        available = self.cash - margin_used
-        book = [Exposure(q, p.side, p.qty * max(0.0, p.side * (float(self.last_px[q]) - p.stop))) for q, p in staying]
-        book += [Exposure(e[0], e[2].side, e[3].planned_loss) for e in entries]
-        s = self.prisk.plan_entry(k=k, row=r, side=d.side, px=px, stop=d.stop, equity=equity, available=available,
-                                  inst=self.inst[r], sp=self.sp, risk_mult=self.guard.risk_multiplier(equity),
-                                  book=book)
-        if isinstance(s, Skip):
-            self.skips.append((t_close, sym, s.reason))
-            return None
-        return (r, t_close, d, s)
-
-    def _plan_stop(self, r: int, stop: float, px: float) -> float | None:
-        p = self.pos[r]
-        stop = self.inst[r].round_price(stop, "down" if p.side == LONG else "up")
-        tighter = stop > p.stop if p.side == LONG else stop < p.stop
-        valid = stop < px if p.side == LONG else stop > px
-        return stop if (tighter and valid) else None
 
     # ----------------------------------------------------------- execution
     def _execute_entry(self, m: int, e) -> None:

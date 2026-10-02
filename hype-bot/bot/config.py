@@ -152,6 +152,23 @@ class StrategyCfg(_Strict):
         return self
 
 
+class EngineCfg(_Strict):
+    """Боевой движок: тайминги, допуски, файлы."""
+    loop_s: float = Field(10, ge=1, le=120)              # пауза основного цикла
+    reconcile_every_s: float = Field(60, ge=10)          # сверка с биржей не реже
+    bar_delay_s: float = Field(5, ge=0, le=120)          # ждать после закрытия свечи 4h
+    max_bar_lag_s: float = Field(600, ge=60)             # позже — новые входы по этой свече не открываются
+    data_wait_s: float = Field(180, ge=0)                # сколько ждать неполные данные
+    ws_required: bool = True                             # без живого WebSocket новые позиции не открываются
+    ws_stale_s: float = Field(90, ge=10)                 # нет сообщений дольше — данные устарели
+    snapshot_every_s: float = Field(300, ge=10)
+    data_dir: str = "data/live"
+    db_path: str = "data/state/bot_{mode}.sqlite"
+    stop_file: str = "STOP"                              # файл аварийной остановки в папке бота
+    daily_alive_hour_utc: int = Field(6, ge=0, le=23)    # ежедневное «жив» (9:00 МСК)
+    weekly_report_weekday: int = Field(0, ge=0, le=6)    # 0 — понедельник
+
+
 class LiveCfg(_Strict):
     enabled: bool = False
     min_size_only: bool = True
@@ -169,6 +186,7 @@ class Config(_Strict):
     live: LiveCfg = LiveCfg()
     portfolio: PortfolioCfg = PortfolioCfg()
     strategy: StrategyCfg = StrategyCfg()
+    engine: EngineCfg = EngineCfg()
 
     def data_dir(self) -> Path:
         p = Path(self.data.dir)
